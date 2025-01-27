@@ -1,2 +1,0 @@
-# ITU UltiMate
-## Denemedir
