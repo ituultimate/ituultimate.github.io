@@ -36393,26 +36393,35 @@
             }
         }
 
-        function addCourse() { 
+        const crnColors = {};
+
+function addCourse() { 
     const course = document.getElementById('courseSelect').value;
-    if (!course || !schedule[course]) return;
+    const crn = document.getElementById('crnSelect').value;
 
-    
-    Object.values(schedule[course]).forEach(scheduleEntries => {
-        scheduleEntries.forEach(({ day, start, duration }) => {
-            const dayColumn = document.getElementById(day);
-            if (!dayColumn) return;
+    // Seçili ders veya CRN yoksa çık
+    if (!course || !crn || !schedule[course] || !schedule[course][crn]) return;
 
-            const color = '#' + Math.floor(Math.random()*16777215).toString(16);
-            const courseBlock = document.createElement("div");
-            courseBlock.className = "course-block";
-            courseBlock.style.backgroundColor = color;
-            courseBlock.style.height = `${duration * 40}px`;
-            courseBlock.style.top = `${start * 40}px`;
-            courseBlock.innerText = course;
+    // Eğer bu CRN için bir renk atanmadıysa, yeni bir renk ata
+    if (!crnColors[crn]) {
+        crnColors[crn] = '#' + Math.floor(Math.random() * 16777215).toString(16); // Rastgele renk
+    }
+    const color = crnColors[crn];
 
-            dayColumn.appendChild(courseBlock);
-        });
+    // Sadece seçilen CRN'ye ait program girişlerini ekle
+    const scheduleEntries = schedule[course][crn];
+    scheduleEntries.forEach(({ day, start, duration }) => {
+        const dayColumn = document.getElementById(day);
+        if (!dayColumn) return;
+
+        const courseBlock = document.createElement("div");
+        courseBlock.className = "course-block";
+        courseBlock.style.backgroundColor = color;
+        courseBlock.style.height = `${duration * 40}px`; // 1 saat = 40px olarak hesaplanmış
+        courseBlock.style.top = `${start * 40}px`;
+        courseBlock.innerText = `${course} (${crn})`; // Ders ve CRN'yi göstermek için
+
+        dayColumn.appendChild(courseBlock);
     });
 }
 
