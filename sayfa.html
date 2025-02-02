@@ -48,6 +48,7 @@
 </head>
 
 <body class="p-6">
+    
     <div class="mb-4">
         <label class="block text-lg font-semibold">Select a Course:</label>
         <select id="departmentSelect" onchange="updateCourseOptions()">
@@ -171,7 +172,11 @@
         <select id="crnSelect" disabled>
             <option value="">Select CRN</option>
         </select>
-        <button class="bg-purple-600 text-white p-1 rounded h-[40px]" onclick="addCourse()">Add Course</button>
+        <button class="bg-purple-600 text-white p-1 rounded h-[40px]" onclick="addCourse(); addCourseToList(); sifirla();">Add Course</button>
+    </div>
+    <div id="addedCoursesList">
+        <h3>Added Courses:</h3>
+        <ul id="courseList"></ul>
     </div>
     
     <div class="grid grid-cols-5 gap-2 border p-8 relative">
@@ -36393,7 +36398,37 @@
             }
         }
 
-        const crnColors = {};
+        function addCourseToList() {
+    const course = document.getElementById('courseSelect').value;
+    const crn = document.getElementById('crnSelect').value;
+
+    // Seçili ders veya CRN yoksa çık
+    if (!course || !crn) return;
+
+    const courseList = document.getElementById('courseList');
+
+    // Daha önce eklenmişse tekrar eklemeyin
+    if ([...courseList.children].some(item => item.dataset.crn === crn)) return;
+
+    const listItem = document.createElement('li');
+    listItem.dataset.crn = crn; // CRN'yi veri olarak kaydediyoruz
+    listItem.textContent = `${course} (${crn})`;
+
+    const removeButton = document.createElement('button');
+    removeButton.textContent = 'Remove';
+    removeButton.style.marginLeft = '10px';
+    removeButton.onclick = () => {
+        listItem.remove(); // Liste elemanını kaldır
+
+        // CRN'ye ait program kutularını da kaldır
+        document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
+    };
+
+    listItem.appendChild(removeButton);
+    courseList.appendChild(listItem);
+}
+
+const crnColors = {};
 
 function addCourse() { 
     const course = document.getElementById('courseSelect').value;
@@ -36416,14 +36451,22 @@ function addCourse() {
 
         const courseBlock = document.createElement("div");
         courseBlock.className = "course-block";
+        courseBlock.dataset.crn = crn; // CRN bilgisini kaydet
         courseBlock.style.backgroundColor = color;
         courseBlock.style.height = `${duration * 40}px`; // 1 saat = 40px olarak hesaplanmış
         courseBlock.style.top = `${start * 40}px`;
         courseBlock.innerText = `${course} (${crn})`; // Ders ve CRN'yi göstermek için
 
         dayColumn.appendChild(courseBlock);
+        
     });
 }
+function sifirla(){
+    document.getElementById('courseSelect').value = '';
+        document.getElementById('crnSelect').value = '';
+        document.getElementById('departmentSelect').value = '';
+}
+
 
     </script>
 </body>
