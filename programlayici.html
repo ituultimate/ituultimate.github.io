@@ -43952,6 +43952,28 @@ function adjustCourseBlocks(dayColumn) {
     });
 }
 
+function removeCourse(crn) {
+    const crnBlocks = document.querySelectorAll(`.course-block[data-crn='${crn}']`);
+    crnBlocks.forEach(block => {
+        const dayColumn = block.parentElement;
+        const start = parseInt(block.style.top) / 40;
+        block.remove();
+
+        const remainingBlocks = [...dayColumn.getElementsByClassName("course-block")]
+            .filter(b => parseInt(b.style.top) / 40 === start);
+
+        if (remainingBlocks.length === 1) {
+            remainingBlocks[0].style.width = "100%";
+            remainingBlocks[0].style.left = "0%";
+        } else {
+            const width = 100 / remainingBlocks.length;
+            remainingBlocks.forEach((b, index) => {
+                b.style.width = `${width}%`;
+                b.style.left = `${index * width}%`;
+            });
+        }
+    });
+}
 function addCourseToList() {
     const course = document.getElementById('courseSelect').value;
     const crn = document.getElementById('crnSelect').value;
