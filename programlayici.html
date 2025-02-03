@@ -43905,34 +43905,49 @@ function addCourse() {
 
 function updateCourseLayout() {
     const dayColumns = document.querySelectorAll(".day-column");
-
     dayColumns.forEach(dayColumn => adjustCourseBlocks(dayColumn));
 }
 
 function adjustCourseBlocks(dayColumn) {
     const blocks = [...dayColumn.getElementsByClassName("course-block")];
-
-    // Aynı başlangıç saatine göre gruplandır
     const timeGroups = {};
+
     blocks.forEach(block => {
         const start = parseInt(block.style.top) / 40;
+        const duration = parseInt(block.style.height) / 40;
+        const end = start + duration;
+
         if (!timeGroups[start]) {
             timeGroups[start] = [];
         }
-        timeGroups[start].push(block);
+        timeGroups[start].push({ block, start, end });
     });
 
-    // Tüm blokları kaldır
     blocks.forEach(block => block.remove());
 
-    // Grupları yeniden çiz
     Object.values(timeGroups).forEach(group => {
-        const width = 100 / group.length;
+        group.sort((a, b) => a.start - b.start);
+        let track = [];
 
-        group.forEach((block, index) => {
-            block.style.width = `${width}%`;
-            block.style.left = `${index * width}%`;
-            dayColumn.appendChild(block); // Güncellenmiş blokları tekrar ekle
+        group.forEach(({ block, start, end }) => {
+            let placed = false;
+            for (let i = 0; i < track.length; i++) {
+                if (track[i] <= start) {
+                    block.style.left = `${i * (100 / (track.length + 1))}%`;
+                    block.style.width = `${100 / (track.length + 1)}%`;
+                    track[i] = end;
+                    placed = true;
+                    break;
+                }
+            }
+
+            if (!placed) {
+                track.push(end);
+                block.style.left = `${(track.length - 1) * (100 / track.length)}%`;
+                block.style.width = `${100 / track.length}%`;
+            }
+            
+            dayColumn.appendChild(block);
         });
     });
 }
