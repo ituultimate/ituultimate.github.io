@@ -43959,11 +43959,31 @@ function addCourseToList() {
 
     removeButton.onclick = () => {
         listItem.remove();
-        document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
-        releaseColor(crn);
 
-        // Tüm gün sütunlarını yeniden hizala
-        document.querySelectorAll(".day-column").forEach(dayColumn => adjustCourseBlocks(dayColumn));
+        // İlgili CRN'ye ait blokları bul
+        const crnBlocks = document.querySelectorAll(`.course-block[data-crn='${crn}']`);
+
+        // Her blok için aynı saat dilimindeki diğer blokları da yeniden düzenle
+        crnBlocks.forEach(block => {
+            const dayColumn = block.parentElement;
+            const start = parseInt(block.style.top) / 40;
+
+            // Bloku sil
+            block.remove();
+
+            // Aynı saat dilimindeki kalan blokları güncelle
+            const remainingBlocks = [...dayColumn.getElementsByClassName("course-block")]
+                .filter(b => parseInt(b.style.top) / 40 === start);
+
+            const width = 100 / (remainingBlocks.length || 1);
+
+            remainingBlocks.forEach((b, index) => {
+                b.style.width = `${width}%`;
+                b.style.left = `${index * width}%`;
+            });
+        });
+
+        releaseColor(crn);
     };
 
     listItem.appendChild(removeButton);
