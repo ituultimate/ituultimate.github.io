@@ -43938,34 +43938,24 @@ function addCourseToList() {
     updateCourseLayout(); // Güncellenmiş düzeni uygula
 };
 
+
 function updateCourseLayout() {
     const dayColumns = document.querySelectorAll(".day-column");
 
     dayColumns.forEach(dayColumn => {
         const blocks = [...dayColumn.getElementsByClassName("course-block")];
 
-        // Aynı saat dilimine denk gelen dersleri grupla
-        const timeGroups = {};
-        blocks.forEach(block => {
-            const start = parseInt(block.style.top) / 40;
-            if (!timeGroups[start]) {
-                timeGroups[start] = [];
-            }
-            timeGroups[start].push(block);
-        });
+        if (blocks.length === 0) return; // Eğer ders yoksa işlem yapma
 
-        // Gruplara göre genişlik ve konum hesapla
-        Object.values(timeGroups).forEach(group => {
-            const count = group.length;
-            const width = 100 / count; // Ders sayısına göre genişliği belirle
+        const width = 100 / blocks.length; // Kalan derslere göre genişliği belirle
 
-            group.forEach((block, index) => {
-                block.style.width = `${width}%`;
-                block.style.left = `${index * width}%`; // Dersleri sola hizala
-            });
+        blocks.forEach((block, index) => {
+            block.style.width = `${width}%`; 
+            block.style.left = `${index * width}%`; // Dersleri sola hizala
         });
     });
 }
+
 
 
 function sifirla(){
