@@ -43956,12 +43956,36 @@ function addCourseToList() {
         listItem.remove();
         document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
         releaseColor(crn);
-        updateCourseLayout();
+
+        // Tüm gün sütunları için layout'u tekrar düzenle
+        document.querySelectorAll(".day-column").forEach(dayColumn => {
+            const blocks = [...dayColumn.getElementsByClassName("course-block")];
+            const timeGroups = {};
+
+            blocks.forEach(block => {
+                const start = parseInt(block.style.top) / 40;
+                if (!timeGroups[start]) {
+                    timeGroups[start] = [];
+                }
+                timeGroups[start].push(block);
+            });
+
+            Object.values(timeGroups).forEach(group => {
+                const groupLength = group.length;
+                const width = 100 / groupLength;
+
+                group.forEach((block, index) => {
+                    block.style.width = `${width}%`;
+                    block.style.left = `${index * width}%`;
+                });
+            });
+        });
     };
 
     listItem.appendChild(removeButton);
     courseList.appendChild(listItem);
 }
+
 
 
 function sifirla(){
