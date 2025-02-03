@@ -43903,41 +43903,6 @@ function addCourse() {
     });
 }
 
-function addCourseToList() {
-    const course = document.getElementById('courseSelect').value;
-    const crn = document.getElementById('crnSelect').value;
-    const { dersadi, uyesi } = schedule[course][crn][0];
-   
-    // Seçili ders veya CRN yoksa çık
-    if (!course || !crn) return;
-
-    const courseList = document.getElementById('courseList');
-
-    // Daha önce eklenmişse tekrar eklemeyin
-    if ([...courseList.children].some(item => item.dataset.crn === crn)) return;
-
-    const listItem = document.createElement('li');
-    listItem.dataset.crn = crn; // CRN'yi veri olarak kaydediyoruz
-    listItem.innerHTML = `<strong>${course}</strong> (<strong>${crn}</strong>) (${uyesi})`;
-
-    const removeButton = document.createElement('button');
-    removeButton.textContent = 'Remove';
-    removeButton.style.marginLeft = '10px';
-    removeButton.className = 'bg-purple-600 text-white p-1 rounded h-[40px]';
-    
-    removeButton.onclick = () => {
-    listItem.remove(); // Liste elemanını kaldır
-
-    // CRN'ye ait program kutularını kaldır
-    document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
-
-    // Kullanılan rengi tekrar kullanılabilir yap
-    releaseColor(crn);
-
-    console.log("Ders kaldırıldı, updateCourseLayout çağrılıyor...");
-    updateCourseLayout(); // Güncellenmiş düzeni uygula
-};
-
 function updateCourseLayout() {
     const dayColumns = document.querySelectorAll(".day-column");
 
@@ -43956,28 +43921,48 @@ function updateCourseLayout() {
 
         // Geriye kalan dersleri düzenle
         Object.values(timeGroups).forEach(group => {
-            let width = 100 / group.length;
+            const groupLength = group.length;
+            const width = 100 / groupLength;
 
-            // Eğer tek ders kaldıysa genişliği tam yap
-            if (group.length === 1) {
-                width = 100;
-                group[0].style.left = "0";  // Tek ders kaldığında sola hizala
-            }
-
-            // Her dersi uygun şekilde hizala
             group.forEach((block, index) => {
                 block.style.width = `${width}%`;
                 block.style.left = `${index * width}%`;
             });
         });
     });
-
-    // 🚀 ÇÖZÜM: Tüm dersleri güncelledikten sonra genişliği kesin olarak 100% yap
-    document.querySelectorAll(".course-block").forEach(block => block.style.width = "100%");
 }
+
+function addCourseToList() {
+    const course = document.getElementById('courseSelect').value;
+    const crn = document.getElementById('crnSelect').value;
+    const { dersadi, uyesi } = schedule[course][crn][0];
+
+    if (!course || !crn) return;
+
+    const courseList = document.getElementById('courseList');
+
+    if ([...courseList.children].some(item => item.dataset.crn === crn)) return;
+
+    const listItem = document.createElement('li');
+    listItem.dataset.crn = crn;
+    listItem.innerHTML = `<strong>${course}</strong> (<strong>${crn}</strong>) (${uyesi})`;
+
+    const removeButton = document.createElement('button');
+    removeButton.textContent = 'Remove';
+    removeButton.style.marginLeft = '10px';
+    removeButton.className = 'bg-purple-600 text-white p-1 rounded h-[40px]';
+
+    removeButton.onclick = () => {
+        listItem.remove();
+        document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
+        releaseColor(crn);
+        updateCourseLayout();
+    };
+
     listItem.appendChild(removeButton);
     courseList.appendChild(listItem);
 }
+
 
 function sifirla(){
     document.getElementById('courseSelect').value = '';
