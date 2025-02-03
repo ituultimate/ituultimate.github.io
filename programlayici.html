@@ -43857,30 +43857,47 @@ function addCourse() {
     const course = document.getElementById('courseSelect').value;
     const crn = document.getElementById('crnSelect').value;
 
-    // Seçili ders veya CRN yoksa çık
     if (!course || !crn || !schedule[course] || !schedule[course][crn]) return;
 
-    // Eğer bu CRN için bir renk atanmadıysa, yeni bir renk ata
     if (!crnColors[crn]) {
         crnColors[crn] = getNextColor();
     }
     const color = crnColors[crn];
 
-    // Sadece seçilen CRN'ye ait program girişlerini ekle
     const scheduleEntries = schedule[course][crn];
+
     scheduleEntries.forEach(({ day, start, duration, dersadi, uyesi }) => {
         const dayColumn = document.getElementById(day);
         if (!dayColumn) return;
 
+        const existingBlocks = [...dayColumn.getElementsByClassName("course-block")].filter(block => {
+            const blockStart = parseInt(block.style.top) / 40;
+            const blockEnd = blockStart + parseInt(block.style.height) / 40;
+            return (start < blockEnd && (start + duration) > blockStart);
+        });
+
+        const offset = existingBlocks.length * 100 / (existingBlocks.length + 1); 
+
+        existingBlocks.forEach((block, index) => {
+            block.style.width = `${100 / (existingBlocks.length + 1)}%`;
+            block.style.left = `${index * (100 / (existingBlocks.length + 1))}%`;
+        });
+
         const courseBlock = document.createElement("div");
         courseBlock.className = "course-block";
-        courseBlock.dataset.crn = crn; // CRN bilgisini kaydet
+        courseBlock.dataset.crn = crn;
         courseBlock.style.backgroundColor = color;
-        courseBlock.style.height = `${duration * 40}px`; // 1 saat = 40px olarak hesaplanmış
+        courseBlock.style.height = `${duration * 40}px`;
         courseBlock.style.top = `${start * 40}px`;
+        courseBlock.style.width = `${100 / (existingBlocks.length + 1)}%`;
+        courseBlock.style.left = `${offset}%`;
+        courseBlock.style.position = "absolute";
+        courseBlock.style.boxSizing = "border-box";
+        courseBlock.style.border = "1px solid black";
+
         courseBlock.innerHTML = `<div style="display: flex; flex-direction: column; gap: 0px;">
         <span style="font-size: 13px; font-weight: bold;">${course} (${crn})</span>
-    </div>`; // Ders ve CRN'yi göstermek için <span style="font-size: 14px; font-weight: bold;">${dersadi}</span>
+        </div>`;
 
         dayColumn.appendChild(courseBlock);
     });
