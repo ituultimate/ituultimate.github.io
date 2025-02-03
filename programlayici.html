@@ -43830,40 +43830,7 @@ function updateCourseOptions() {
             }
         }
 
-        function addCourseToList() {
-    const course = document.getElementById('courseSelect').value;
-    const crn = document.getElementById('crnSelect').value;
-    const { dersadi, uyesi } = schedule[course][crn][0];
-   
-    // Seçili ders veya CRN yoksa çık
-    if (!course || !crn) return;
-
-    const courseList = document.getElementById('courseList');
-
-    // Daha önce eklenmişse tekrar eklemeyin
-    if ([...courseList.children].some(item => item.dataset.crn === crn)) return;
-
-    const listItem = document.createElement('li');
-    listItem.dataset.crn = crn; // CRN'yi veri olarak kaydediyoruz <strong>${dersadi}</strong>
-    listItem.innerHTML = `<strong>${course}</strong> (<strong>${crn}</strong>) - (${uyesi})`;
-
-    const removeButton = document.createElement('button');
-    removeButton.textContent = 'Remove';
-    removeButton.style.marginLeft = '10px';
-    removeButton.className = 'bg-purple-600 text-white p-1 rounded h-[40px]';
-    
-    removeButton.onclick = () => {
-        listItem.remove(); // Liste elemanını kaldır
-
-        // CRN'ye ait program kutularını da kaldır
-        document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
-    };
-
-    listItem.appendChild(removeButton);
-    courseList.appendChild(listItem);
-}
-
-const availableColors = [
+    const availableColors = [
     "rgb(252, 161, 241)", "rgb(91, 150, 210)", "rgb(115, 44, 196)", "rgb(135, 147, 61)",
     "rgb(178, 168, 144)", "rgb(196, 145, 145)", "rgb(53, 118, 161)", "rgb(184, 114, 106)",
     "rgb(17, 47, 137)", "rgb(27, 176, 139)", "rgb(175, 217, 239)", "rgb(114, 203, 180)"
@@ -43877,6 +43844,13 @@ function getNextColor() {
         remainingColors = [...availableColors]; // Tüm renkler kullanıldıysa sıfırla
     }
     return remainingColors.shift(); // İlk rengi al ve listeden çıkar
+}
+
+function releaseColor(crn) {
+    if (crnColors[crn]) {
+        remainingColors.push(crnColors[crn]); // Kullanılan rengi tekrar kullanılabilir yap
+        delete crnColors[crn]; // CRN rengini kaldır
+    }
 }
 
 function addCourse() { 
@@ -43912,6 +43886,43 @@ function addCourse() {
         dayColumn.appendChild(courseBlock);
     });
 }
+
+function addCourseToList() {
+    const course = document.getElementById('courseSelect').value;
+    const crn = document.getElementById('crnSelect').value;
+    const { dersadi, uyesi } = schedule[course][crn][0];
+   
+    // Seçili ders veya CRN yoksa çık
+    if (!course || !crn) return;
+
+    const courseList = document.getElementById('courseList');
+
+    // Daha önce eklenmişse tekrar eklemeyin
+    if ([...courseList.children].some(item => item.dataset.crn === crn)) return;
+
+    const listItem = document.createElement('li');
+    listItem.dataset.crn = crn; // CRN'yi veri olarak kaydediyoruz
+    listItem.innerHTML = `${course} (<strong>${crn}</strong>) - <strong>${dersadi}</strong> (${uyesi})`;
+
+    const removeButton = document.createElement('button');
+    removeButton.textContent = 'Remove';
+    removeButton.style.marginLeft = '10px';
+    removeButton.className = 'bg-purple-600 text-white p-1 rounded h-[40px]';
+    
+    removeButton.onclick = () => {
+        listItem.remove(); // Liste elemanını kaldır
+
+        // CRN'ye ait program kutularını da kaldır
+        document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
+        
+        // Kullanılan rengi tekrar kullanılabilir yap
+        releaseColor(crn);
+    };
+
+    listItem.appendChild(removeButton);
+    courseList.appendChild(listItem);
+}
+
 function sifirla(){
     document.getElementById('courseSelect').value = '';
         document.getElementById('crnSelect').value = '';
