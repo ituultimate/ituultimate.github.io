@@ -43956,19 +43956,23 @@ function updateCourseLayout() {
         // Geriye kalan dersleri düzenle
         Object.values(timeGroups).forEach(group => {
             let width = 100 / group.length;
-            
-            // Eğer tek ders kaldıysa tam genişlik kullan
+
+            // Eğer tek ders kaldıysa genişliği 100% yap
             if (group.length === 1) {
                 width = 100;
+                group[0].style.left = "0";  // Tek ders kaldıysa sola hizala
             }
 
             group.forEach((block, index) => {
                 block.style.width = `${width}%`;
                 block.style.left = `${index * width}%`;
             });
+
+            console.log(`Ders sayısı: ${group.length}, Genişlik: ${width}%`);
         });
     });
 }
+
 
 
 
