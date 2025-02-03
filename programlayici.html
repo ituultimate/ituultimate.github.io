@@ -43833,7 +43833,7 @@
         function addCourseToList() {
     const course = document.getElementById('courseSelect').value;
     const crn = document.getElementById('crnSelect').value;
-    const { dersadi, uyesi } = schedule[course][crn][dersadi, uyesi];
+    const { dersadi, uyesi } = schedule[course][crn][0];
    
     // Seçili ders veya CRN yoksa çık
     if (!course || !crn) return;
