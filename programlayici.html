@@ -43880,8 +43880,7 @@ function addCourse() {
         courseBlock.style.top = `${start * 40}px`;
         courseBlock.innerHTML = `<div style="display: flex; flex-direction: column; gap: 0px;">
         <span style="font-size: 13px; font-weight: bold;">${course} (${crn})</span>
-        <span style="font-size: 14px; font-weight: bold;">${dersadi}</span>
-    </div>`; // Ders ve CRN'yi göstermek için
+    </div>`; // Ders ve CRN'yi göstermek için <span style="font-size: 14px; font-weight: bold;">${dersadi}</span>
 
         dayColumn.appendChild(courseBlock);
     });
@@ -43902,7 +43901,7 @@ function addCourseToList() {
 
     const listItem = document.createElement('li');
     listItem.dataset.crn = crn; // CRN'yi veri olarak kaydediyoruz
-    listItem.innerHTML = `${course} (<strong>${crn}</strong>) - <strong>${dersadi}</strong> (${uyesi})`;
+    listItem.innerHTML = `<strong>${course}</strong> (<strong>${crn}</strong>) (${uyesi})`;
 
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove';
