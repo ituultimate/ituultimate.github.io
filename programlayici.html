@@ -43853,46 +43853,6 @@ function releaseColor(crn) {
     }
 }
 
-function adjustOverlappingBlocks(dayColumn) {
-    // Sütundaki tüm "course-block" elementlerini al
-    const blocks = [...dayColumn.getElementsByClassName("course-block")];
-
-    // Çakışmaları belirlemek için başlangıç ve bitiş saatlerini kontrol et
-    const overlappingGroups = [];
-    blocks.forEach(block => {
-        const start = parseInt(block.style.top) / 40; // Başlangıç zamanı
-        const duration = parseInt(block.style.height) / 40; // Süre
-        const end = start + duration; // Bitiş zamanı
-
-        // Grupları oluştur
-        let addedToGroup = false;
-        for (const group of overlappingGroups) {
-            if (group.some(existingBlock => {
-                const gStart = parseInt(existingBlock.style.top) / 40;
-                const gDuration = parseInt(existingBlock.style.height) / 40;
-                const gEnd = gStart + gDuration;
-                return !(end <= gStart || start >= gEnd); // Çakışma kontrolü
-            })) {
-                group.push(block);
-                addedToGroup = true;
-                break;
-            }
-        }
-        if (!addedToGroup) {
-            overlappingGroups.push([block]);
-        }
-    });
-
-    // Her grup için "width" ve "left" değerlerini düzenle
-    overlappingGroups.forEach(group => {
-        const width = 100 / group.length; // Grup içindeki derslerin genişlik oranı
-        group.forEach((block, index) => {
-            block.style.width = `${width}%`;
-            block.style.left = `${index * width}%`;
-        });
-    });
-}
-
 function addCourse() { 
     const course = document.getElementById('courseSelect').value;
     const crn = document.getElementById('crnSelect').value;
@@ -43952,38 +43912,22 @@ function updateCourseLayout() {
 function adjustCourseBlocks(dayColumn) {
     const blocks = [...dayColumn.getElementsByClassName("course-block")];
 
-    // Çakışmaları belirlemek için başlangıç ve bitiş saatlerini hesapla
-    const timeGroups = [];
+    // Aynı başlangıç saatine göre gruplandır
+    const timeGroups = {};
     blocks.forEach(block => {
         const start = parseInt(block.style.top) / 40;
-        const duration = parseInt(block.style.height) / 40;
-        const end = start + duration;
-
-        // Zaman gruplarına ekle
-        let added = false;
-        for (const group of timeGroups) {
-            if (group.some(b => {
-                const gStart = parseInt(b.style.top) / 40;
-                const gDuration = parseInt(b.style.height) / 40;
-                const gEnd = gStart + gDuration;
-                return !(end <= gStart || start >= gEnd); // Kısmen çakışma kontrolü
-            })) {
-                group.push(block);
-                added = true;
-                break;
-            }
+        if (!timeGroups[start]) {
+            timeGroups[start] = [];
         }
-        if (!added) {
-            timeGroups.push([block]);
-        }
+        timeGroups[start].push(block);
     });
 
     // Tüm blokları kaldır
     blocks.forEach(block => block.remove());
 
     // Grupları yeniden çiz
-    timeGroups.forEach(group => {
-        const width = 100 / group.length; // Grup içindeki derslerin genişliklerini hesapla
+    Object.values(timeGroups).forEach(group => {
+        const width = 100 / group.length;
 
         group.forEach((block, index) => {
             block.style.width = `${width}%`;
@@ -43991,18 +43935,6 @@ function adjustCourseBlocks(dayColumn) {
             dayColumn.appendChild(block); // Güncellenmiş blokları tekrar ekle
         });
     });
-}
-
-function removeCourse(crn) {
-    const courseBlocks = document.querySelectorAll(`.course-block[data-crn="${crn}"]`);
-
-    courseBlocks.forEach(block => {
-        const dayColumn = block.parentElement;
-        block.remove(); // Bloku kaldır
-        adjustCourseBlocks(dayColumn); // Kalan blokları yeniden düzenle
-    });
-
-    releaseColor(crn); // Rengi serbest bırak
 }
 
 function addCourseToList() {
@@ -44026,25 +43958,37 @@ function addCourseToList() {
     removeButton.className = 'bg-purple-600 text-white p-1 rounded h-[40px]';
 
     removeButton.onclick = () => {
-    listItem.remove();
+        listItem.remove();
 
-    // İlgili CRN'ye ait blokları bul
-    const crnBlocks = document.querySelectorAll(`.course-block[data-crn='${crn}']`);
+        // İlgili CRN'ye ait blokları bul
+        const crnBlocks = document.querySelectorAll(`.course-block[data-crn='${crn}']`);
 
-    // Her blok için aynı saat dilimindeki diğer blokları da yeniden düzenle
-    crnBlocks.forEach(block => {
-        const dayColumn = block.parentElement;
+        // Her blok için aynı saat dilimindeki diğer blokları da yeniden düzenle
+        crnBlocks.forEach(block => {
+            const dayColumn = block.parentElement;
+            const start = parseInt(block.style.top) / 40;
 
-        // Bloku sil
-        block.remove();
+            // Bloku sil
+            block.remove();
 
-        // Kalan blokları güncelle
-        adjustOverlappingBlocks(dayColumn); // Kalan blokları yeniden hizala
-    });
+            // Aynı saat dilimindeki kalan blokları güncelle
+            const remainingBlocks = [...dayColumn.getElementsByClassName("course-block")]
+                .filter(b => parseInt(b.style.top) / 40 === start);
 
-    releaseColor(crn); // CRN'nin rengini serbest bırak
-};
+            const width = 100 / (remainingBlocks.length || 1);
 
+            remainingBlocks.forEach((b, index) => {
+                b.style.width = `${width}%`;
+                b.style.left = `${index * width}%`;
+            });
+        });
+
+        releaseColor(crn);
+    };
+
+    listItem.appendChild(removeButton);
+    courseList.appendChild(listItem);
+}
 
 
 function sifirla(){
