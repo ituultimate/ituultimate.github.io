@@ -43912,7 +43912,7 @@ function updateCourseLayout() {
 function adjustCourseBlocks(dayColumn) {
     const blocks = [...dayColumn.getElementsByClassName("course-block")];
 
-    // Zaman çakışmalarını hesapla
+    // Zaman çakışmalarını hesaplamak için grupları oluştur
     const timeGroups = [];
     blocks.forEach(block => {
         const start = parseInt(block.style.top) / 40;
@@ -43924,7 +43924,7 @@ function adjustCourseBlocks(dayColumn) {
             if (group.some(b => {
                 const groupStart = parseInt(b.style.top) / 40;
                 const groupEnd = groupStart + parseInt(b.style.height) / 40;
-                // Kısmi çakışma kontrolü
+                // Kısmi veya tam çakışma kontrolü
                 return !(end <= groupStart || start >= groupEnd);
             })) {
                 group.push(block);
@@ -43937,7 +43937,7 @@ function adjustCourseBlocks(dayColumn) {
         }
     });
 
-    // Mevcut blokları kaldır
+    // Tüm blokları kaldır
     blocks.forEach(block => block.remove());
 
     // Grupları yeniden çiz
@@ -43950,6 +43950,36 @@ function adjustCourseBlocks(dayColumn) {
             dayColumn.appendChild(block); // Güncellenmiş blokları tekrar ekle
         });
     });
+}
+
+function handleCourseRemoval(crn, dayColumn) {
+    // İlgili CRN'ye ait blokları bul
+    const blocksToRemove = [...dayColumn.getElementsByClassName("course-block")]
+        .filter(block => block.dataset.crn === crn);
+
+    // Aynı zaman dilimindeki diğer blokları da kaldır
+    const affectedBlocks = [];
+    blocksToRemove.forEach(block => {
+        const start = parseInt(block.style.top) / 40;
+        const end = start + parseInt(block.style.height) / 40;
+
+        [...dayColumn.getElementsByClassName("course-block")].forEach(otherBlock => {
+            const otherStart = parseInt(otherBlock.style.top) / 40;
+            const otherEnd = otherStart + parseInt(otherBlock.style.height) / 40;
+
+            if (!(end <= otherStart || start >= otherEnd)) {
+                if (!affectedBlocks.includes(otherBlock)) {
+                    affectedBlocks.push(otherBlock);
+                }
+            }
+        });
+    });
+
+    // Blokları kaldır
+    [...blocksToRemove, ...affectedBlocks].forEach(block => block.remove());
+
+    // Kalan dersleri yeniden düzenle
+    adjustCourseBlocks(dayColumn);
 }
 
 function addCourseToList() {
