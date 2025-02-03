@@ -43909,56 +43909,24 @@ function updateCourseLayout() {
     dayColumns.forEach(dayColumn => adjustCourseBlocks(dayColumn));
 }
 
-function handleCourseRemoval(crn, dayColumn) {
-    const allBlocks = [...dayColumn.getElementsByClassName("course-block")];
+function adjustCourseBlocks(dayColumn) {
+    const blocks = [...dayColumn.getElementsByClassName("course-block")];
 
-    // Kaldırılan ders ve çakışan dersleri bul
-    const affectedBlocks = [];
-    allBlocks.forEach(block => {
-        const blockCrn = block.dataset.crn;
+    // Çakışmaları belirlemek için başlangıç ve bitiş saatlerini hesapla
+    const timeGroups = [];
+    blocks.forEach(block => {
         const start = parseInt(block.style.top) / 40;
         const duration = parseInt(block.style.height) / 40;
         const end = start + duration;
 
-        if (blockCrn === crn) {
-            affectedBlocks.push(block);
-        } else {
-            // Çakışma kontrolü
-            const removedBlock = allBlocks.find(b => b.dataset.crn === crn);
-            if (removedBlock) {
-                const removedStart = parseInt(removedBlock.style.top) / 40;
-                const removedDuration = parseInt(removedBlock.style.height) / 40;
-                const removedEnd = removedStart + removedDuration;
-
-                if (!(end <= removedStart || start >= removedEnd)) {
-                    affectedBlocks.push(block);
-                }
-            }
-        }
-    });
-
-    // Çakışan blokları kaldır
-    affectedBlocks.forEach(block => block.remove());
-
-    // Kalan blokları düzenle
-    adjustCourseBlocks(dayColumn);
-}
-
-function adjustCourseBlocks(dayColumn) {
-    const blocks = [...dayColumn.getElementsByClassName("course-block")];
-
-    // Zaman gruplarını oluştur
-    const timeGroups = [];
-    blocks.forEach(block => {
-        const start = parseInt(block.style.top) / 40;
-        const end = start + parseInt(block.style.height) / 40;
-
+        // Zaman gruplarına ekle
         let added = false;
         for (const group of timeGroups) {
             if (group.some(b => {
-                const groupStart = parseInt(b.style.top) / 40;
-                const groupEnd = groupStart + parseInt(b.style.height) / 40;
-                return !(end <= groupStart || start >= groupEnd); // Çakışma kontrolü
+                const gStart = parseInt(b.style.top) / 40;
+                const gDuration = parseInt(b.style.height) / 40;
+                const gEnd = gStart + gDuration;
+                return !(end <= gStart || start >= gEnd); // Kısmen çakışma kontrolü
             })) {
                 group.push(block);
                 added = true;
@@ -43970,19 +43938,31 @@ function adjustCourseBlocks(dayColumn) {
         }
     });
 
-    // Blokları kaldır
+    // Tüm blokları kaldır
     blocks.forEach(block => block.remove());
 
     // Grupları yeniden çiz
     timeGroups.forEach(group => {
-        const width = 100 / group.length;
+        const width = 100 / group.length; // Grup içindeki derslerin genişliklerini hesapla
 
         group.forEach((block, index) => {
             block.style.width = `${width}%`;
             block.style.left = `${index * width}%`;
-            dayColumn.appendChild(block);
+            dayColumn.appendChild(block); // Güncellenmiş blokları tekrar ekle
         });
     });
+}
+
+function removeCourse(crn) {
+    const courseBlocks = document.querySelectorAll(`.course-block[data-crn="${crn}"]`);
+
+    courseBlocks.forEach(block => {
+        const dayColumn = block.parentElement;
+        block.remove(); // Bloku kaldır
+        adjustCourseBlocks(dayColumn); // Kalan blokları yeniden düzenle
+    });
+
+    releaseColor(crn); // Rengi serbest bırak
 }
 
 function addCourseToList() {
