@@ -43947,35 +43947,33 @@ function updateCourseLayout() {
         // Aynı saat dilimine denk gelen dersleri grupla
         const timeGroups = {};
         blocks.forEach(block => {
-            const start = parseInt(block.style.top) / 40; // Saat dilimine göre grupla
+            const start = parseInt(block.style.top) / 40;
             if (!timeGroups[start]) {
                 timeGroups[start] = [];
             }
             timeGroups[start].push(block);
         });
 
-        // Gruplanmış dersleri düzenle
+        // Geriye kalan dersleri düzenle
         Object.values(timeGroups).forEach(group => {
-            let width = 100 / group.length; // Ders sayısına göre genişlik belirle
+            let width = 100 / group.length;
 
-            // Eğer 1 ders kaldıysa %100 genişlik yap, değilse çakışan ders oranını kullan
+            // Eğer tek ders kaldıysa genişliği tam yap
+            if (group.length === 1) {
+                width = 100;
+                group[0].style.left = "0";  // Tek ders kaldığında sola hizala
+            }
+
+            // Her dersi uygun şekilde hizala
             group.forEach((block, index) => {
                 block.style.width = `${width}%`;
                 block.style.left = `${index * width}%`;
             });
-
-            console.log(`Ders sayısı: ${group.length}, Yeni genişlik: ${width}%`);
         });
     });
-}
 
-
-
-
-
-
-    listItem.appendChild(removeButton);
-    courseList.appendChild(listItem);
+    // ❌ Bu satır kaldırıldı, çünkü tüm genişlikleri %100 yapıyordu:
+    // document.querySelectorAll(".course-block").forEach(block => block.style.width = "100%");
 }
 
 function sifirla(){
