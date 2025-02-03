@@ -43833,6 +43833,7 @@
         function addCourseToList() {
     const course = document.getElementById('courseSelect').value;
     const crn = document.getElementById('crnSelect').value;
+    const { dersadi, uyesi } = schedule[course][crn][dersadi, uyesi];
    
     // Seçili ders veya CRN yoksa çık
     if (!course || !crn) return;
@@ -43844,7 +43845,7 @@
 
     const listItem = document.createElement('li');
     listItem.dataset.crn = crn; // CRN'yi veri olarak kaydediyoruz
-    listItem.textContent = `${course} (${crn})`;
+    listItem.textContent = `${course} (${crn}) ${dersadi}`;
 
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove';
