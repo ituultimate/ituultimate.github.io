@@ -43906,28 +43906,30 @@ function addCourse() {
 function updateCourseLayout() {
     const dayColumns = document.querySelectorAll(".day-column");
 
-    dayColumns.forEach(dayColumn => {
-        const blocks = [...dayColumn.getElementsByClassName("course-block")];
+    dayColumns.forEach(dayColumn => adjustCourseBlocks(dayColumn));
+}
 
-        // Aynı saat dilimine denk gelen dersleri grupla
-        const timeGroups = {};
-        blocks.forEach(block => {
-            const start = parseInt(block.style.top) / 40;
-            if (!timeGroups[start]) {
-                timeGroups[start] = [];
-            }
-            timeGroups[start].push(block);
-        });
+function adjustCourseBlocks(dayColumn) {
+    const blocks = [...dayColumn.getElementsByClassName("course-block")];
 
-        // Geriye kalan dersleri düzenle
-        Object.values(timeGroups).forEach(group => {
-            const groupLength = group.length;
-            const width = 100 / groupLength;
+    // Aynı başlangıç saatine sahip dersleri gruplandır
+    const timeGroups = {};
+    blocks.forEach(block => {
+        const start = parseInt(block.style.top) / 40;
+        if (!timeGroups[start]) {
+            timeGroups[start] = [];
+        }
+        timeGroups[start].push(block);
+    });
 
-            group.forEach((block, index) => {
-                block.style.width = `${width}%`;
-                block.style.left = `${index * width}%`;
-            });
+    // Her grup için yeniden hizalama
+    Object.values(timeGroups).forEach(group => {
+        const groupLength = group.length;
+        const width = 100 / groupLength;
+
+        group.forEach((block, index) => {
+            block.style.width = `${width}%`;
+            block.style.left = `${index * width}%`;
         });
     });
 }
@@ -43957,56 +43959,12 @@ function addCourseToList() {
         document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
         releaseColor(crn);
 
-        // Tüm gün sütunları için layout'u tekrar düzenle
-        document.querySelectorAll(".day-column").forEach(dayColumn => {
-            const blocks = [...dayColumn.getElementsByClassName("course-block")];
-            const timeGroups = {};
-
-            blocks.forEach(block => {
-                const start = parseInt(block.style.top) / 40;
-                if (!timeGroups[start]) {
-                    timeGroups[start] = [];
-                }
-                timeGroups[start].push(block);
-            });
-
-            Object.values(timeGroups).forEach(group => {
-                const groupLength = group.length;
-                const width = 100 / groupLength;
-
-                group.forEach((block, index) => {
-                    block.style.width = `${width}%`;
-                    block.style.left = `${index * width}%`;
-                });
-            });
-        });
+        // Tüm gün sütunlarını yeniden hizala
+        document.querySelectorAll(".day-column").forEach(dayColumn => adjustCourseBlocks(dayColumn));
     };
 
     listItem.appendChild(removeButton);
     courseList.appendChild(listItem);
-}
-
-function adjustCourseBlocks(dayColumn) {
-    const blocks = [...dayColumn.getElementsByClassName("course-block")];
-    const timeGroups = {};
-
-    blocks.forEach(block => {
-        const start = parseInt(block.style.top) / 40;
-        if (!timeGroups[start]) {
-            timeGroups[start] = [];
-        }
-        timeGroups[start].push(block);
-    });
-
-    Object.values(timeGroups).forEach(group => {
-        const groupLength = group.length;
-        const width = 100 / groupLength;
-
-        group.forEach((block, index) => {
-            block.style.width = `${width}%`;
-            block.style.left = `${index * width}%`;
-        });
-    });
 }
 
 
