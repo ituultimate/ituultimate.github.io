@@ -43866,7 +43866,7 @@ function addCourse() {
 
     const scheduleEntries = schedule[course][crn];
 
-    scheduleEntries.forEach(({ day, start, duration, dersadi, uyesi }) => {
+    scheduleEntries.forEach(({ day, start, duration }) => {
         const dayColumn = document.getElementById(day);
         if (!dayColumn) return;
 
@@ -43876,67 +43876,22 @@ function addCourse() {
             return (start < blockEnd && (start + duration) > blockStart);
         });
 
-        const offset = existingBlocks.length * 100 / (existingBlocks.length + 1); 
-
-        existingBlocks.forEach((block, index) => {
-            block.style.width = `${100 / (existingBlocks.length + 1)}%`;
-            block.style.left = `${index * (100 / (existingBlocks.length + 1))}%`;
-        });
-
         const courseBlock = document.createElement("div");
         courseBlock.className = "course-block";
         courseBlock.dataset.crn = crn;
         courseBlock.style.backgroundColor = color;
         courseBlock.style.height = `${duration * 40}px`;
         courseBlock.style.top = `${start * 40}px`;
-        courseBlock.style.width = `${100 / (existingBlocks.length + 1)}%`;
-        courseBlock.style.left = `${offset}%`;
         courseBlock.style.position = "absolute";
         courseBlock.style.boxSizing = "border-box";
         courseBlock.style.border = "1px solid black";
-
-        courseBlock.innerHTML = `<div style="display: flex; flex-direction: column; gap: 0px;">
-        <span style="font-size: 13px; font-weight: bold;">${course} (${crn})</span>
-        </div>`;
+        courseBlock.innerHTML = `<div style="font-size: 13px; font-weight: bold;">${course} (${crn})</div>`;
 
         dayColumn.appendChild(courseBlock);
+
+        updateCourseLayout();
     });
 }
-
-function addCourseToList() {
-    const course = document.getElementById('courseSelect').value;
-    const crn = document.getElementById('crnSelect').value;
-    const { dersadi, uyesi } = schedule[course][crn][0];
-   
-    // Seçili ders veya CRN yoksa çık
-    if (!course || !crn) return;
-
-    const courseList = document.getElementById('courseList');
-
-    // Daha önce eklenmişse tekrar eklemeyin
-    if ([...courseList.children].some(item => item.dataset.crn === crn)) return;
-
-    const listItem = document.createElement('li');
-    listItem.dataset.crn = crn; // CRN'yi veri olarak kaydediyoruz
-    listItem.innerHTML = `<strong>${course}</strong> (<strong>${crn}</strong>) (${uyesi})`;
-
-    const removeButton = document.createElement('button');
-    removeButton.textContent = 'Remove';
-    removeButton.style.marginLeft = '10px';
-    removeButton.className = 'bg-purple-600 text-white p-1 rounded h-[40px]';
-    
-    removeButton.onclick = () => {
-    listItem.remove(); // Liste elemanını kaldır
-
-    // CRN'ye ait program kutularını kaldır
-    document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
-
-    // Kullanılan rengi tekrar kullanılabilir yap
-    releaseColor(crn);
-
-    console.log("Ders kaldırıldı, updateCourseLayout çağrılıyor...");
-    updateCourseLayout(); // Güncellenmiş düzeni uygula
-};
 
 function updateCourseLayout() {
     const dayColumns = document.querySelectorAll(".day-column");
@@ -43944,7 +43899,6 @@ function updateCourseLayout() {
     dayColumns.forEach(dayColumn => {
         const blocks = [...dayColumn.getElementsByClassName("course-block")];
 
-        // Aynı saat dilimine denk gelen dersleri grupla
         const timeGroups = {};
         blocks.forEach(block => {
             const start = parseInt(block.style.top) / 40;
@@ -43954,28 +43908,47 @@ function updateCourseLayout() {
             timeGroups[start].push(block);
         });
 
-        // Geriye kalan dersleri düzenle
         Object.values(timeGroups).forEach(group => {
             let width = 100 / group.length;
 
-            // Eğer tek ders kaldıysa genişliği tam yap
-            if (group.length === 1) {
-                width = 100;
-                group[0].style.left = "0";  // Tek ders kaldığında sola hizala
-            }
-
-            // Her dersi uygun şekilde hizala
             group.forEach((block, index) => {
                 block.style.width = `${width}%`;
                 block.style.left = `${index * width}%`;
             });
         });
     });
-
-    // ❌ Bu satır kaldırıldı, çünkü tüm genişlikleri %100 yapıyordu:
-    // document.querySelectorAll(".course-block").forEach(block => block.style.width = "100%");
 }
 
+function addCourseToList() {
+    const course = document.getElementById('courseSelect').value;
+    const crn = document.getElementById('crnSelect').value;
+    const { uyesi } = schedule[course][crn][0];
+   
+    if (!course || !crn) return;
+
+    const courseList = document.getElementById('courseList');
+
+    if ([...courseList.children].some(item => item.dataset.crn === crn)) return;
+
+    const listItem = document.createElement('li');
+    listItem.dataset.crn = crn;
+    listItem.innerHTML = `<strong>${course}</strong> (<strong>${crn}</strong>) (${uyesi})`;
+
+    const removeButton = document.createElement('button');
+    removeButton.textContent = 'Remove';
+    removeButton.style.marginLeft = '10px';
+    removeButton.className = 'bg-purple-600 text-white p-1 rounded h-[40px]';
+    
+    removeButton.onclick = () => {
+        listItem.remove();
+        document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
+        releaseColor(crn);
+        updateCourseLayout();
+    };
+
+    listItem.appendChild(removeButton);
+    courseList.appendChild(listItem);
+}
 function sifirla(){
     document.getElementById('courseSelect').value = '';
         document.getElementById('crnSelect').value = '';
