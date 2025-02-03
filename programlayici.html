@@ -43863,7 +43863,21 @@ function updateCourseOptions() {
     courseList.appendChild(listItem);
 }
 
+const availableColors = [
+    "rgb(252, 161, 241)", "rgb(91, 150, 210)", "rgb(115, 44, 196)", "rgb(135, 147, 61)",
+    "rgb(178, 168, 144)", "rgb(196, 145, 145)", "rgb(53, 118, 161)", "rgb(184, 114, 106)",
+    "rgb(17, 47, 137)", "rgb(27, 176, 139)", "rgb(175, 217, 239)", "rgb(114, 203, 180)"
+];
+
 const crnColors = {};
+let remainingColors = [...availableColors];
+
+function getNextColor() {
+    if (remainingColors.length === 0) {
+        remainingColors = [...availableColors]; // Tüm renkler kullanıldıysa sıfırla
+    }
+    return remainingColors.shift(); // İlk rengi al ve listeden çıkar
+}
 
 function addCourse() { 
     const course = document.getElementById('courseSelect').value;
@@ -43874,7 +43888,7 @@ function addCourse() {
 
     // Eğer bu CRN için bir renk atanmadıysa, yeni bir renk ata
     if (!crnColors[crn]) {
-        crnColors[crn] = '#' + Math.floor(Math.random() * 16777215).toString(16); // Rastgele renk
+        crnColors[crn] = getNextColor();
     }
     const color = crnColors[crn];
 
@@ -43892,11 +43906,10 @@ function addCourse() {
         courseBlock.style.top = `${start * 40}px`;
         courseBlock.innerHTML = `<div style="display: flex; flex-direction: column; gap: 0px;">
         <span style="font-size: 13px; font-weight: bold;">${course} (${crn})</span>
-        
-    </div>`; // Ders ve CRN'yi göstermek için <span style="font-size: 14px; font-weight: bold;">${dersadi}</span>
+        <span style="font-size: 14px; font-weight: bold;">${dersadi}</span>
+    </div>`; // Ders ve CRN'yi göstermek için
 
         dayColumn.appendChild(courseBlock);
-        
     });
 }
 function sifirla(){
