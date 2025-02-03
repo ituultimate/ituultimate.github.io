@@ -43912,7 +43912,7 @@ function updateCourseLayout() {
 function adjustCourseBlocks(dayColumn) {
     const blocks = [...dayColumn.getElementsByClassName("course-block")];
 
-    // Aynı başlangıç saatine sahip dersleri gruplandır
+    // Aynı başlangıç saatine göre gruplandır
     const timeGroups = {};
     blocks.forEach(block => {
         const start = parseInt(block.style.top) / 40;
@@ -43922,14 +43922,17 @@ function adjustCourseBlocks(dayColumn) {
         timeGroups[start].push(block);
     });
 
-    // Her grup için yeniden hizalama
+    // Tüm blokları kaldır
+    blocks.forEach(block => block.remove());
+
+    // Grupları yeniden çiz
     Object.values(timeGroups).forEach(group => {
-        const groupLength = group.length;
-        const width = 100 / groupLength;
+        const width = 100 / group.length;
 
         group.forEach((block, index) => {
             block.style.width = `${width}%`;
             block.style.left = `${index * width}%`;
+            dayColumn.appendChild(block); // Güncellenmiş blokları tekrar ekle
         });
     });
 }
@@ -43966,7 +43969,6 @@ function addCourseToList() {
     listItem.appendChild(removeButton);
     courseList.appendChild(listItem);
 }
-
 
 
 function sifirla(){
