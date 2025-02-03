@@ -43805,32 +43805,32 @@
     }
 };
 function updateCourseOptions() {
-            let department = document.getElementById("departmentSelect").value;
-            let courseSelect = document.getElementById("courseSelect");
-            courseSelect.innerHTML = '<option value="">Select Course</option>';
-            courseSelect.disabled = !department;
-            if (department) {
-                for (let course in courses[department]) {
-                    courseSelect.innerHTML += `<option value="${course}">${course}</option>`;
-                }
-            }
-            updateCRNOptions();
+    let department = document.getElementById("departmentSelect").value;
+    let courseSelect = document.getElementById("courseSelect");
+    courseSelect.innerHTML = '<option value="">Select Course</option>';
+    courseSelect.disabled = !department;
+    if (department) {
+        for (let course in courses[department]) {
+            courseSelect.innerHTML += `<option value="${course}">${course}</option>`;
         }
+    }
+    updateCRNOptions();
+}
 
-        function updateCRNOptions() {
-            let department = document.getElementById("departmentSelect").value;
-            let course = document.getElementById("courseSelect").value;
-            let crnSelect = document.getElementById("crnSelect");
-            crnSelect.innerHTML = '<option value="">Select CRN</option>';
-            crnSelect.disabled = !course;
-            if (course) {
-                courses[department][course].forEach(crn => {
-                    crnSelect.innerHTML += `<option value="${crn}">${crn}</option>`;
-                });
-            }
-        }
+function updateCRNOptions() {
+    let department = document.getElementById("departmentSelect").value;
+    let course = document.getElementById("courseSelect").value;
+    let crnSelect = document.getElementById("crnSelect");
+    crnSelect.innerHTML = '<option value="">Select CRN</option>';
+    crnSelect.disabled = !course;
+    if (course) {
+        courses[department][course].forEach(crn => {
+            crnSelect.innerHTML += `<option value="${crn}">${crn}</option>`;
+        });
+    }
+}
 
-    const availableColors = [
+const availableColors = [
     "rgb(252, 161, 241)", "rgb(91, 150, 210)", "rgb(115, 44, 196)", "rgb(135, 147, 61)",
     "rgb(178, 168, 144)", "rgb(196, 145, 145)", "rgb(53, 118, 161)", "rgb(184, 114, 106)",
     "rgb(17, 47, 137)", "rgb(27, 176, 139)", "rgb(175, 217, 239)", "rgb(114, 203, 180)"
@@ -43841,15 +43841,15 @@ let remainingColors = [...availableColors];
 
 function getNextColor() {
     if (remainingColors.length === 0) {
-        remainingColors = [...availableColors]; // Tüm renkler kullanıldıysa sıfırla
+        remainingColors = [...availableColors];
     }
-    return remainingColors.shift(); // İlk rengi al ve listeden çıkar
+    return remainingColors.shift();
 }
 
 function releaseColor(crn) {
     if (crnColors[crn]) {
-        remainingColors.push(crnColors[crn]); // Kullanılan rengi tekrar kullanılabilir yap
-        delete crnColors[crn]; // CRN rengini kaldır
+        remainingColors.push(crnColors[crn]);
+        delete crnColors[crn];
     }
 }
 
@@ -43866,7 +43866,7 @@ function addCourse() {
 
     const scheduleEntries = schedule[course][crn];
 
-    scheduleEntries.forEach(({ day, start, duration, dersadi, uyesi }) => {
+    scheduleEntries.forEach(({ day, start, duration }) => {
         const dayColumn = document.getElementById(day);
         if (!dayColumn) return;
 
@@ -43876,11 +43876,14 @@ function addCourse() {
             return (start < blockEnd && (start + duration) > blockStart);
         });
 
-        const offset = existingBlocks.length * 100 / (existingBlocks.length + 1); 
+        existingBlocks.push(null);
+        const width = 100 / existingBlocks.length;
 
         existingBlocks.forEach((block, index) => {
-            block.style.width = `${100 / (existingBlocks.length + 1)}%`;
-            block.style.left = `${index * (100 / (existingBlocks.length + 1))}%`;
+            if (block) {
+                block.style.width = `${width}%`;
+                block.style.left = `${index * width}%`;
+            }
         });
 
         const courseBlock = document.createElement("div");
@@ -43889,54 +43892,46 @@ function addCourse() {
         courseBlock.style.backgroundColor = color;
         courseBlock.style.height = `${duration * 40}px`;
         courseBlock.style.top = `${start * 40}px`;
-        courseBlock.style.width = `${100 / (existingBlocks.length + 1)}%`;
-        courseBlock.style.left = `${offset}%`;
+        courseBlock.style.width = `${width}%`;
+        courseBlock.style.left = `${(existingBlocks.length - 1) * width}%`;
         courseBlock.style.position = "absolute";
-        courseBlock.style.boxSizing = "border-box";
         courseBlock.style.border = "1px solid black";
-
-        courseBlock.innerHTML = `<div style="display: flex; flex-direction: column; gap: 0px;">
-        <span style="font-size: 13px; font-weight: bold;">${course} (${crn})</span>
-        </div>`;
 
         dayColumn.appendChild(courseBlock);
     });
 }
 
-function updateCourseLayout() {
-    const dayColumns = document.querySelectorAll(".day-column");
+function removeCourse(crn) {
+    document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
+    releaseColor(crn);
+    updateCourseLayout();
+}
 
-    dayColumns.forEach(dayColumn => adjustCourseBlocks(dayColumn));
+function updateCourseLayout() {
+    document.querySelectorAll(".day-column").forEach(dayColumn => adjustCourseBlocks(dayColumn));
 }
 
 function adjustCourseBlocks(dayColumn) {
     const blocks = [...dayColumn.getElementsByClassName("course-block")];
-
-    // Aynı başlangıç saatine göre gruplandır
+    
     const timeGroups = {};
     blocks.forEach(block => {
         const start = parseInt(block.style.top) / 40;
-        if (!timeGroups[start]) {
-            timeGroups[start] = [];
-        }
+        if (!timeGroups[start]) timeGroups[start] = [];
         timeGroups[start].push(block);
     });
 
-    // Tüm blokları kaldır
     blocks.forEach(block => block.remove());
 
-    // Grupları yeniden çiz
     Object.values(timeGroups).forEach(group => {
         const width = 100 / group.length;
-
         group.forEach((block, index) => {
             block.style.width = `${width}%`;
             block.style.left = `${index * width}%`;
-            dayColumn.appendChild(block); // Güncellenmiş blokları tekrar ekle
+            dayColumn.appendChild(block);
         });
     });
 }
-
 function addCourseToList() {
     const course = document.getElementById('courseSelect').value;
     const crn = document.getElementById('crnSelect').value;
