@@ -43955,7 +43955,13 @@ function updateCourseLayout() {
 
         // Geriye kalan dersleri düzenle
         Object.values(timeGroups).forEach(group => {
-            const width = 100 / group.length; // Dersler çakışmazsa %100 yapar
+            let width = 100 / group.length;
+            
+            // Eğer tek ders kaldıysa tam genişlik kullan
+            if (group.length === 1) {
+                width = 100;
+            }
+
             group.forEach((block, index) => {
                 block.style.width = `${width}%`;
                 block.style.left = `${index * width}%`;
@@ -43963,6 +43969,7 @@ function updateCourseLayout() {
         });
     });
 }
+
 
 
     listItem.appendChild(removeButton);
