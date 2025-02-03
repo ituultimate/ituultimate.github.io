@@ -43845,7 +43845,7 @@
 
     const listItem = document.createElement('li');
     listItem.dataset.crn = crn; // CRN'yi veri olarak kaydediyoruz
-    listItem.textContent = `${course} (${crn}) "-" ${dersadi} (${uyesi})`;
+    listItem.textContent = `${course} (${crn}) - ${dersadi} (${uyesi})`;
 
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove';
@@ -43890,7 +43890,7 @@ function addCourse() {
         courseBlock.style.backgroundColor = color;
         courseBlock.style.height = `${duration * 40}px`; // 1 saat = 40px olarak hesaplanmış
         courseBlock.style.top = `${start * 40}px`;
-        courseBlock.innerHTML = `${course} (${crn})<br><span style="font-size: 12px; font-weight: normal; margin-top: 10px;">${dersadi}</span>`; // Ders ve CRN'yi göstermek için
+        courseBlock.innerHTML = `${course} (${crn})<br><span style="font-size: 12px; font-weight: normal; margin-bottom: 2px;">${dersadi}</span>`; // Ders ve CRN'yi göstermek için
 
         dayColumn.appendChild(courseBlock);
         
