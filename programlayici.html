@@ -43912,31 +43912,44 @@ function updateCourseLayout() {
 function adjustCourseBlocks(dayColumn) {
     const blocks = [...dayColumn.getElementsByClassName("course-block")];
 
-    // Aynı başlangıç saatine göre gruplandır
-    const timeGroups = {};
+    // Çakışan dersleri belirlemek için zaman aralığını kontrol et
+    const timeGroups = [];
+
     blocks.forEach(block => {
         const start = parseInt(block.style.top) / 40;
-        if (!timeGroups[start]) {
-            timeGroups[start] = [];
+        const end = start + parseInt(block.style.height) / 40;
+
+        let foundGroup = false;
+        for (const group of timeGroups) {
+            if (group.some(b => {
+                const gStart = parseInt(b.style.top) / 40;
+                const gEnd = gStart + parseInt(b.style.height) / 40;
+                return (start < gEnd && end > gStart); // Çakışma varsa gruba ekle
+            })) {
+                group.push(block);
+                foundGroup = true;
+                break;
+            }
         }
-        timeGroups[start].push(block);
+
+        if (!foundGroup) {
+            timeGroups.push([block]);
+        }
     });
 
-    // Tüm blokları kaldır
+    // Blokları temizleyip yeni düzenle
     blocks.forEach(block => block.remove());
 
-    // Grupları yeniden çiz
-    Object.values(timeGroups).forEach(group => {
+    timeGroups.forEach(group => {
         const width = 100 / group.length;
 
         group.forEach((block, index) => {
             block.style.width = `${width}%`;
             block.style.left = `${index * width}%`;
-            dayColumn.appendChild(block); // Güncellenmiş blokları tekrar ekle
+            dayColumn.appendChild(block);
         });
     });
 }
-
 function addCourseToList() {
     const course = document.getElementById('courseSelect').value;
     const crn = document.getElementById('crnSelect').value;
@@ -43958,33 +43971,22 @@ function addCourseToList() {
     removeButton.className = 'bg-purple-600 text-white p-1 rounded h-[40px]';
 
     removeButton.onclick = () => {
-        listItem.remove();
+    listItem.remove();
 
-        // İlgili CRN'ye ait blokları bul
-        const crnBlocks = document.querySelectorAll(`.course-block[data-crn='${crn}']`);
+    // İlgili CRN'ye ait blokları bul
+    const crnBlocks = document.querySelectorAll(`.course-block[data-crn='${crn}']`);
 
-        // Her blok için aynı saat dilimindeki diğer blokları da yeniden düzenle
-        crnBlocks.forEach(block => {
-            const dayColumn = block.parentElement;
-            const start = parseInt(block.style.top) / 40;
+    crnBlocks.forEach(block => {
+        const dayColumn = block.parentElement;
+        block.remove();
 
-            // Bloku sil
-            block.remove();
+        // Güncellenen blokları yeniden düzenle
+        adjustCourseBlocks(dayColumn);
+    });
 
-            // Aynı saat dilimindeki kalan blokları güncelle
-            const remainingBlocks = [...dayColumn.getElementsByClassName("course-block")]
-                .filter(b => parseInt(b.style.top) / 40 === start);
+    releaseColor(crn);
+};
 
-            const width = 100 / (remainingBlocks.length || 1);
-
-            remainingBlocks.forEach((b, index) => {
-                b.style.width = `${width}%`;
-                b.style.left = `${index * width}%`;
-            });
-        });
-
-        releaseColor(crn);
-    };
 
     listItem.appendChild(removeButton);
     courseList.appendChild(listItem);
