@@ -43905,13 +43905,15 @@ function addCourse() {
 
 function updateCourseLayout() {
     const dayColumns = document.querySelectorAll(".day-column");
+
     dayColumns.forEach(dayColumn => adjustCourseBlocks(dayColumn));
 }
 
 function adjustCourseBlocks(dayColumn) {
     const blocks = [...dayColumn.getElementsByClassName("course-block")];
-    const timeGroups = {};
 
+    // Aynı başlangıç saatine göre gruplandır
+    const timeGroups = {};
     blocks.forEach(block => {
         const start = parseInt(block.style.top) / 40;
         if (!timeGroups[start]) {
@@ -43920,53 +43922,19 @@ function adjustCourseBlocks(dayColumn) {
         timeGroups[start].push(block);
     });
 
+    // Tüm blokları kaldır
     blocks.forEach(block => block.remove());
 
+    // Grupları yeniden çiz
     Object.values(timeGroups).forEach(group => {
         const width = 100 / group.length;
+
         group.forEach((block, index) => {
             block.style.width = `${width}%`;
             block.style.left = `${index * width}%`;
-            dayColumn.appendChild(block);
+            dayColumn.appendChild(block); // Güncellenmiş blokları tekrar ekle
         });
     });
-}
-
-function removeCourse(crn) {
-    const crnBlocks = document.querySelectorAll(`.course-block[data-crn='${crn}']`);
-    
-    crnBlocks.forEach(block => {
-        const dayColumn = block.parentElement;
-        const start = parseInt(block.style.top) / 40;
-        block.remove();
-
-        const remainingBlocks = [...dayColumn.getElementsByClassName("course-block")]
-            .filter(b => parseInt(b.style.top) / 40 === start);
-        
-        adjustRemainingBlocks(remainingBlocks);
-    });
-
-    releaseColor(crn);
-}
-
-function adjustRemainingBlocks(blocks) {
-    const count = blocks.length;
-    if (count === 1) {
-        blocks[0].style.width = "100%";
-        blocks[0].style.left = "0%";
-    } else if (count === 2) {
-        blocks[0].style.width = "50%";
-        blocks[0].style.left = "0%";
-        blocks[1].style.width = "50%";
-        blocks[1].style.left = "50%";
-    } else if (count === 3) {
-        blocks[0].style.width = "33.33%";
-        blocks[0].style.left = "0%";
-        blocks[1].style.width = "33.33%";
-        blocks[1].style.left = "33.33%";
-        blocks[2].style.width = "33.33%";
-        blocks[2].style.left = "66.66%";
-    }
 }
 
 function addCourseToList() {
