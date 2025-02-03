@@ -43833,6 +43833,8 @@
         function addCourseToList() {
     const course = document.getElementById('courseSelect').value;
     const crn = document.getElementById('crnSelect').value;
+    const scheduleEntries = schedule[course][crn];
+    scheduleEntries.forEach(({ dersadi, uyesi })
 
     // Seçili ders veya CRN yoksa çık
     if (!course || !crn) return;
@@ -43844,7 +43846,7 @@
 
     const listItem = document.createElement('li');
     listItem.dataset.crn = crn; // CRN'yi veri olarak kaydediyoruz
-    listItem.textContent = `${course} (${crn})`;
+    listItem.textContent = `${course} (${crn}) ${dersadi} "-" ${uyesi}`;
 
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove';
@@ -43879,7 +43881,7 @@ function addCourse() {
 
     // Sadece seçilen CRN'ye ait program girişlerini ekle
     const scheduleEntries = schedule[course][crn];
-    scheduleEntries.forEach(({ day, start, duration, dersadi }) => {
+    scheduleEntries.forEach(({ day, start, duration, dersadi, uyesi }) => {
         const dayColumn = document.getElementById(day);
         if (!dayColumn) return;
 
@@ -43889,7 +43891,7 @@ function addCourse() {
         courseBlock.style.backgroundColor = color;
         courseBlock.style.height = `${duration * 40}px`; // 1 saat = 40px olarak hesaplanmış
         courseBlock.style.top = `${start * 40}px`;
-        courseBlock.innerText = `${course} (${crn})\n${dersadi}`; // Ders ve CRN'yi göstermek için
+        courseBlock.innerText = `${course} (${crn})\n${dersadi} ${uyesi}`; // Ders ve CRN'yi göstermek için
 
         dayColumn.appendChild(courseBlock);
         
