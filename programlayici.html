@@ -43986,6 +43986,29 @@ function addCourseToList() {
     courseList.appendChild(listItem);
 }
 
+function adjustCourseBlocks(dayColumn) {
+    const blocks = [...dayColumn.getElementsByClassName("course-block")];
+    const timeGroups = {};
+
+    blocks.forEach(block => {
+        const start = parseInt(block.style.top) / 40;
+        if (!timeGroups[start]) {
+            timeGroups[start] = [];
+        }
+        timeGroups[start].push(block);
+    });
+
+    Object.values(timeGroups).forEach(group => {
+        const groupLength = group.length;
+        const width = 100 / groupLength;
+
+        group.forEach((block, index) => {
+            block.style.width = `${width}%`;
+            block.style.left = `${index * width}%`;
+        });
+    });
+}
+
 
 
 function sifirla(){
