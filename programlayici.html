@@ -43932,6 +43932,8 @@ function adjustCourseBlocks(dayColumn) {
 
     // Grupları hizala
     timeGroups.forEach(group => {
+        group.sort((a, b) => parseInt(a.style.top) - parseInt(b.style.top));
+
         const width = 100 / group.length;
         group.forEach((block, index) => {
             block.style.width = `${width}%`;
@@ -43944,6 +43946,7 @@ function updateCourseLayout() {
     const dayColumns = document.querySelectorAll(".day-column");
     dayColumns.forEach(adjustCourseBlocks);
 }
+
 
 function addCourseToList() {
     const course = document.getElementById('courseSelect').value;
