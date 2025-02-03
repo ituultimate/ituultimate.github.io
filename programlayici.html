@@ -43954,30 +43954,19 @@ function updateCourseLayout() {
             timeGroups[start].push(block);
         });
 
-        // Geriye kalan dersleri düzenle
+        // Gruplara göre genişlik ve konum hesapla
         Object.values(timeGroups).forEach(group => {
-            let width = 100 / group.length;
+            const count = group.length;
+            const width = 100 / count; // Ders sayısına göre genişliği belirle
 
-            // Eğer tek ders kaldıysa genişliği tam yap
-            if (group.length === 1) {
-                width = 100;
-                group[0].style.left = "0";  // Tek ders kaldığında sola hizala
-            }
-
-            // Her dersi uygun şekilde hizala
             group.forEach((block, index) => {
                 block.style.width = `${width}%`;
-                block.style.left = `${index * width}%`;
+                block.style.left = `${index * width}%`; // Dersleri sola hizala
             });
         });
     });
+}
 
-    // 🚀 ÇÖZÜM: Tüm dersleri güncelledikten sonra genişliği kesin olarak 100% yap
-    document.querySelectorAll(".course-block").forEach(block => block.style.width = "auto");
-}
-    listItem.appendChild(removeButton);
-    courseList.appendChild(listItem);
-}
 
 function sifirla(){
     document.getElementById('courseSelect').value = '';
