@@ -43947,33 +43947,26 @@ function updateCourseLayout() {
         // Aynı saat dilimine denk gelen dersleri grupla
         const timeGroups = {};
         blocks.forEach(block => {
-            const start = parseInt(block.style.top) / 40;
+            const start = parseInt(block.style.top) / 40; // Saat dilimine göre grupla
             if (!timeGroups[start]) {
                 timeGroups[start] = [];
             }
             timeGroups[start].push(block);
         });
 
-        // Geriye kalan dersleri düzenle
+        // Gruplanmış dersleri düzenle
         Object.values(timeGroups).forEach(group => {
-            let width = 100 / group.length;
+            let width = 100 / group.length; // Ders sayısına göre genişlik belirle
 
-            // Eğer tek ders kaldıysa genişliği tam yap
-            if (group.length === 1) {
-                width = 100;
-                group[0].style.left = "0";  // Tek ders kaldığında sola hizala
-            }
-
-            // Her dersi uygun şekilde hizala
+            // Eğer 1 ders kaldıysa %100 genişlik yap, değilse çakışan ders oranını kullan
             group.forEach((block, index) => {
                 block.style.width = `${width}%`;
                 block.style.left = `${index * width}%`;
             });
+
+            console.log(`Ders sayısı: ${group.length}, Yeni genişlik: ${width}%`);
         });
     });
-
-    // 🚀 ÇÖZÜM: Tüm dersleri güncelledikten sonra genişliği kesin olarak 100% yap
-    document.querySelectorAll(".course-block").forEach(block => block.style.width = "100%");
 }
 
 
