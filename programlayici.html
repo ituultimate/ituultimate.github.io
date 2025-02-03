@@ -43926,14 +43926,44 @@ function addCourseToList() {
     removeButton.className = 'bg-purple-600 text-white p-1 rounded h-[40px]';
     
     removeButton.onclick = () => {
-        listItem.remove(); // Liste elemanını kaldır
+    listItem.remove(); // Liste elemanını kaldır
 
-        // CRN'ye ait program kutularını da kaldır
-        document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
-        
-        // Kullanılan rengi tekrar kullanılabilir yap
-        releaseColor(crn);
-    };
+    // CRN'ye ait program kutularını kaldır
+    document.querySelectorAll(`.course-block[data-crn='${crn}']`).forEach(block => block.remove());
+
+    // Kullanılan rengi tekrar kullanılabilir yap
+    releaseColor(crn);
+
+    // Geriye kalan dersleri düzenle
+    updateCourseLayout();
+};
+function updateCourseLayout() {
+    const dayColumns = document.querySelectorAll(".day-column");
+
+    dayColumns.forEach(dayColumn => {
+        const blocks = [...dayColumn.getElementsByClassName("course-block")];
+
+        // Aynı saat dilimine denk gelen dersleri grupla
+        const timeGroups = {};
+        blocks.forEach(block => {
+            const start = parseInt(block.style.top) / 40;
+            if (!timeGroups[start]) {
+                timeGroups[start] = [];
+            }
+            timeGroups[start].push(block);
+        });
+
+        // Geriye kalan dersleri düzenle
+        Object.values(timeGroups).forEach(group => {
+            const width = 100 / group.length; // Dersler çakışmazsa %100 yapar
+            group.forEach((block, index) => {
+                block.style.width = `${width}%`;
+                block.style.left = `${index * width}%`;
+            });
+        });
+    });
+}
+
 
     listItem.appendChild(removeButton);
     courseList.appendChild(listItem);
