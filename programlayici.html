@@ -43903,38 +43903,46 @@ function addCourse() {
     });
 }
 
-function updateCourseLayout() {
-    const dayColumns = document.querySelectorAll(".day-column");
-
-    dayColumns.forEach(dayColumn => adjustCourseBlocks(dayColumn));
-}
-
 function adjustCourseBlocks(dayColumn) {
     const blocks = [...dayColumn.getElementsByClassName("course-block")];
+    const timeGroups = [];
 
-    // Aynı başlangıç saatine göre gruplandır
-    const timeGroups = {};
+    // Çakışan dersleri gruplandır
     blocks.forEach(block => {
-        const start = parseInt(block.style.top) / 40;
-        if (!timeGroups[start]) {
-            timeGroups[start] = [];
+        const start = parseInt(block.style.top);
+        const end = start + parseInt(block.style.height);
+
+        let added = false;
+        for (let group of timeGroups) {
+            if (group.some(b => {
+                const bStart = parseInt(b.style.top);
+                const bEnd = bStart + parseInt(b.style.height);
+                return (start < bEnd && end > bStart);
+            })) {
+                group.push(block);
+                added = true;
+                break;
+            }
         }
-        timeGroups[start].push(block);
+
+        if (!added) {
+            timeGroups.push([block]);
+        }
     });
 
-    // Tüm blokları kaldır
-    blocks.forEach(block => block.remove());
-
-    // Grupları yeniden çiz
-    Object.values(timeGroups).forEach(group => {
+    // Grupları hizala
+    timeGroups.forEach(group => {
         const width = 100 / group.length;
-
         group.forEach((block, index) => {
             block.style.width = `${width}%`;
             block.style.left = `${index * width}%`;
-            dayColumn.appendChild(block); // Güncellenmiş blokları tekrar ekle
         });
     });
+}
+
+function updateCourseLayout() {
+    const dayColumns = document.querySelectorAll(".day-column");
+    dayColumns.forEach(adjustCourseBlocks);
 }
 
 function addCourseToList() {
