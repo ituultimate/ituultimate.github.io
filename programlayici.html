@@ -43845,7 +43845,7 @@
 
     const listItem = document.createElement('li');
     listItem.dataset.crn = crn; // CRN'yi veri olarak kaydediyoruz
-    listItem.textContent = `${course} (${crn}) - ${dersadi} (${uyesi})`;
+    listItem.innerHTML = `${course} (<strong>${crn}</strong>) - <strong>${dersadi}</strong> (${uyesi})`;
 
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove';
