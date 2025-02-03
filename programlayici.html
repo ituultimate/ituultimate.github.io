@@ -43879,7 +43879,7 @@ function addCourse() {
 
     // Sadece seçilen CRN'ye ait program girişlerini ekle
     const scheduleEntries = schedule[course][crn];
-    scheduleEntries.forEach(({ day, start, duration }) => {
+    scheduleEntries.forEach(({ day, start, duration, dersadi }) => {
         const dayColumn = document.getElementById(day);
         if (!dayColumn) return;
 
