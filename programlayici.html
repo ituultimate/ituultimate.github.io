@@ -43934,6 +43934,7 @@ function adjustCourseBlocks(dayColumn) {
 
 function removeCourse(crn) {
     const crnBlocks = document.querySelectorAll(`.course-block[data-crn='${crn}']`);
+    
     crnBlocks.forEach(block => {
         const dayColumn = block.parentElement;
         const start = parseInt(block.style.top) / 40;
@@ -43941,25 +43942,33 @@ function removeCourse(crn) {
 
         const remainingBlocks = [...dayColumn.getElementsByClassName("course-block")]
             .filter(b => parseInt(b.style.top) / 40 === start);
-
-        if (remainingBlocks.length === 1) {
-            remainingBlocks[0].style.width = "100%";
-            remainingBlocks[0].style.left = "0%";
-        } else if (remainingBlocks.length === 2) {
-            remainingBlocks[0].style.width = "50%";
-            remainingBlocks[0].style.left = "0%";
-            remainingBlocks[1].style.width = "50%";
-            remainingBlocks[1].style.left = "50%";
-        } else if (remainingBlocks.length === 3) {
-            remainingBlocks[0].style.width = "33.33%";
-            remainingBlocks[0].style.left = "0%";
-            remainingBlocks[1].style.width = "33.33%";
-            remainingBlocks[1].style.left = "33.33%";
-            remainingBlocks[2].style.width = "33.33%";
-            remainingBlocks[2].style.left = "66.66%";
-        }
+        
+        adjustRemainingBlocks(remainingBlocks);
     });
+
+    releaseColor(crn);
 }
+
+function adjustRemainingBlocks(blocks) {
+    const count = blocks.length;
+    if (count === 1) {
+        blocks[0].style.width = "100%";
+        blocks[0].style.left = "0%";
+    } else if (count === 2) {
+        blocks[0].style.width = "50%";
+        blocks[0].style.left = "0%";
+        blocks[1].style.width = "50%";
+        blocks[1].style.left = "50%";
+    } else if (count === 3) {
+        blocks[0].style.width = "33.33%";
+        blocks[0].style.left = "0%";
+        blocks[1].style.width = "33.33%";
+        blocks[1].style.left = "33.33%";
+        blocks[2].style.width = "33.33%";
+        blocks[2].style.left = "66.66%";
+    }
+}
+
 function addCourseToList() {
     const course = document.getElementById('courseSelect').value;
     const crn = document.getElementById('crnSelect').value;
