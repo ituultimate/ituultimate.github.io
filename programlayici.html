@@ -43889,7 +43889,7 @@ function addCourse() {
         courseBlock.style.backgroundColor = color;
         courseBlock.style.height = `${duration * 40}px`; // 1 saat = 40px olarak hesaplanmış
         courseBlock.style.top = `${start * 40}px`;
-        courseBlock.innerText = `${course} (${crn})\n(${crn})`; // Ders ve CRN'yi göstermek için
+        courseBlock.innerText = `${course} (${crn})\n${crn}`; // Ders ve CRN'yi göstermek için
 
         dayColumn.appendChild(courseBlock);
         
