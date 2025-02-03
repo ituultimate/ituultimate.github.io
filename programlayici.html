@@ -43934,9 +43934,10 @@ function addCourseToList() {
     // Kullanılan rengi tekrar kullanılabilir yap
     releaseColor(crn);
 
-    // Geriye kalan dersleri düzenle
-    updateCourseLayout();
+    console.log("Ders kaldırıldı, updateCourseLayout çağrılıyor...");
+    updateCourseLayout(); // Güncellenmiş düzeni uygula
 };
+
 function updateCourseLayout() {
     const dayColumns = document.querySelectorAll(".day-column");
 
@@ -43946,23 +43947,24 @@ function updateCourseLayout() {
         // Aynı saat dilimine denk gelen dersleri grupla
         const timeGroups = {};
         blocks.forEach(block => {
-            const start = parseInt(block.style.top) / 40;
+            const start = parseInt(block.style.top) / 40; // Saat dilimine göre grupla
             if (!timeGroups[start]) {
                 timeGroups[start] = [];
             }
             timeGroups[start].push(block);
         });
 
-        // Geriye kalan dersleri düzenle
+        // Gruplanmış dersleri düzenle
         Object.values(timeGroups).forEach(group => {
             let width = 100 / group.length;
 
-            // Eğer tek ders kaldıysa genişliği 100% yap
+            // Eğer tek ders kaldıysa genişliği tam yap
             if (group.length === 1) {
                 width = 100;
-                group[0].style.left = "0";  // Tek ders kaldıysa sola hizala
+                group[0].style.left = "0";  // Tek ders kaldığında sola hizala
             }
 
+            // Her dersi uygun şekilde hizala
             group.forEach((block, index) => {
                 block.style.width = `${width}%`;
                 block.style.left = `${index * width}%`;
@@ -43972,6 +43974,7 @@ function updateCourseLayout() {
         });
     });
 }
+
 
 
 
