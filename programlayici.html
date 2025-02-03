@@ -43903,64 +43903,39 @@ function addCourse() {
     });
 }
 
+function updateCourseLayout() {
+    const dayColumns = document.querySelectorAll(".day-column");
+
+    dayColumns.forEach(dayColumn => adjustCourseBlocks(dayColumn));
+}
+
 function adjustCourseBlocks(dayColumn) {
     const blocks = [...dayColumn.getElementsByClassName("course-block")];
 
-    // Blokları başlangıç saatine ve bitiş saatine göre sıralıyoruz
-    blocks.sort((a, b) => {
-        const startA = parseInt(a.style.top) / 40;
-        const startB = parseInt(b.style.top) / 40;
-        return startA - startB;
-    });
-
-    // Çakışan blokları gruplara ayırıyoruz
-    const groups = [];
+    // Aynı başlangıç saatine göre gruplandır
+    const timeGroups = {};
     blocks.forEach(block => {
         const start = parseInt(block.style.top) / 40;
-        const end = start + parseInt(block.style.height) / 40;
-
-        let placed = false;
-        for (let group of groups) {
-            // Eğer blok mevcut grubun herhangi bir bloğuyla çakışıyorsa, gruba ekle
-            if (group.some(b => {
-                const bStart = parseInt(b.style.top) / 40;
-                const bEnd = bStart + parseInt(b.style.height) / 40;
-                return (start < bEnd && end > bStart);
-            })) {
-                group.push(block);
-                placed = true;
-                break;
-            }
+        if (!timeGroups[start]) {
+            timeGroups[start] = [];
         }
-
-        // Eğer çakışan grup yoksa yeni bir grup oluştur
-        if (!placed) {
-            groups.push([block]);
-        }
+        timeGroups[start].push(block);
     });
 
-    // Mevcut blokları kaldır
+    // Tüm blokları kaldır
     blocks.forEach(block => block.remove());
 
-    // Grupları yerleştiriyoruz
-    groups.forEach(group => {
+    // Grupları yeniden çiz
+    Object.values(timeGroups).forEach(group => {
         const width = 100 / group.length;
 
         group.forEach((block, index) => {
             block.style.width = `${width}%`;
             block.style.left = `${index * width}%`;
-            dayColumn.appendChild(block);
+            dayColumn.appendChild(block); // Güncellenmiş blokları tekrar ekle
         });
     });
 }
-
-}
-
-function updateCourseLayout() {
-    const dayColumns = document.querySelectorAll(".day-column");
-    dayColumns.forEach(adjustCourseBlocks);
-}
-
 
 function addCourseToList() {
     const course = document.getElementById('courseSelect').value;
