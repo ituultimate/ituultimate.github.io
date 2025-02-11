@@ -207,11 +207,15 @@
 										</li>
 										<li>
 											<h3>Social</h3>
-                                                                                        <button onclick="window.location.href='https://google-oauth-worker.pulatkaan.workers.dev/login'">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" 
-       width="20px" style="margin-right: 8px;">
-  Sign in with Google
-</button>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<div id="g_id_onload"
+     data-client_id="YOUR_GOOGLE_CLIENT_ID"
+     data-login_uri="https://example.com/auth/google/callback"
+     data-auto_prompt="false">
+</div>
+<div class="g_id_signin"
+     data-type="standard"></div>
+
 											<ul class="icons">
 												<li><a href="https://www.instagram.com/ituultimate?igsh=M3dkcTZyeWRscTM4" class="icon brands fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
                                                                                                 <li><a href="https://youtube.com/@ituultimate?si=VmYNM_W5wKk4jURT" class="icon brands fa-youtube" target="_blank"><span class="label">YouTube</span></a></li>
