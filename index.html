@@ -216,6 +216,29 @@
 <div class="g_id_signin"
      data-type="standard"></div>
 
+<button onclick="googleSignOut()">Sign Out</button>
+
+<script>
+  function googleSignOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log("User signed out.");
+      alert("You have been signed out.");
+      window.location.href = "/";
+    });
+  }
+
+  function initGoogleAuth() {
+    gapi.load("auth2", function () {
+      gapi.auth2.init({
+        client_id: "YOUR_GOOGLE_CLIENT_ID",
+      });
+    });
+  }
+</script>
+<script src="https://apis.google.com/js/platform.js?onload=initGoogleAuth" async defer></script>
+
+
 											<ul class="icons">
 												<li><a href="https://www.instagram.com/ituultimate?igsh=M3dkcTZyeWRscTM4" class="icon brands fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
                                                                                                 <li><a href="https://youtube.com/@ituultimate?si=VmYNM_W5wKk4jURT" class="icon brands fa-youtube" target="_blank"><span class="label">YouTube</span></a></li>
