@@ -46,15 +46,24 @@
   <tbody>
     <!-- Örnek dersler -->
     <script>
-      const dersler = ["Termodinamik", "Akışkanlar Mekaniği", "Matematik", "Fizik"];
-      dersler.forEach((ders, i) => {
-        document.write(`<tr><td>${ders}</td>`);
-        for (let j = 0; j < 14; j++) {
-          document.write(`<td><input type="checkbox" onchange="guncelleDurum(${i})"></td>`);
-        }
-        document.write(`<td id="durum-${i}">0%</td></tr>`);
-      });
-    </script>
+  const dersler = ["Termodinamik", "Akışkanlar Mekaniği", "Matematik", "Fizik"];
+
+  dersler.forEach((ders, dersIndex) => {
+    document.write(`<tr><td>${ders}</td>`);
+    for (let hafta = 1; hafta <= 14; hafta++) {
+      const checkboxId = `hafta${hafta}-ders${dersIndex}`;
+      document.write(`
+        <td>
+          <div class="col-4 col-12-small">
+            <input type="checkbox" id="${checkboxId}" onchange="guncelleDurum(${dersIndex})">
+            <label for="${checkboxId}">✔</label>
+          </div>
+        </td>
+      `);
+    }
+    document.write(`<td id="durum-${dersIndex}">0%</td></tr>`);
+  });
+</script>
   </tbody>
 </table>
 
