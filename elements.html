@@ -56,7 +56,7 @@
         <td>
           <div class="col-4 col-12-small">
             <input type="checkbox" id="${checkboxId}" onchange="guncelleDurum(${dersIndex})">
-            <label for="${checkboxId}">✔</label>
+            <label for="${checkboxId}"></label>
           </div>
         </td>
       `);
@@ -75,7 +75,7 @@
     const oran = Math.round((checked / 14) * 100);
     const durumHucresi = document.getElementById(`durum-${dersIndex}`);
     if (oran >= 70) {
-      durumHucresi.innerHTML = `<span class="ok">${oran}%</span>`;
+      durumHucresi.innerHTML = `<span class="ok">${oran}% - ✔ Devam yeterli</span>`;
     } else {
       durumHucresi.innerHTML = `<span class="warning">${oran}% - Devam yetersiz</span>`;
     }
