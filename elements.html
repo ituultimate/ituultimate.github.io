@@ -26,6 +26,49 @@
 			<div id="wrapper">
 
 				<!-- Main -->
+                                        <h2>Ders Takip Sistemi</h2>
+<table id="takipTablosu">
+  <thead>
+    <tr>
+      <th>Ders Adı</th>
+      <!-- 14 Hafta Başlığı -->
+      <script>
+        for (let i = 1; i <= 14; i++) {
+          document.write(`<th>Hafta ${i}</th>`);
+        }
+      </script>
+      <th>Durum</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Örnek dersler -->
+    <script>
+      const dersler = ["Termodinamik", "Akışkanlar Mekaniği", "Matematik", "Fizik"];
+      dersler.forEach((ders, i) => {
+        document.write(`<tr><td>${ders}</td>`);
+        for (let j = 0; j < 14; j++) {
+          document.write(`<td><input type="checkbox" onchange="guncelleDurum(${i})"></td>`);
+        }
+        document.write(`<td id="durum-${i}">0%</td></tr>`);
+      });
+    </script>
+  </tbody>
+</table>
+
+<script>
+  function guncelleDurum(dersIndex) {
+    const row = document.querySelectorAll("#takipTablosu tbody tr")[dersIndex];
+    const checkboxes = row.querySelectorAll("input[type=checkbox]");
+    const checked = [...checkboxes].filter(cb => cb.checked).length;
+    const oran = Math.round((checked / 14) * 100);
+    const durumHucresi = document.getElementById(`durum-${dersIndex}`);
+    if (oran >= 70) {
+      durumHucresi.innerHTML = `<span class="ok">${oran}%</span>`;
+    } else {
+      durumHucresi.innerHTML = `<span class="warning">${oran}% - Devam yetersiz</span>`;
+    }
+  }
+</script>
 					<section id="main" class="wrapper">
 						<div class="inner">
 							<h1 class="major">Yoklama Takip Sistemi - YTS</h1>
