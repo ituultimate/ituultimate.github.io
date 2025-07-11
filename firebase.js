@@ -1,14 +1,15 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// Firebase panelinden alınan config
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "API_KEY",
-  authDomain: "PROJEN.firebaseapp.com",
-  projectId: "PROJEN-ID",
-  storageBucket: "PROJEN.appspot.com",
-  messagingSenderId: "MESAJ-ID",
-  appId: "APP-ID"
+  apiKey: "AIzaSyA_b1yaECqlO_m2p2fZ0WKtCqrvq0buchI",
+  authDomain: "ituultimate.firebaseapp.com",
+  projectId: "ituultimate",
+  storageBucket: "ituultimate.firebasestorage.app",
+  messagingSenderId: "633943417394",
+  appId: "1:633943417394:web:97279ba32cdc3ee4e9d22b",
+  measurementId: "G-1ZXF2BG1SE"
 };
 
 // Firebase başlat
