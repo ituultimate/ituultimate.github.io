@@ -1,160 +1,285 @@
 <!DOCTYPE HTML>
+
 <html>
 	<head>
+		
 		<title>ITU UltiMate</title>
-        <link rel="icon" type="image/png" href="favicon.png">
+                <link rel="icon" type="image/png" href="favicon.png"> <!-- PNG Favicon -->
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="ITU UltiMate - İTÜ öğrencileri için ders programı oluşturucu, yoklama takip sistemi ve ders değerlendirme araçları.">
-        <meta name="google-site-verification" content="O0h2DtqUMl6ivICFyWi8peoQ9G9Y9lhLtHpFEff_5PY" />
+                <meta name="google-site-verification" content="O0h2DtqUMl6ivICFyWi8peoQ9G9Y9lhLtHpFEff_5PY" />
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-        <style>
-            .content-container {
-                display: flex;
-                align-items: center;
-                gap: 20px;
-            }
-            .text-content {
-                display: flex;
-                flex-direction: column;
-            }
-            .google-login-btn {
-                background: #4285F4;
-                color: white;
-                border: none;
-                padding: 10px 15px;
-                border-radius: 5px;
-                cursor: pointer;
-                font-weight: bold;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            .google-login-btn:hover {
-                background: #3367D6;
-            }
-        </style>
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-7FYKRMSJ99"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-7FYKRMSJ99');
-        </script>
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3654675030589940" crossorigin="anonymous"></script>
+                <style>
+        .content-container {
+            display: flex;
+            align-items: center; /* Dikey hizalama */
+            gap: 20px; /* Resim ile metin arasındaki boşluk */
+        }
+
+        .text-content {
+            display: flex;
+            flex-direction: column; /* Metni dikey hizala */
+        }
+    </style>
+		<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA_b1yaECqlO_m2p2fZ0WKtCqrvq0buchI",
+    authDomain: "ituultimate.firebaseapp.com",
+    projectId: "ituultimate",
+    storageBucket: "ituultimate.appspot.com",
+    messagingSenderId: "633943417394",
+    appId: "1:633943417394:web:97279ba32cdc3ee4e9d22b"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const analytics = getAnalytics(app);
+  const provider = new GoogleAuthProvider();
+
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    signInWithPopup(auth, provider)
+      .then((result) => alert(`Giriş başarılı: ${result.user.displayName}`))
+      .catch((error) => console.error("Hata:", error));
+  });
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3654675030589940"
+     crossorigin="anonymous"></script>
 	</head>
+        <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7FYKRMSJ99"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-7FYKRMSJ99');
+</script>
 	<body class="is-preload">
 
 		<!-- Header -->
-		<header id="header">
-			<a href="https://ituultimate.github.io" class="title">ITU UltiMate</a>
-			<nav>					
-				<ul>    
-					<li><a href="https://ituultimate.github.io" class="active">Anasayfa</a></li>
-					<li><a href="https://ituultimate.github.io/programlayici">Programlayıcı</a></li>
-					<li><button id="headerLoginBtn" class="google-login-btn">Google ile Giriş Yap</button></li>
-				</ul>
-			</nav>
-		</header>
-
-		<!-- Sidebar -->
-		<section id="sidebar">
-			<div class="inner">
-				<nav>
-                    <ul>
-						<li><a href="#intro">Hoş Geldiniz</a></li>
-						<li><a href="#one">Uygulamalar</a></li>
-						<li><a href="#two">ITU UltiMate Nedir?</a></li>
-						<li><a href="#three">Bizimle İletişime Geçin</a></li>
-						<li><button id="sidebarLoginBtn" class="google-login-btn">Google ile Giriş Yap</button></li>
+			<header id="header">
+				<a href="https://ituultimate.github.io" class="title">ITU UltiMate</a>
+				<nav>					
+					<ul>    
+						
+					        <li><a href="https://ituultimate.github.io" class="active">Anasayfa</a></li>
+						<li><a href="https://ituultimate.github.io/programlayici">Programlayıcı</a></li>
+						
+						
 					</ul>
 				</nav>
-			</div>
-		</section>
-
-		<!-- Wrapper -->
-		<div id="wrapper">
-			<!-- Intro -->
-			<section id="intro" class="wrapper style1 fullscreen fade-up">
+			</header>
+		<!-- Sidebar -->
+			<section id="sidebar">
 				<div class="inner">
-					<div class="split style2" style="position: relative; top: -35px;">
-						<div class="container" style="width: 40%; display: flex; justify-content: center; align-items: center;">
-							<img src="logo.png" border="" width="380" height="380" alt="">
-						</div>
-						<div class="text-content" style="width: 60%">
-							<h1>ITU UltiMate</h1>
-							<p>İTÜ öğrencileri için hayatı kolaylaştıracak her şey</p>
-							<button id="mainLoginBtn" class="google-login-btn">Google ile Giriş Yap</button>
-							<ul class="actions">
-								<li><a href="#one" class="button primary scrolly">Uygulamalar</a></li>
-							</ul>
-						</div>
-					</div>
+					<nav>
+                                                <ul>
+							<li><a href="#intro">Hoş Geldiniz</a></li>
+							<li><a href="#one">Uygulamalar</a></li>
+							<li><a href="#two">ITU UltiMate Nedir?</a></li>
+							<li><a href="#three">Bizimle İletişime Geçin</a></li>
+							<li><button id="loginBtn" class="google-login-btn">Google ile Giriş Yap</button></li>
+						</ul>
+					</nav>
 				</div>
 			</section>
 
-			<!-- Diğer bölümler (One, Two, Three) aynı kalıyor -->
-			<!-- ... -->
+		<!-- Wrapper -->
+			<div id="wrapper">
+				<!-- Intro -->
+<section id="intro" class="wrapper style1 fullscreen fade-up">
+    <div class="inner">
+        
+            <div class="split style2" style="position: relative; top: -35px;">
+            <div class="container" style="width: 40%; display: flex; justify-content: center; align-items: center;">
+    <img src="logo.png" border="" width="380" height="380" alt="">
+</div>
+<div class="text-content" style="width: 60%">
+                <h1>ITU UltiMate</h1>
+                <p>İTÜ öğrencileri için hayatı kolaylaştıracak her şey</p>
+	
+	
+	
+	<button id="loginBtn">Google ile Giriş Yap</button>
 
-		</div>
+
+
+
+	
+                <ul class="actions">
+                    <li><a href="#one" class="button primary scrolly">Uygulamalar</a></li>
+                </ul>
+            </div>
+            </div>
+       
+    </div>
+</section>
+
+
+				<!-- One -->
+					<section id="one" class="wrapper style3 fade-up">
+						<div class="inner">
+							<h2>UYGULAMALAR</h2>
+							<p></p>
+							<div class="features">
+								<section>
+									<span class="icon solid major fa-code"></span>
+									<h3><a href="https://ituultimate.github.io/programlayici">PROGRAMLAYICI(BETA Sürümü)</a></h3>
+									<p>Sürekli güncel kalan ve işinizi kolaylaştıran programlayıcı</p>
+								</section>
+								<section>
+									<span class="icon solid major fa-lock"></span>
+									<h3>YOKLAMA TAKİP SİSTEMİ(YAKINDA)</h3>
+									<p>Yaptığınız programdaki derslerin yoklama durumlarını rahatça takip edebileceğiniz YTS</p>
+								</section>
+								<section>
+									<span class="icon solid major fa-cog"></span>
+									<h3>DERS IMDB(YAKINDA)</h3>
+									<p>Dersleri puanlayabileceğiniz DERS IMDB</p>
+								</section>
+								<section>
+									<span class="icon solid major fa-desktop"></span>
+									<h3><a href="http://notkutusu.com/">NOT KUTUSU</a></h3>
+									<p></p>
+								</section>
+								<section>
+									<span class="icon solid major fa-link"></span>
+									<h3><a href="https://ortalama.meniz.io/">Ortalama Hesaplama Şeysi</a></h3>
+									<p>İTÜ öğrencileri için Enes Faruk Meniz tarafından hazılranmış ortalama hesaplama sitesi</p>
+								</section>
+								<section>
+									<span class="icon major fa-gem"></span>
+									<h3><a href="https://itu-helper.github.io/prereq-scheduler/prerequsitory_chains.html">ÖN ŞART DİYAGRAMI - ITU HELPER</a></h3>
+									<p>Ata Türkoğlu & Evren Geydirici tarafından hazırlanmış ITU HELPER sitesi</p>
+								</section>
+							</div>
+						</div>
+					</section>
+				<!-- Two -->
+					<section id="two" class="wrapper style2 spotlights">
+						<section>
+							<a href="#" class="image"><img src="images/pic01.jpg" alt="" data-position="center center" /></a>
+							<div class="content">
+								<div class="inner">
+									<h2>Programlayıcı(BETA Sürümü)</h2>
+									<p>Dönemin ders programını hazırlamanızı kolaylaştıran programlayıcı</p>
+									<ul class="actions">
+										<li><a href="programlayici.html" class="button primary">Programlayıcı'ya Git</a></li>
+									</ul>
+								</div>
+							</div>
+						</section>
+						<section>
+							<a href="#" class="image"><img src="images/pic02.jpg" alt="" data-position="top center" /></a>
+							<div class="content">
+								<div class="inner">
+									<h2>Ders IMDB</h2>
+									<p>Derslerin zorluğunu ve diğer özelliklerini puanlayabileceğiniz ders IMDB'si</p>
+									<ul class="actions">
+										<li><a href="" class="button primary">Ders IMDB'sine Git</a></li>
+									</ul>
+								</div>
+							</div>
+						</section>
+						<section>
+							<a href="#" class="image"><img src="images/pic03.jpg" alt="" data-position="25% 25%" /></a>
+							<div class="content">
+								<div class="inner">
+									<h2>Bulamadım</h2>
+									<p>Burayı daha bulamadım</p>
+									<ul class="actions">
+										<li><a href="" class="button primary">Bulamadığım Şeye Git</a></li>
+									</ul>
+								</div>
+							</div>
+						</section>
+					</section>
+
+
+				<!-- Three -->
+					<section id="three" class="wrapper style1 fade-up">
+						<div class="inner">
+							<h2>İletişim</h2>
+							<p>Önerileriniz ve reklam teklifleriniz için bizimle iletişime geçebilirsiniz.(mail ilk tercihimizdir)</p>
+							<div class="split style1">
+								<section>
+									<form method="post" action="#">
+										<div class="fields">
+											<div class="field half">
+												<label for="name">Name</label>
+												<input type="text" name="name" id="name" />
+											</div>
+											<div class="field half">
+												<label for="email">Email</label>
+												<input type="text" name="email" id="email" />
+											</div>
+											<div class="field">
+												<label for="message">Message</label>
+												<textarea name="message" id="message" rows="5"></textarea>
+											</div>
+										</div>
+										<ul class="actions">
+											<li><a href="" class="button submit">Send Message</a></li>
+										</ul>
+									</form>
+								</section>
+								<section>
+									<ul class="contact">
+										<li>
+											<h3>Address</h3>
+											<span>-----<br />
+											-----<br />
+											-----</span>
+										</li>
+										<li>
+											<h3>Email</h3>
+											<a href="#">ituultimate@outlook.com</a>
+										</li>
+										<li>
+											<h3>Phone</h3>
+											<span>(000) 000-0000</span>
+										</li>
+										<li>
+											<h3>Social</h3>
+											
+
+
+											<ul class="icons">
+												<li><a href="https://www.instagram.com/ituultimate?igsh=M3dkcTZyeWRscTM4" class="icon brands fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+                                                                                                <li><a href="https://youtube.com/@ituultimate?si=VmYNM_W5wKk4jURT" class="icon brands fa-youtube" target="_blank"><span class="label">YouTube</span></a></li>
+												
+											</ul>
+										</li>
+									</ul>
+								</section>
+							</div>
+						</div>
+					</section>
+
+			</div>
 
 		<!-- Footer -->
-		<footer id="footer" class="wrapper style1-alt">
-			<div class="inner">
-				<ul class="menu">
-					<li>&copy; ITU UltiMate. All rights reserved.</li><li>KMM Ulti</li>
-				</ul>
-			</div>
-		</footer>
+			<footer id="footer" class="wrapper style1-alt">
+				<div class="inner">
+					<ul class="menu">
+						<li>&copy; Untitled. All rights reserved.</li><li>KMM Ulti</li>
+					</ul>
+				</div>
+			</footer>
 
 		<!-- Scripts -->
-		<script src="assets/js/jquery.min.js"></script>
-		<script src="assets/js/jquery.scrollex.min.js"></script>
-		<script src="assets/js/jquery.scrolly.min.js"></script>
-		<script src="assets/js/browser.min.js"></script>
-		<script src="assets/js/breakpoints.min.js"></script>
-		<script src="assets/js/util.js"></script>
-		<script src="assets/js/main.js"></script>
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
 
-		<!-- Firebase App -->
-		<script type="module">
-			import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-			import { getAuth, GoogleAuthProvider, signInWithPopup, getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-			const firebaseConfig = {
-				apiKey: "AIzaSyA_b1yaECqlO_m2p2fZ0WKtCqrvq0buchI",
-				authDomain: "ituultimate.firebaseapp.com",
-				projectId: "ituultimate",
-				storageBucket: "ituultimate.appspot.com",
-				messagingSenderId: "633943417394",
-				appId: "1:633943417394:web:97279ba32cdc3ee4e9d22b",
-				measurementId: "G-1ZXF2BG1SE"
-			};
-
-			const app = initializeApp(firebaseConfig);
-			const auth = getAuth(app);
-			const analytics = getAnalytics(app);
-			const provider = new GoogleAuthProvider();
-
-			// Tüm giriş butonlarına event listener ekle
-			const handleLogin = async () => {
-				try {
-					const result = await signInWithPopup(auth, provider);
-					const user = result.user;
-					console.log("Giriş başarılı:", user.displayName);
-					alert(`Hoş geldin, ${user.displayName}!`);
-					window.location.href = "/profile.html"; 
-				} catch (error) {
-					console.error("Giriş hatası:", error);
-					alert("Giriş başarısız: " + error.message);
-				}
-			};
-
-			document.getElementById("headerLoginBtn").addEventListener("click", handleLogin);
-			document.getElementById("sidebarLoginBtn").addEventListener("click", handleLogin);
-			document.getElementById("mainLoginBtn").addEventListener("click", handleLogin);
-		</script>
 	</body>
 </html>
