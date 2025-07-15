@@ -1,6 +1,9 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAnalytics } from "firebase/analytics";
 
+// Firebase başlatma sonrası analytics ekleyebilirsiniz
+const analytics = getAnalytics(app);
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyA_b1yaECqlO_m2p2fZ0WKtCqrvq0buchI",
