@@ -24,43 +24,7 @@
         </style>
 
 		<!-- Firebase App -->
-		<script type="module">
-			import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-			import { getAuth, GoogleAuthProvider, signInWithPopup, getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-			const firebaseConfig = {
-				apiKey: "AIzaSyA_b1yaECqlO_m2p2fZ0WKtCqrvq0buchI",
-				authDomain: "ituultimate.firebaseapp.com",
-				projectId: "ituultimate",
-				storageBucket: "ituultimate.appspot.com",
-				messagingSenderId: "633943417394",
-				appId: "1:633943417394:web:97279ba32cdc3ee4e9d22b",
-				measurementId: "G-1ZXF2BG1SE"
-			};
-
-			const app = initializeApp(firebaseConfig);
-			const auth = getAuth(app);
-			const analytics = getAnalytics(app);
-			const provider = new GoogleAuthProvider();
-
-			// Tüm giriş butonlarına event listener ekle
-			const handleLogin = async () => {
-				try {
-					const result = await signInWithPopup(auth, provider);
-					const user = result.user;
-					console.log("Giriş başarılı:", user.displayName);
-					alert(`Hoş geldin, ${user.displayName}!`);
-					window.location.href = "/profile.html"; 
-				} catch (error) {
-					console.error("Giriş hatası:", error);
-					alert("Giriş başarısız: " + error.message);
-				}
-			};
-
-			document.getElementById("headerLoginBtn").addEventListener("click", handleLogin);
-			document.getElementById("sidebarLoginBtn").addEventListener("click", handleLogin);
-			document.getElementById("mainLoginBtn").addEventListener("click", handleLogin);
-		</script>
+		
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3654675030589940"
         crossorigin="anonymous"></script>
     </head>
