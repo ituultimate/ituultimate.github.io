@@ -24,7 +24,9 @@
         </style>
 
 		<!-- Firebase App -->
-		
+		<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+                <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3654675030589940"
         crossorigin="anonymous"></script>
     </head>
@@ -45,6 +47,46 @@
             <a href="https://ituultimate.github.io" class="title">ITU UltiMate</a>
             <nav>
                 <ul>
+		    <li><button onclick="login()">Giriş Yap</button></li>
+<script>
+    // 1. Firebase yapılandırması (BURAYI KENDİ PROJE BİLGİLERİNLE DEĞİŞTİR)
+    const firebaseConfig = {
+      apiKey: "FIREBASE_API_KEY",
+      authDomain: "your-project-id.firebaseapp.com",
+      projectId: "your-project-id",
+      appId: "YOUR_APP_ID"
+    };
+
+    // 2. Firebase başlat
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // 3. Google ile giriş fonksiyonu
+    function login() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          const user = result.user;
+          alert("Giriş başarılı: " + user.displayName);
+          // buraya yönlendirme de ekleyebilirsin (örnek: window.location.href = 'profil.html')
+        })
+        .catch(error => {
+          console.error("Giriş hatası:", error);
+        });
+    }
+
+    // 4. Oturum kontrolü (sayfa yenilendiğinde kullanıcı hala girişliyse tespit eder)
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        console.log("Giriş yapmış kullanıcı:", user.displayName);
+        // örnek: kullanıcı girişliyse giriş butonunu gizle
+        // document.querySelector("button").style.display = "none";
+      } else {
+        console.log("Giriş yapılmamış");
+      }
+    });
+  </script>
+
                     <li><a href="https://ituultimate.github.io/" class="active">ANASAYFA</a></li>
 		    <li><a href="programlayici">PROGRAMLAYICI</a></li>
 		    <li><a href="yts">YTS</a></li>
