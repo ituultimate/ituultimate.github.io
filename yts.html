@@ -76,7 +76,7 @@
     const oran = Math.round((checked / 14) * 100);
     const durumHucresi = document.getElementById(`durum-${dersIndex}`);
     if (oran >= 70) {
-      durumHucresi.innerHTML = `<span class="ok">${oran}% </span>`;
+      durumHucresi.innerHTML = `<span class="ok">${oran}% ✓</span>`;
     } else {
       durumHucresi.innerHTML = `<span class="warning">${oran}% Devam yetersiz</span>`;
     }
