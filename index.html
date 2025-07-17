@@ -119,7 +119,9 @@ firebase.initializeApp(firebaseConfig);
     });
 
     // 🔥 Bu satır en çok hata yapılan yer:
-    document.getElementById("loginBtn").addEventListener("click", login);
+    document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("loginBtn").addEventListener("click", login);
+});
   </script>
 
 				    
