@@ -23,10 +23,7 @@
         }
         </style>
 
-		<!-- Firebase App -->
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3654675030589940"
-        crossorigin="anonymous"></script>
-	<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+		
     </head>
     
     <!-- Google tag (gtag.js) -->
@@ -80,54 +77,38 @@
                             <p>İTÜ öğrencileri için hayatı kolaylaştıracak her şey</p>
                             <ul class="actions">
                                 <li><a href="#one" class="button primary scrolly">Uygulamalar</a></li>
-				    <button id="loginBtn">Giriş Yap</button>
+				    
+<button id="loginBtn">Giriş Yap</button>
   <div id="userInfo"></div>
 
-  <!-- DİĞER SCRİPT'LER BODY SONUNDA -->
+  <!-- Tüm Firebase script'lerini buraya ekleyin -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  
   <script>
     // Firebase yapılandırması
     const firebaseConfig = {
       apiKey: "AIzaSyA_b1yaECqlO_m2p2fZ0WKtCqrvq0buchI",
       authDomain: "ituultimate.firebaseapp.com",
       projectId: "ituultimate",
-      storageBucket: "ituultimate.firebasestorage.com",
+      storageBucket: "ituultimate.appspot.com",
       messagingSenderId: "633943417394",
       appId: "1:633943417394:web:97279ba32cdc3ee4e9d22b",
       measurementId: "G-1ZXF2BG1SE"
     };
 
     // Firebase'i başlat
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    // Giriş fonksiyonu
-    function login() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(result => {
-          console.log("Giriş başarılı!", result.user);
-        })
-        .catch(error => {
-          console.error("Hata:", error);
-          alert("Giriş hatası: " + error.message);
-        });
+    try {
+      firebase.initializeApp(firebaseConfig);
+      console.log("Firebase başarıyla başlatıldı!");
+      
+      const auth = firebase.auth();
+      
+      // Diğer kodlarınız...
+      
+    } catch (error) {
+      console.error("Firebase başlatma hatası:", error);
     }
-
-    // Buton event'i (DOM tam yüklendikten sonra)
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("loginBtn").addEventListener("click", login);
-    });
-
-    // Oturum kontrolü
-    auth.onAuthStateChanged(user => {
-      const userInfoEl = document.getElementById("userInfo");
-      if (user) {
-        userInfoEl.textContent = `Hoş geldin, ${user.displayName}!`;
-      } else {
-        userInfoEl.textContent = "Giriş yapılmadı.";
-      }
-    });
   </script>
 
 				    
