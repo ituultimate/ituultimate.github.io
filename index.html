@@ -118,10 +118,8 @@ firebase.initializeApp(firebaseConfig);
       }
     });
 
-    // BUTON ANCAK DOM YÜKLENDİKTEN SONRA VAR OLUR
-    document.addEventListener("DOMContentLoaded", function () {
-      document.getElementById("loginBtn").addEventListener("click", login);
-    });
+    // 🔥 Bu satır en çok hata yapılan yer:
+    document.getElementById("loginBtn").addEventListener("click", login);
   </script>
 
 				    
