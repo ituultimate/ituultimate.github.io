@@ -95,39 +95,34 @@ const firebaseConfig = {
   appId: "1:633943417394:web:97279ba32cdc3ee4e9d22b",
   measurementId: "G-1ZXF2BG1SE"
 };
-
-    // 2. Firebase başlat
-    firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // 3. Google ile giriş fonksiyonu
     function login() {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider)
         .then(result => {
           const user = result.user;
           alert("Giriş başarılı: " + user.displayName);
-          // buraya yönlendirme de ekleyebilirsin (örnek: window.location.href = 'profil.html')
         })
         .catch(error => {
           console.error("Giriş hatası:", error);
         });
     }
 
-    // 4. Oturum kontrolü (sayfa yenilendiğinde kullanıcı hala girişliyse tespit eder)
     auth.onAuthStateChanged(user => {
       if (user) {
         console.log("Giriş yapmış kullanıcı:", user.displayName);
-        // örnek: kullanıcı girişliyse giriş butonunu gizle
-        // document.querySelector("button").style.display = "none";
       } else {
         console.log("Giriş yapılmamış");
       }
     });
-	 document.getElementById("loginBtn").addEventListener("click", login);
+
+    // BUTON ANCAK DOM YÜKLENDİKTEN SONRA VAR OLUR
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("loginBtn").addEventListener("click", login);
+    });
   </script>
-
-
 
 				    
                             </ul>
