@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programlayıcı | ITU UltiMate</title>
+
+    <!-- Google Fonts: Inter for body, Poppins for headings -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="scheduler-style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <nav class="navbar container">
+            <a href="https://ituultimate.github.io/" class="nav-logo">ITU UltiMate</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="https://ituultimate.github.io/" class="nav-link">Anasayfa</a></li>
+                <li class="nav-item"><a href="https://ituultimate.github.io/programlayici"
+                        class="nav-link">Programlayıcı</a></li>
+                <li class="nav-item"><a href="https://ituultimate.github.io/yts" class="nav-link">Yoklama Takip
+                        Sistemi</a></li>
+                <li class="nav-item"><a href="https://ituultimate.github.io/ortalamahesaplayici"
+                        class="nav-link">Ortalama Hesaplayıcı</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="scheduler-section">
+            <div class="container">
+                <h1 class="page-title">Programım</h1>
+                <!-- MOVED: The title is now inside the schedule container -->
+                <div class="scheduler-container" id="scheduler-container">
+                    <div class="available-courses-panel">
+                        <!-- CHANGED: Button text -->
+                        <button id="close-panel-btn" class="panel-toggle-btn" title="Hide Panel">
+                            Gizle
+                        </button>
+                        <div class="added-courses-section">
+                            <h2>Derslerim</h2>
+                            <ul id="added-courses-list">
+                                <li class="placeholder-text">Eklediğin dersler burada görünür.</li>
+                            </ul>
+                        </div>
+                        <h3>Ders Ekle</h3>
+                        <!-- ... rest of the panel content remains the same ... -->
+                        <div class="selection-step">
+                            <label for="subject-search-input">1. Branş Kodu:</label>
+                            <div class="custom-dropdown-wrapper">
+                                <input type="text" id="subject-search-input" placeholder="Branş ara veya seç..."
+                                    autocomplete="off">
+                                <div id="subject-dropdown-list" class="dropdown-list"></div>
+                            </div>
+                        </div>
+                        <div class="selection-step">
+                            <label for="specific-course-select">2. Ders Kodu:</label>
+                            <select id="specific-course-select" disabled>
+                                <option value="" disabled selected>Önce branş seçmelisin.</option>
+                            </select>
+                        </div>
+                        <div class="selection-step">
+                            <label>3. CRN:</label>
+                            <div id="crn-section-list-container">
+                                <p class="placeholder-text">Önce ders seçmelisin.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-table-wrapper">
+                        <!-- MOVED: Title is now here -->
+                        <div class="schedule-wrapper">
+                            <div class="schedule-container">
+                                <div class="schedule-header">
+                                    <div class="day-header">Pazartesi</div>
+                                    <div class="day-header">Salı</div>
+                                    <div class="day-header">Çarşamba</div>
+                                    <div class="day-header">Perşembe</div>
+                                    <div class="day-header">Cuma</div>
+                                </div>
+                                <div class="schedule-body">
+                                    <div class="time-labels" id="timeLabels"></div>
+                                    <div class="grid-container" id="grid"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- CHANGED: Button text -->
+    <button id="open-panel-btn" class="open-panel-btn" title="Ders Ekle">
+        Ders Ekle
+    </button>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 ITU Ultimate. Made with ❤️ for ITU Students.</p>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
+    <script src="scheduler-script.js"></script>
+</body>
+
+</html>
