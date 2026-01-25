@@ -40,7 +40,7 @@ function updateNavbar(user) {
         document.getElementById('global-logout-btn').addEventListener('click', (e) => {
             e.preventDefault();
             signOut(auth).then(() => {
-                window.location.href = "https://ituultimate.github.io/login";
+                window.location.href = "login.html?redirect=" + encodeURIComponent(currentPage);
             });
         });
 
@@ -49,7 +49,7 @@ function updateNavbar(user) {
 
         // Eğer giriş zorunlu bir sayfadaysak -> Login'e at!
         if (protectedPages.includes(currentPage)) {
-            window.location.href = "https://ituultimate.github.io/login";
+            window.location.href = "login.html?redirect=" + encodeURIComponent(currentPage);
             return; // Fonksiyonu durdur
         }
 
@@ -77,3 +77,4 @@ onAuthStateChanged(auth, (user) => {
     }
 
 });
+
