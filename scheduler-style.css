@@ -1,0 +1,796 @@
+/* --- CSS Variables for Theme --- */
+:root {
+    --primary-color: #062a54;
+    --primary-color-light: #0a3d6f;
+    --secondary-color: #00a8cc;
+    --text-color-light: #f4f4f4;
+    --text-color-dark: #333;
+    --bg-color-light: #ffffff;
+    --bg-color-grey: #f8f9fa;
+    --card-shadow: 0 4px 15px rgba(6, 42, 84, 0.1);
+    --transition: all 0.3s ease-in-out;
+}
+
+/* --- Global Styles & Resets --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color-light);
+    color: var(--text-color-dark);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.btn {
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: var(--transition);
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: var(--secondary-color);
+    color: var(--bg-color-light);
+}
+
+.btn-primary:hover {
+    background-color: #0096b3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 168, 204, 0.3);
+}
+
+/* --- Header & Navigation --- */
+.header {
+    background-color: var(--bg-color-light);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+}
+
+.nav-logo {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: var(--text-color-dark);
+    font-weight: 500;
+    transition: var(--transition);
+    position: relative;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--secondary-color);
+}
+
+.nav-link::after {
+    content: '';
+    width: 0;
+    height: 2px;
+    background: var(--secondary-color);
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
+}
+
+.hamburger {
+    display: none;
+    cursor: pointer;
+}
+
+.bar {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    background-color: var(--primary-color);
+    transition: var(--transition);
+}
+
+.footer {
+    background-color: var(--primary-color);
+    color: var(--text-color-light);
+    text-align: center;
+    padding: 2rem 0;
+    font-size: 0.9rem;
+}
+
+/* --- Responsive Nav --- */
+@media (max-width: 768px) {
+    .hamburger {
+        display: block;
+    }
+
+    .hamburger.active .bar:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger.active .bar:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+
+    .hamburger.active .bar:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+
+    .nav-menu {
+        position: fixed;
+        left: -100%;
+        top: 80px;
+        flex-direction: column;
+        background-color: var(--bg-color-light);
+        width: 100%;
+        text-align: center;
+        transition: 0.3s;
+        box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+        padding: 2rem 0;
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+}
+
+/* --- Scheduler Page Specific Styles --- */
+.scheduler-section {
+    padding: 40px 0 80px 0;
+}
+
+.page-title {
+    text-align: center;
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+}
+
+/* scheduler-style.css içinde bu bloğu bul ve güncelle */
+.scheduler-container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 40px;
+    align-items: start;
+    /* gap özelliğini de transition'a ekledik */
+    transition: grid-template-columns 0.4s ease-in-out, gap 0.4s ease-in-out;
+}
+
+/* --- Left Panel Styles --- */
+.available-courses-panel {
+    background-color: var(--bg-color-grey);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.available-courses-panel h2 {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.selection-step {
+    margin-bottom: 1.5rem;
+}
+
+.selection-step label {
+    display: block;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.search-select-wrapper {
+    position: relative;
+}
+
+#subject-search-input,
+#subject-prefix-select,
+#specific-course-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: white;
+    box-sizing: border-box;
+}
+
+#subject-search-input {
+    position: relative;
+    z-index: 2;
+    border-bottom: 1px solid #ccc;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: 0;
+}
+
+#subject-prefix-select {
+    position: relative;
+    z-index: 1;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-top: -1px;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1em;
+    padding-right: 2.5em;
+}
+
+#subject-search-input:focus,
+#subject-prefix-select:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.1);
+}
+
+#crn-section-list-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background-color: var(--bg-color-light);
+}
+
+.placeholder-text {
+    padding: 1rem;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.crn-section-item {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
+}
+
+.crn-section-item:last-child {
+    border-bottom: none;
+}
+
+.crn-section-item:hover {
+    background-color: var(--bg-color-grey);
+}
+
+.crn-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.crn-info strong {
+    color: var(--primary-color);
+}
+
+.crn-info span {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.add-course-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.add-course-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* --- Added Courses List --- */
+.panel-divider {
+    border: none;
+    height: 1px;
+    background-color: #e9ecef;
+    margin: 2rem 0;
+}
+
+.added-courses-section h3 {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+#added-courses-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#added-courses-list li {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
+}
+
+#added-courses-list li:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+#added-courses-list .placeholder-text {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 1rem;
+    background-color: transparent;
+    border: none;
+}
+
+#added-courses-list .course-info-text {
+    font-size: 0.9rem;
+    color: var(--text-color-dark);
+}
+
+#added-courses-list .drop-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#added-courses-list .drop-button:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+/* --- Visual Schedule Grid --- */
+.schedule-wrapper {
+    max-width: 100%;
+    margin: 1rem 0;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.schedule-container {
+    display: grid;
+    grid-template-columns: 80px repeat(5, 1fr);
+    --hour-height: 60px;
+}
+
+.schedule-header {
+    display: contents;
+}
+
+.day-header {
+    background-color: var(--primary-color);
+    padding: 15px 5px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-color-light);
+    border-right: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.day-header:first-of-type {
+    grid-column: 2;
+}
+
+.day-header:last-of-type {
+    border-right: none;
+}
+
+.schedule-body {
+    display: contents;
+}
+
+.time-labels {
+    grid-column: 1;
+    position: relative;
+    border-right: 1px solid #dee2e6;
+    background-color: #fafafa;
+}
+
+.time-slot {
+    position: absolute;
+    width: 100%;
+    text-align: right;
+    padding-right: 10px;
+    box-sizing: border-box;
+    font-size: 0.75em;
+    color: #6c757d;
+    transform: translateY(-50%);
+}
+
+.time-slot.half-hour {
+    font-size: 0.7em;
+    color: #adb5bd;
+}
+
+.grid-container {
+    position: relative;
+    grid-column: 2 / -1;
+}
+
+.grid-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.grid-line.half-hour-line {
+    border-bottom: 1px dashed #e9ecef;
+}
+
+.vertical-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-right: 1px solid #f1f3f5;
+    z-index: 0;
+}
+
+.event {
+    position: absolute;
+    padding: 8px;
+    margin: 0 4px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: white;
+    overflow: hidden;
+    box-sizing: border-box;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.event:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    z-index: 20;
+}
+
+.event-title {
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.event-time {
+    font-size: 0.8em;
+    opacity: 0.9;
+}
+
+.event-mon {
+    left: 0%;
+    width: 20%;
+}
+
+.event-tue {
+    left: 20%;
+    width: 20%;
+}
+
+.event-wed {
+    left: 40%;
+    width: 20%;
+}
+
+.event-thu {
+    left: 60%;
+    width: 20%;
+}
+
+.event-fri {
+    left: 80%;
+    width: 20%;
+}
+
+/* --- Responsive for Scheduler --- */
+@media (max-width: 1024px) {
+    .scheduler-container {
+        grid-template-columns: 1fr;
+    }
+
+    .available-courses-panel {
+        position: static;
+        max-height: none;
+    }
+}
+
+/* Add these new styles to scheduler-style.css */
+
+.event-crn {
+    font-size: 0.8em;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.event-location {
+    font-size: 0.7em;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+/* Add these new styles to scheduler-style.css */
+
+/* --- Panel Toggle Button Styles --- */
+.panel-toggle-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: #6c757d;
+    font-size: 0.9rem;
+    /* Slightly smaller */
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 10;
+    padding: 5px 8px;
+    line-height: 1;
+    border-radius: 4px;
+    /* Add a border for better visibility */
+    transition: var(--transition);
+}
+
+.panel-toggle-btn:hover {
+    color: var(--primary-color);
+    background-color: #f0f0f0;
+}
+
+.open-panel-btn {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    background-color: var(--primary-color);
+    color: var(--text-color-light);
+    border: none;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    padding: 10px 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 1000;
+    transition: var(--transition);
+    opacity: 0;
+    visibility: hidden;
+    writing-mode: vertical-rl;
+    /* Make text vertical */
+    text-orientation: mixed;
+}
+
+.open-panel-btn.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.open-panel-btn:hover {
+    background-color: var(--primary-color-light);
+    padding-right: 12px;
+}
+
+/* --- Panel Animation and State Styles --- */
+.scheduler-container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 40px;
+    align-items: start;
+    transition: grid-template-columns 0.4s ease-in-out;
+}
+
+.available-courses-panel {
+    transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* scheduler-style.css içinde bu bloğu bul ve TAMAMEN DEĞİŞTİR */
+.scheduler-container.panel-closed {
+    /* 1fr yerine 0px 1fr yapıyoruz. İlk sütun eziliyor, ikinci sütun yayılıyor. */
+    grid-template-columns: 0px 1fr;
+    gap: 0;
+    /* Aradaki boşluğu da sıfırlıyoruz */
+}
+
+/* scheduler-style.css içinde bu bloğu bul ve güncelle */
+.available-courses-panel {
+    background-color: var(--bg-color-grey);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+    max-height: 80vh;
+    overflow-y: auto;
+
+    /* AŞAĞIDAKİLERİ EKLE/GÜNCELLE */
+    /* Sütun daralsa bile panel içeriği sabit kalsın */
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 350px;
+    min-width: 350px;
+    /* Taşmayı gizle */
+
+    transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* --- Layout Adjustment for Top Alignment --- */
+.scheduler-section {
+    padding: 20px 0 80px 0;
+    /* Reduced top padding */
+}
+
+.schedule-table-wrapper {
+    /* This wrapper now contains the title and the schedule */
+    transition: margin-top 0.4s ease-in-out;
+    margin-top: 0;
+}
+
+/* When panel is closed, give the schedule more top margin */
+.scheduler-container.panel-closed .schedule-table-wrapper {
+    margin-top: -2rem;
+    /* Moves the schedule up to compensate for the removed title space */
+}
+
+/* scheduler-style.css dosyasının en altına ekleyin */
+
+.scheduler-container.panel-closed .available-courses-panel {
+    transform: translateX(-100%);
+    /* Paneli ekranın soluna ötele */
+    opacity: 0;
+    /* Görünmez yap */
+    pointer-events: none;
+    /* Gizliyken tıklanmasını engelle */
+    min-width: 0;
+    /* Genişlik zorlamasını kaldır */
+    width: 0;
+    /* Genişliği sıfırla */
+    padding: 0;
+    /* İç boşluğu sıfırla */
+    border: none;
+    /* Kenarlığı kaldır */
+}
+
+/* --- Custom Searchable Dropdown Styles --- */
+
+/* Input artık tek başına olduğu için kenarlarını düzeltelim */
+#subject-search-input {
+    border-radius: 8px !important;
+    /* !important ile eski stilleri eziyoruz */
+    border: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 0;
+}
+
+/* Kapsayıcı: Listeyi buna göre konumlandıracağız */
+.custom-dropdown-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Aşağı açılan liste kutusu */
+.dropdown-list {
+    position: absolute;
+    top: 100%;
+    /* Tam inputun altında başlasın */
+    left: 0;
+    width: 100%;
+    max-height: 250px;
+    /* Çok uzarsa scroll çıksın */
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    z-index: 1000;
+    /* Diğer her şeyin üstünde görünsün */
+    display: none;
+    /* Başlangıçta gizli */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* JS ile 'show' sınıfı eklenince görünür olacak */
+.dropdown-list.show {
+    display: block;
+}
+
+/* Listedeki her bir eleman */
+.dropdown-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 0.95rem;
+    color: var(--text-color-dark);
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background-color: var(--bg-color-grey);
+    color: var(--secondary-color);
+}
