@@ -89,6 +89,12 @@
         import { auth } from "./firebase-config.js";
         import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+        // --- YÖNLENDİRME MANTIĞI (YENİ) ---
+        // URL'den 'redirect' parametresini al (Örn: login.html?redirect=programlayici.html)
+        const urlParams = new URLSearchParams(window.location.search);
+        // Eğer redirect varsa oraya git, yoksa varsayılan olarak 'index.html'e git
+        const redirectPage = urlParams.get('redirect') || 'index.html';
+
         // --- Email Giriş ---
         const loginForm = document.getElementById('login-form');
         const errorDiv = document.getElementById('error-message');
@@ -103,7 +109,10 @@
             btn.disabled = true;
 
             signInWithEmailAndPassword(auth, email, password)
-                .then(() => window.location.href = "yts.html")
+                .then(() => {
+                    // YENİ: Dinamik yönlendirme
+                    window.location.href = redirectPage;
+                })
                 .catch((error) => {
                     btn.innerText = "Giriş Yap";
                     btn.disabled = false;
@@ -119,7 +128,8 @@
             signInWithPopup(auth, provider)
                 .then((result) => {
                     console.log("Google girişi başarılı:", result.user);
-                    window.location.href = "yts.html";
+                    // YENİ: Dinamik yönlendirme
+                    window.location.href = redirectPage;
                 })
                 .catch((error) => {
                     showError(error);
@@ -137,5 +147,4 @@
         }
     </script>
 </body>
-
 </html>
