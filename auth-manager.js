@@ -29,7 +29,7 @@ function updateNavbar(user) {
                     ${user.displayName || user.email.split('@')[0]} ▼
                 </span>
                 <div class="dropdown-content">
-                    <a href="profil.html" class="dropdown-item">Profilim</a>
+                    <a href="profil" class="dropdown-item">Profilim</a>
                     <a href="#" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
                 </div>
             </div>
@@ -40,7 +40,7 @@ function updateNavbar(user) {
         document.getElementById('global-logout-btn').addEventListener('click', (e) => {
             e.preventDefault();
             signOut(auth).then(() => {
-                window.location.href = "login.html?redirect=" + encodeURIComponent(currentPage);
+                window.location.href = "login?redirect=" + encodeURIComponent(currentPage);
             });
         });
 
@@ -49,7 +49,7 @@ function updateNavbar(user) {
 
         // Eğer giriş zorunlu bir sayfadaysak -> Login'e at!
         if (protectedPages.includes(currentPage)) {
-            window.location.href = "login.html?redirect=" + encodeURIComponent(currentPage);
+            window.location.href = "login?redirect=" + encodeURIComponent(currentPage);
             return; // Fonksiyonu durdur
         }
 
@@ -57,7 +57,7 @@ function updateNavbar(user) {
         const li = document.createElement('li');
         li.className = 'nav-item';
         li.id = 'login-btn-item';
-        li.innerHTML = `<a href="login.html" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
+        li.innerHTML = `<a href="login" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
         navMenu.appendChild(li);
     }
 }
@@ -77,4 +77,5 @@ onAuthStateChanged(auth, (user) => {
     }
 
 });
+
 
