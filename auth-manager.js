@@ -30,7 +30,7 @@ function updateNavbar(user) {
                 </span>
                 <div class="dropdown-content">
                     <a href="profil" class="dropdown-item">Profilim</a>
-                    <a href="#" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
+                    <a href="https://ituultimate.github.io/" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
                 </div>
             </div>
         `;
@@ -77,5 +77,6 @@ onAuthStateChanged(auth, (user) => {
     }
 
 });
+
 
 
