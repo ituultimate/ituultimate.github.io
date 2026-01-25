@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap | ITU UltiMate</title>
+    <link rel="stylesheet" href="attendance-style.css">
+
+    <style>
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 85vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #e9ecef;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .error-msg {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="navbar container">
+            <a href="index.html" class="nav-logo">ITU UltiMate</a>
+        </nav>
+    </header>
+
+    <main class="login-wrapper">
+        <div class="login-card">
+            <h2 style="text-align: center; color: #062a54; margin-bottom: 1.5rem;">Hoş Geldin</h2>
+
+            <form id="login-form">
+                <label style="font-weight: 600; display:block; margin-bottom:5px;">Email</label>
+                <input type="email" id="email" class="form-input" placeholder="mail@itu.edu.tr" required>
+
+                <label style="font-weight: 600; display:block; margin-bottom:5px;">Şifre</label>
+                <input type="password" id="password" class="form-input" placeholder="********" required>
+
+                <button type="submit" class="btn btn-primary btn-full">Giriş Yap</button>
+            </form>
+
+            <div class="separator">veya</div>
+
+            <button id="google-btn" class="btn btn-google btn-full">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" alt="Google">
+                Google ile Giriş Yap
+            </button>
+
+            <div id="error-message" class="error-msg"></div>
+
+            <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+                Hesabın yok mu? <a href="register.html" style="color: #00a8cc; font-weight: bold;">Kayıt Ol</a>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth } from "./firebase-config.js";
+        import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // --- Email Giriş ---
+        const loginForm = document.getElementById('login-form');
+        const errorDiv = document.getElementById('error-message');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = loginForm.querySelector('button');
+
+            btn.innerText = "Giriş yapılıyor...";
+            btn.disabled = true;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => window.location.href = "yts.html")
+                .catch((error) => {
+                    btn.innerText = "Giriş Yap";
+                    btn.disabled = false;
+                    showError(error);
+                });
+        });
+
+        // --- Google Giriş ---
+        const googleBtn = document.getElementById('google-btn');
+        const provider = new GoogleAuthProvider();
+
+        googleBtn.addEventListener('click', () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    console.log("Google girişi başarılı:", result.user);
+                    window.location.href = "yts.html";
+                })
+                .catch((error) => {
+                    showError(error);
+                });
+        });
+
+        function showError(error) {
+            let msg = "Hata oluştu: " + error.code;
+            if (error.code === 'auth/invalid-credential') msg = "Email veya şifre hatalı.";
+            if (error.code === 'auth/user-not-found') msg = "Böyle bir kullanıcı bulunamadı.";
+            if (error.code === 'auth/wrong-password') msg = "Şifre yanlış.";
+
+            errorDiv.textContent = msg;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
