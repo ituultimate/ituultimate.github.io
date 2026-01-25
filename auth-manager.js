@@ -40,7 +40,7 @@ function updateNavbar(user) {
         document.getElementById('global-logout-btn').addEventListener('click', (e) => {
             e.preventDefault();
             signOut(auth).then(() => {
-                window.location.href = "login?redirect=" + encodeURIComponent(currentPage);
+                window.location.href = "https://ituultimate.github.io/";
             });
         });
 
@@ -77,6 +77,7 @@ onAuthStateChanged(auth, (user) => {
     }
 
 });
+
 
 
 
