@@ -93,7 +93,7 @@
         // URL'den 'redirect' parametresini al (Örn: login.html?redirect=programlayici.html)
         const urlParams = new URLSearchParams(window.location.search);
         // Eğer redirect varsa oraya git, yoksa varsayılan olarak 'index.html'e git
-        const redirectPage = urlParams.get('redirect') || 'index.html';
+        const redirectPage = urlParams.get('redirect') || 'https://ituultimate.github.io/';
 
         // --- Email Giriş ---
         const loginForm = document.getElementById('login-form');
@@ -148,5 +148,6 @@
     </script>
 </body>
 </html>
+
 
 
