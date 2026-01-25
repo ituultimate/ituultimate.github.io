@@ -2,7 +2,7 @@ import { auth } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 // Hangi sayfalara giriş yapmadan girilemez? Listeyi buraya yaz.
-const protectedPages = ["https://ituultimate.github.io/programlayici", "https://ituultimate.github.io/programlayici.yts"];
+const protectedPages = ["programlayici", "yts"];
 
 // Şu an hangi sayfadayız? (Örn: "yts.html" veya "index.html")
 const currentPage = window.location.pathname.split("/").pop();
@@ -75,4 +75,5 @@ onAuthStateChanged(auth, (user) => {
         loadingOverlay.style.display = 'none';
         mainContent.style.display = 'block';
     }
+
 });
