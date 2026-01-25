@@ -107,7 +107,7 @@
                 .then((userCredential) => {
                     console.log("Kayıt başarılı!");
                     // Kayıt başarılıysa direkt YTS sayfasına atabilirsin
-                    window.location.href = "yts.html";
+                    window.location.href = "redirectPage";
                 })
                 .catch((error) => {
                     btn.innerText = "Kayıt Ol";
@@ -130,7 +130,7 @@
         googleBtn.addEventListener('click', () => {
             signInWithPopup(auth, provider)
                 .then(() => {
-                    window.location.href = "yts.html";
+                    window.location.href = "redirectPage";
                 })
                 .catch((error) => {
                     errorDiv.textContent = "Google hatası: " + error.message;
@@ -142,4 +142,5 @@
 
 
 </html>
+
 
