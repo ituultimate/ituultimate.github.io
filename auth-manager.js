@@ -24,13 +24,13 @@ const protectedPages = [
 const path = window.location.pathname;
 // Boşlukları temizle, son parçayı al, decode et (Türkçe karakteri düzelt) ve ?parametreleri at
 const rawPageName = path.split("/").filter(Boolean).pop(); 
-const currentPage = decodeURIComponent(rawPageName || "index.html").split("?")[0];
+const currentPage = decodeURIComponent(rawPageName || "ituultimate.com").split("?")[0];
 
 console.log("Algılanan Sayfa:", currentPage); // Konsoldan kontrol edebilirsin
 
 // Yönlendirme hedefi (Login'den sonra nereye gidecek?)
 const urlParams = new URLSearchParams(window.location.search);
-const redirectTarget = urlParams.get('redirect') || 'index.html';
+const redirectTarget = urlParams.get('redirect') || 'ituultimate.com';
 
 // ==========================================
 // 2. ARAYÜZ (NAVBAR & LOADING) YÖNETİMİ
@@ -59,8 +59,8 @@ function updateUI(user) {
                         ${user.displayName || user.email.split('@')[0]} ▼
                     </span>
                     <div class="dropdown-content">
-                        <a href="profil.html" class="dropdown-item">Profilim</a>
-                        <a href="#" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
+                        <a href="ituultimate.com/profil" class="dropdown-item">Profilim</a>
+                        <a href="ituultimate.com" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
                     </div>
                 </div>
             `;
@@ -69,7 +69,7 @@ function updateUI(user) {
             // Çıkış Butonu
             document.getElementById('global-logout-btn').addEventListener('click', (e) => {
                 e.preventDefault();
-                signOut(auth).then(() => window.location.href = "index.html");
+                signOut(auth).then(() => window.location.href = "ituultimate.com");
             });
         } else {
             // Kullanıcı Yoksa (Login/Register sayfaları hariç buton ekle)
@@ -77,7 +77,7 @@ function updateUI(user) {
                 const li = document.createElement('li');
                 li.className = 'nav-item';
                 li.id = 'login-btn-item';
-                li.innerHTML = `<a href="login.html?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
+                li.innerHTML = `<a href="ituultimate.com/login?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
                 navMenu.appendChild(li);
             }
         }
@@ -93,7 +93,7 @@ function updateUI(user) {
     } else {
         // Kullanıcı yok VE sayfa korumalı -> Yönlendir
         console.warn("Erişim reddedildi. Yönlendiriliyor...");
-        window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
+        window.location.href = `ituultimate.com/login?redirect=${encodeURIComponent(currentPage)}`;
     }
 }
 
@@ -108,8 +108,8 @@ function setupAuthForms() {
     // Linkleri Güncelle (Redirect parametresini korumak için)
     // Örn: Login sayfasındaki "Kayıt Ol" linkine ?redirect=yts.html ekler
     const switchLink = document.querySelector('.toggle-link a') || document.querySelector('a[href*="register"], a[href*="login"]');
-    if(switchLink && redirectTarget !== 'index.html') {
-        const targetPage = currentPage.includes("login") ? "register.html" : "login.html";
+    if(switchLink && redirectTarget !== 'ituultimate.com') {
+        const targetPage = currentPage.includes("login") ? "ituultimate.com/register" : "ituultimate.com/login";
         switchLink.href = `${targetPage}?redirect=${encodeURIComponent(redirectTarget)}`;
     }
 
@@ -194,3 +194,4 @@ document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
+
