@@ -107,8 +107,8 @@
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     console.log("Kayıt başarılı!");
-                    // Kayıt başarılıysa direkt YTS sayfasına atabilirsin
-                    window.location.href = "redirectPage";
+                    
+                    window.location.href = redirectPage;
                 })
                 .catch((error) => {
                     btn.innerText = "Kayıt Ol";
@@ -143,6 +143,7 @@
 
 
 </html>
+
 
 
 
