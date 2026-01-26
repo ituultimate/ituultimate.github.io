@@ -1,3 +1,47 @@
+setTimeout(() => {
+
+    console.clear();
+
+    console.log(
+        `%c
+       / \\
+      / _ \\
+     | / \\ |
+     ||   || _______
+     ||   || |\\     \\
+     ||   || ||\\     \\
+     ||   || || \\    |
+     ||   || ||  \\__/
+     ||   || ||   ||
+     \\\\_/ \\_// \\_//
+    /   _   \\  _/
+   / _ / \\ _ \\
+  / / \\   / \\ \\
+  | |   | |   | |
+  \\ \\ _ / \\ _ / /
+   \\ _ /   \\ _ /
+        `,
+        "font-family: monospace; color: #f5c71a; font-weight: bold;"
+    );
+    
+    console.log(
+        "%c ITU UltiMate ",
+        "background: #062a54; color: #fff; font-size: 30px; padding: 10px; border-radius: 5px; font-weight: bold; font-family: 'Poppins', sans-serif;"
+    );
+
+    console.log(
+        "%cHey Mühendis! Kolay gelsin 👋\nBeni kodlarımla yargılamadan önce bil ki ileride sadece kimya mühendisliği yapacağım.\nBuraya sadece aklımdaki fikrimi bir şekilde gerçekleştirmeye geldim.",
+        "color: #00a8cc; font-size: 14px; font-weight: 600; line-height: 1.5;"
+    );
+
+    console.log(
+        "%cBu proje İTÜ öğrencileri tarafından geliştirilmiştir. 🐝",
+        "font-size: 12px; color: #666; margin-top: 10px;"
+    );
+
+}, 1000);
+
+
 import { auth } from "./firebase-config.js";
 import { 
     onAuthStateChanged, 
@@ -210,4 +254,5 @@ document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
+
 
