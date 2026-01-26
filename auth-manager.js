@@ -24,7 +24,7 @@ const protectedPages = [
 const path = window.location.pathname;
 const rawPageName = path.split("/").filter(Boolean).pop(); 
 // Eğer anasayfadaysak (boşsa) 'index.html' kabul et
-const currentPage = decodeURIComponent(rawPageName || "index.html").split("?")[0];
+const currentPage = decodeURIComponent(rawPageName || "https://ituultimate.com/").split("?")[0];
 
 console.log("Algılanan Sayfa:", currentPage); 
 
@@ -60,7 +60,7 @@ function updateUI(user) {
                         ${user.displayName || user.email.split('@')[0]} ▼
                     </span>
                     <div class="dropdown-content">
-                        <a href="/profil.html" class="dropdown-item">Profilim</a>
+                        <a href="/profil" class="dropdown-item">Profilim</a>
                         <a href="#" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
                     </div>
                 </div>
@@ -80,7 +80,7 @@ function updateUI(user) {
                 li.className = 'nav-item';
                 li.id = 'login-btn-item';
                 // DÜZELTME: Başına / koyduk
-                li.innerHTML = `<a href="/login.html?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
+                li.innerHTML = `<a href="/login?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
                 navMenu.appendChild(li);
             }
         }
@@ -96,7 +96,7 @@ function updateUI(user) {
         // Kullanıcı yok VE sayfa korumalı -> Yönlendir
         console.warn("Erişim reddedildi. Yönlendiriliyor...");
         // DÜZELTME: Başına / koyduk
-        window.location.href = `/login.html?redirect=${encodeURIComponent(currentPage)}`;
+        window.location.href = `/login?redirect=${encodeURIComponent(currentPage)}`;
     }
 }
 
@@ -113,7 +113,7 @@ function setupAuthForms() {
     
     if(switchLink && redirectTarget !== '/') {
         // DÜZELTME: domain ismini sildik, başına / koyduk
-        const targetPage = currentPage.includes("login") ? "/register.html" : "/login.html";
+        const targetPage = currentPage.includes("login") ? "/register" : "/login";
         switchLink.href = `${targetPage}?redirect=${encodeURIComponent(redirectTarget)}`;
     }
 
@@ -194,3 +194,4 @@ document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
+
