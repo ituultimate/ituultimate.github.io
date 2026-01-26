@@ -24,13 +24,13 @@ const protectedPages = [
 const path = window.location.pathname;
 // Boşlukları temizle, son parçayı al, decode et (Türkçe karakteri düzelt) ve ?parametreleri at
 const rawPageName = path.split("/").filter(Boolean).pop(); 
-const currentPage = decodeURIComponent(rawPageName || "ituultimate.com").split("?")[0];
+const currentPage = decodeURIComponent(rawPageName || "ituultimate.com/").split("?")[0];
 
 console.log("Algılanan Sayfa:", currentPage); // Konsoldan kontrol edebilirsin
 
 // Yönlendirme hedefi (Login'den sonra nereye gidecek?)
 const urlParams = new URLSearchParams(window.location.search);
-const redirectTarget = urlParams.get('redirect') || 'ituultimate.com';
+const redirectTarget = urlParams.get('redirect') || 'ituultimate.com/';
 
 // ==========================================
 // 2. ARAYÜZ (NAVBAR & LOADING) YÖNETİMİ
@@ -93,7 +93,7 @@ function updateUI(user) {
     } else {
         // Kullanıcı yok VE sayfa korumalı -> Yönlendir
         console.warn("Erişim reddedildi. Yönlendiriliyor...");
-        window.location.href = `ituultimate.com/login?redirect=${encodeURIComponent(currentPage)}`;
+        window.location.href = `login?redirect=${encodeURIComponent(currentPage)}`;
     }
 }
 
@@ -108,7 +108,7 @@ function setupAuthForms() {
     // Linkleri Güncelle (Redirect parametresini korumak için)
     // Örn: Login sayfasındaki "Kayıt Ol" linkine ?redirect=yts.html ekler
     const switchLink = document.querySelector('.toggle-link a') || document.querySelector('a[href*="register"], a[href*="login"]');
-    if(switchLink && redirectTarget !== 'ituultimate.com') {
+    if(switchLink && redirectTarget !== 'ituultimate.com/') {
         const targetPage = currentPage.includes("login") ? "ituultimate.com/register" : "ituultimate.com/login";
         switchLink.href = `${targetPage}?redirect=${encodeURIComponent(redirectTarget)}`;
     }
@@ -194,6 +194,7 @@ document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
+
 
 
 
