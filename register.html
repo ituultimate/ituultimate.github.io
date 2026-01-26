@@ -65,8 +65,7 @@
                 <input type="email" id="email" class="form-input" placeholder="mail@itu.edu.tr" required>
 
                 <label style="font-weight: 600; display:block; margin-bottom:5px;">Şifre</label>
-                <input type="password" id="password" class="form-input" placeholder="En az 6 karakter" required
-                    minlength="6">
+                <input type="password" id="password" class="form-input" placeholder="En az 6 karakter" required minlength="6">
 
                 <button type="submit" class="btn btn-primary btn-full">Kayıt Ol</button>
             </form>
@@ -81,7 +80,7 @@
             <div id="error-message" class="error-msg"></div>
 
             <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
-                Zaten hesabın var mı? <a href="https://ituultimate.github.io/login" style="color: #00a8cc; font-weight: bold;">Giriş Yap</a>
+                Zaten hesabın var mı? <a id="login-link" href="login.html" style="color: #00a8cc; font-weight: bold;">Giriş Yap</a>
             </div>
         </div>
     </main>
@@ -90,10 +89,23 @@
         import { auth } from "./firebase-config.js";
         import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+        // --- YÖNLENDİRME AYARLARI ---
+        // 1. URL parametrelerini oku (Eksik olan kısımdı)
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectParam = urlParams.get('redirect');
+        const redirectPage = redirectParam || 'https://ituultimate.github.io/';
+
+        // 2. "Giriş Yap" linkini güncelle (Böylece Login'e dönerse redirect bilgisi kaybolmaz)
+        if (redirectParam) {
+            const loginLink = document.getElementById('login-link');
+            if (loginLink) {
+                loginLink.href = "login.html?redirect=" + encodeURIComponent(redirectParam);
+            }
+        }
+
         // --- Email Kayıt ---
         const registerForm = document.getElementById('register-form');
         const errorDiv = document.getElementById('error-message');
-        const redirectPage = urlParams.get('redirect') || 'https://ituultimate.github.io/';
 
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -107,7 +119,7 @@
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     console.log("Kayıt başarılı!");
-                    
+                    // Başarılı olunca yönlendir
                     window.location.href = redirectPage;
                 })
                 .catch((error) => {
@@ -124,14 +136,15 @@
                 });
         });
 
-        // --- Google Kayıt (Giriş ile aynı mantık) ---
+        // --- Google Kayıt ---
         const googleBtn = document.getElementById('google-btn');
         const provider = new GoogleAuthProvider();
 
         googleBtn.addEventListener('click', () => {
             signInWithPopup(auth, provider)
                 .then(() => {
-                    window.location.href = "redirectPage";
+                    // DÜZELTME: Tırnak işaretleri kaldırıldı, değişken kullanıldı
+                    window.location.href = redirectPage;
                 })
                 .catch((error) => {
                     errorDiv.textContent = "Google hatası: " + error.message;
@@ -140,10 +153,4 @@
         });
     </script>
 </body>
-
-
 </html>
-
-
-
-
