@@ -1,25 +1,45 @@
 setTimeout(() => {
-
     console.clear();
-
     console.log(
         `%c
-       / \\
-      / _ \\
-     | / \\ |
-     ||   || _______
-     ||   || |\\     \\
-     ||   || ||\\     \\
-     ||   || || \\    |
-     ||   || ||  \\__/
-     ||   || ||   ||
-     \\\\_/ \\_// \\_//
-    /   _   \\  _/
-   / _ / \\ _ \\
-  / / \\   / \\ \\
-  | |   | |   | |
-  \\ \\ _ / \\ _ / /
-   \\ _ /   \\ _ /
+              \     /
+          \    o ^ o    /
+            \ (     ) /
+ ____________(%%%%%%%)____________
+(     /   /  )%%%%%%%(  \   \     )
+(___/___/__/           \__\___\___)
+   (     /  /(%%%%%%%)\  \     )
+    (__/___/ (%%%%%%%) \___\__)
+            /(       )\
+          /   (%%%%%)   \
+               (%%%)
+                 !
+                 
+                                  _  _
+                | )/ )
+             \\ |//,' __
+             (")(_)-"()))=-
+                (\\
+                             _   _
+  HEELP                     ( | / )
+                          \\ \|/,' __
+    \_o_/                 (")(_)-"()))=-
+       )                     <\\
+      /\__
+_____ \ ________________________________
+                 
+       /      .-.         .--''-.
+    .'   '.     /'       `.
+    '.     '. ,'          |
+ o    '.o   ,'        _.-'
+  \.--./'. /.:. :._:.'
+ .\   /'._-':#0: ':#0: ':
+:(#) (#) :  ':#0: ':#0: ':>#=-
+ ' ____ .'_.:J0:' :J0:' :'
+  'V  V'/ | |":' :'":'
+        \  \ \
+
+      
         `,
         "font-family: monospace; color: #f5c71a; font-weight: bold;"
     );
@@ -254,5 +274,41 @@ document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
+// ==========================================
+// KOD KORUMA SİSTEMİ (Sağ Tık & Kısayol Engelleyici)
+// ==========================================
+
+// 1. Sağ Tık Menüsünü Engelle
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    // İstersen burada "Sağ tık yasak!" diye alert de verdirebilirsin ama kullanıcıyı darlar.
+    // alert("Bu sitede sağ tık kısıtlanmıştır."); 
+});
+
+// 2. Klavye Kısayollarını Engelle (F12, Ctrl+U, Ctrl+Shift+I vb.)
+document.onkeydown = function(e) {
+    // F12 Tuşu
+    if(e.keyCode == 123) {
+        return false;
+    }
+    // Ctrl+I (İncele)
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+        return false;
+    }
+    // Ctrl+J (Konsol)
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+        return false;
+    }
+    // Ctrl+U (Kaynağı Görüntüle)
+    if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+        return false;
+    }
+    // Ctrl+S (Sayfayı Kaydet) - İsteğe bağlı
+    if(e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) { // S tuşu
+         e.preventDefault();
+         return false;
+    }
+}
+
 
 
