@@ -196,17 +196,16 @@ a {
 }
 
 .btn-primary {
-    background-color: var(--primary-color);
-    /* Changed from secondary-color to primary-color */
-    color: var(--text-color-light);
-    width: 100%;
-    margin-top: 20px;
+    background-color: var(--secondary-color);
+    color: var(--bg-color-light);
+    border: 2px solid var(--secondary-color);
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-color-light);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(6, 42, 84, 0.3);
+    background-color: transparent;
+    color: var(--secondary-color);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 168, 204, 0.3);
 }
 .hero-bg-pattern {
     position: absolute;
@@ -400,6 +399,7 @@ a {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
 
 
 
