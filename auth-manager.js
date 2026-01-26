@@ -5,14 +5,14 @@ import {
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword, 
     GoogleAuthProvider, 
-    signInWithPopup 
+    signInWithPopup,
+    sendEmailVerification // YENİ: Mail gönderme fonksiyonu eklendi
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 // ==========================================
 // 1. AYARLAR VE TANIMLAMALAR
 // ==========================================
 
-// Korumalı sayfaların tüm varyasyonlarını yaz
 const protectedPages = [
     "programlayici", "programlayici.html",
     "programlayıcı", "programlayıcı.html", 
@@ -20,17 +20,13 @@ const protectedPages = [
     "profil", "profil.html"
 ];
 
-// Şu anki sayfa ismini bul
 const path = window.location.pathname;
 const rawPageName = path.split("/").filter(Boolean).pop(); 
-// Eğer anasayfadaysak (boşsa) 'index.html' kabul et
-const currentPage = decodeURIComponent(rawPageName || "https://ituultimate.com/").split("?")[0];
+const currentPage = decodeURIComponent(rawPageName || "index.html").split("?")[0];
 
 console.log("Algılanan Sayfa:", currentPage); 
 
-// Yönlendirme hedefi (Login'den sonra nereye gidecek?)
 const urlParams = new URLSearchParams(window.location.search);
-// Eğer redirect yoksa varsayılan olarak anasayfaya ('/') git
 const redirectTarget = urlParams.get('redirect') || '/';
 
 // ==========================================
@@ -49,8 +45,8 @@ function updateUI(user) {
         if (existingUser) existingUser.remove();
         if (existingLogin) existingLogin.remove();
 
-        if (user) {
-            // Kullanıcı Giriş Yapmışsa
+        // YENİ KURAL: Kullanıcı var VE maili doğrulanmışsa giriş yapmış say
+        if (user && user.emailVerified) {
             const li = document.createElement('li');
             li.className = 'nav-item';
             li.id = 'user-menu-item';
@@ -60,27 +56,24 @@ function updateUI(user) {
                         ${user.displayName || user.email.split('@')[0]} ▼
                     </span>
                     <div class="dropdown-content">
-                        <a href="/profil" class="dropdown-item">Profilim</a>
+                        <a href="/profil.html" class="dropdown-item">Profilim</a>
                         <a href="#" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
                     </div>
                 </div>
             `;
             navMenu.appendChild(li);
 
-            // Çıkış Butonu
             document.getElementById('global-logout-btn').addEventListener('click', (e) => {
                 e.preventDefault();
-                // DÜZELTME: Sadece "/" diyerek anasayfaya atıyoruz
                 signOut(auth).then(() => window.location.href = "/");
             });
         } else {
-            // Kullanıcı Yoksa
+            // Kullanıcı yoksa veya mailini doğrulamamışsa "Giriş Yap" göster
             if (!currentPage.includes("login") && !currentPage.includes("register")) {
                 const li = document.createElement('li');
                 li.className = 'nav-item';
                 li.id = 'login-btn-item';
-                // DÜZELTME: Başına / koyduk
-                li.innerHTML = `<a href="/login?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
+                li.innerHTML = `<a href="/login.html?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
                 navMenu.appendChild(li);
             }
         }
@@ -89,14 +82,16 @@ function updateUI(user) {
     // --- B. YÜKLEME EKRANI VE İÇERİK ---
     const isProtected = protectedPages.includes(currentPage);
     
-    if (user || !isProtected) {
+    // YENİ KURAL: Korumalı sayfaya girmek için hem user olmalı hem maili onaylı olmalı
+    const isAuthorized = user && user.emailVerified;
+
+    if (isAuthorized || !isProtected) {
         if (loadingOverlay) loadingOverlay.style.display = 'none';
         if (mainContent) mainContent.style.display = 'block';
     } else {
-        // Kullanıcı yok VE sayfa korumalı -> Yönlendir
-        console.warn("Erişim reddedildi. Yönlendiriliyor...");
-        // DÜZELTME: Başına / koyduk
-        window.location.href = `/login?redirect=${encodeURIComponent(currentPage)}`;
+        // Yetkisiz erişim varsa yönlendir
+        console.warn("Erişim reddedildi (Mail onayı yok veya giriş yapılmadı).");
+        window.location.href = `/login.html?redirect=${encodeURIComponent(currentPage)}`;
     }
 }
 
@@ -108,12 +103,10 @@ function setupAuthForms() {
     const errorDiv = document.getElementById('error-message');
     const googleBtn = document.getElementById('google-btn');
 
-    // Linkleri Güncelle (Redirect parametresini korumak için)
+    // Linkleri Güncelle
     const switchLink = document.querySelector('.toggle-link a') || document.querySelector('a[href*="register"], a[href*="login"]');
-    
     if(switchLink && redirectTarget !== '/') {
-        // DÜZELTME: domain ismini sildik, başına / koyduk
-        const targetPage = currentPage.includes("login") ? "/register" : "/login";
+        const targetPage = currentPage.includes("login") ? "/register.html" : "/login.html";
         switchLink.href = `${targetPage}?redirect=${encodeURIComponent(redirectTarget)}`;
     }
 
@@ -131,7 +124,15 @@ function setupAuthForms() {
                 btn.disabled = true;
 
                 signInWithEmailAndPassword(auth, email, password)
-                    .then(() => window.location.href = redirectTarget)
+                    .then((userCredential) => {
+                        // YENİ: Mail doğrulaması kontrolü
+                        if (!userCredential.user.emailVerified) {
+                            signOut(auth); // Girişi iptal et
+                            throw { code: 'auth/email-not-verified' }; // Hata fırlat
+                        }
+                        // Doğrulanmışsa devam et
+                        window.location.href = redirectTarget;
+                    })
                     .catch((err) => {
                         btn.innerText = "Giriş Yap";
                         btn.disabled = false;
@@ -155,7 +156,15 @@ function setupAuthForms() {
                 btn.disabled = true;
 
                 createUserWithEmailAndPassword(auth, email, password)
-                    .then(() => window.location.href = redirectTarget)
+                    .then(async (userCredential) => {
+                        // YENİ: Doğrulama maili gönder
+                        await sendEmailVerification(userCredential.user);
+                        
+                        // Kullanıcıyı bilgilendir ve çıkış yap (Login sayfasına at)
+                        alert("Kayıt başarılı! Lütfen email adresinize gönderilen doğrulama linkine tıklayın.");
+                        await signOut(auth);
+                        window.location.href = "/login.html";
+                    })
                     .catch((err) => {
                         btn.innerText = "Kayıt Ol";
                         btn.disabled = false;
@@ -169,7 +178,10 @@ function setupAuthForms() {
     if (googleBtn) {
         googleBtn.addEventListener('click', () => {
             signInWithPopup(auth, new GoogleAuthProvider())
-                .then(() => window.location.href = redirectTarget)
+                .then(() => {
+                    // Google hesapları otomatik olarak "Doğrulanmış" sayılır, ekstra kontrole gerek yok
+                    window.location.href = redirectTarget;
+                })
                 .catch((err) => showError(err, errorDiv));
         });
     }
@@ -178,6 +190,10 @@ function setupAuthForms() {
 function showError(error, element) {
     if (!element) return;
     let msg = "Hata: " + error.code;
+    
+    // YENİ: Mail doğrulanmamış hatası
+    if (error.code === 'auth/email-not-verified') msg = "Lütfen önce email adresinizi doğrulayın (Spam kutusuna bakın).";
+    
     if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') msg = "Bilgiler hatalı.";
     if (error.code === 'auth/wrong-password') msg = "Şifre yanlış.";
     if (error.code === 'auth/email-already-in-use') msg = "Bu email zaten kayıtlı.";
@@ -188,10 +204,9 @@ function showError(error, element) {
 }
 
 // ==========================================
-// 4. BAŞLATICI (INITIALIZATION)
+// 4. BAŞLATICI
 // ==========================================
 document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
-
