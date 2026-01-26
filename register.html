@@ -1,58 +1,23 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kayıt Ol | ITU UltiMate</title>
     <link rel="stylesheet" href="attendance-style.css">
-
     <style>
-        .login-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 85vh;
-            padding: 20px;
-        }
-
-        .login-card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid #e9ecef;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        .btn-full {
-            width: 100%;
-        }
-
-        .error-msg {
-            color: #dc3545;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-            text-align: center;
-            display: none;
-        }
+        .login-wrapper { display: flex; justify-content: center; align-items: center; min-height: 85vh; padding: 20px; }
+        .login-card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: var(--card-shadow); width: 100%; max-width: 400px; border: 1px solid #e9ecef; }
+        .form-input { width: 100%; padding: 12px; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .btn-full { width: 100%; }
+        .error-msg { color: #dc3545; font-size: 0.9rem; margin-top: 1rem; text-align: center; display: none; }
     </style>
 </head>
 
 <body>
     <header class="header">
         <nav class="navbar container">
-            <a href="https://ituultimate.github.io/" class="nav-logo">ITU UltiMate</a>
+            <a href="https://ituultimate.com/" class="nav-logo">ITU UltiMate</a>
         </nav>
     </header>
 
@@ -80,77 +45,11 @@
             <div id="error-message" class="error-msg"></div>
 
             <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
-                Zaten hesabın var mı? <a id="login-link" href="login.html" style="color: #00a8cc; font-weight: bold;">Giriş Yap</a>
+                Zaten hesabın var mı? <a id="login-link" href="login" style="color: #00a8cc; font-weight: bold;">Giriş Yap</a>
             </div>
         </div>
     </main>
 
-    <script type="module">
-        import { auth } from "./firebase-config.js";
-        import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // --- YÖNLENDİRME AYARLARI ---
-        // 1. URL parametrelerini oku (Eksik olan kısımdı)
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirectParam = urlParams.get('redirect');
-        const redirectPage = redirectParam || 'https://ituultimate.github.io/';
-
-        // 2. "Giriş Yap" linkini güncelle (Böylece Login'e dönerse redirect bilgisi kaybolmaz)
-        if (redirectParam) {
-            const loginLink = document.getElementById('login-link');
-            if (loginLink) {
-                loginLink.href = "login.html?redirect=" + encodeURIComponent(redirectParam);
-            }
-        }
-
-        // --- Email Kayıt ---
-        const registerForm = document.getElementById('register-form');
-        const errorDiv = document.getElementById('error-message');
-
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const btn = registerForm.querySelector('button');
-
-            btn.innerText = "Kaydediliyor...";
-            btn.disabled = true;
-
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    console.log("Kayıt başarılı!");
-                    // Başarılı olunca yönlendir
-                    window.location.href = redirectPage;
-                })
-                .catch((error) => {
-                    btn.innerText = "Kayıt Ol";
-                    btn.disabled = false;
-
-                    let msg = "Hata oluştu: " + error.code;
-                    if (error.code === 'auth/email-already-in-use') msg = "Bu email zaten kayıtlı.";
-                    if (error.code === 'auth/weak-password') msg = "Şifre çok zayıf (en az 6 karakter).";
-                    if (error.code === 'auth/invalid-email') msg = "Geçersiz email adresi.";
-
-                    errorDiv.textContent = msg;
-                    errorDiv.style.display = 'block';
-                });
-        });
-
-        // --- Google Kayıt ---
-        const googleBtn = document.getElementById('google-btn');
-        const provider = new GoogleAuthProvider();
-
-        googleBtn.addEventListener('click', () => {
-            signInWithPopup(auth, provider)
-                .then(() => {
-                    // DÜZELTME: Tırnak işaretleri kaldırıldı, değişken kullanıldı
-                    window.location.href = redirectPage;
-                })
-                .catch((error) => {
-                    errorDiv.textContent = "Google hatası: " + error.message;
-                    errorDiv.style.display = 'block';
-                });
-        });
-    </script>
+    <script type="module" src="auth-manager.js"></script>
 </body>
 </html>
