@@ -1,45 +1,54 @@
+import { auth } from "./firebase-config.js";
+import { 
+    onAuthStateChanged, 
+    signOut,
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    GoogleAuthProvider, 
+    signInWithPopup,
+    sendEmailVerification 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
 setTimeout(() => {
     console.clear();
     console.log(
         `%c
-              \     /
-          \    o ^ o    /
-            \ (     ) /
+              \\     /
+          \\    o ^ o    /
+            \\ (     ) /
  ____________(%%%%%%%)____________
-(     /   /  )%%%%%%%(  \   \     )
-(___/___/__/           \__\___\___)
-   (     /  /(%%%%%%%)\  \     )
-    (__/___/ (%%%%%%%) \___\__)
-            /(       )\
-          /   (%%%%%)   \
+(     /   /  )%%%%%%%(  \\   \\     )
+(___/___/__/           \\__\\___\\___)
+   (     /  /(%%%%%%%)\\  \\     )
+    (__/___/ (%%%%%%%) \\___\\__)
+            /(       )\\
+          /   (%%%%%)   \\
                (%%%)
                  !
                  
                                   _  _
                 | )/ )
-             \\ |//,' __
+             \\\\ |//,' __
              (")(_)-"()))=-
-                (\\
-                             _   _
+                (\\\\
+                             _  _
   HEELP                     ( | / )
-                          \\ \|/,' __
-    \_o_/                 (")(_)-"()))=-
-       )                     <\\
-      /\__
-_____ \ ________________________________
+                          \\\\ \\|/,' __
+    \\_o_/                 (")(_)-"()))=-
+       )                     <\\\\
+      /\\__
+_____ \\ ________________________________
                  
        /      .-.         .--''-.
-    .'   '.     /'       `.
+    .'   '.      /'        \`.
     '.     '. ,'          |
- o    '.o   ,'        _.-'
-  \.--./'. /.:. :._:.'
- .\   /'._-':#0: ':#0: ':
+ o    '.o    ,'        _.-'
+  \\.--./'. /.:. :._:.'
+ .\\   /'._-':#0: ':#0: ':
 :(#) (#) :  ':#0: ':#0: ':>#=-
  ' ____ .'_.:J0:' :J0:' :'
   'V  V'/ | |":' :'":'
-        \  \ \
-
-      
+        \\  \\ \\
         `,
         "font-family: monospace; color: #f5c71a; font-weight: bold;"
     );
@@ -61,22 +70,6 @@ _____ \ ________________________________
 
 }, 1000);
 
-
-import { auth } from "./firebase-config.js";
-import { 
-    onAuthStateChanged, 
-    signOut,
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
-    GoogleAuthProvider, 
-    signInWithPopup,
-    sendEmailVerification // YENİ: Mail gönderme fonksiyonu eklendi
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-// ==========================================
-// 1. AYARLAR VE TANIMLAMALAR
-// ==========================================
-
 const protectedPages = [
     "programlayici", "programlayici.html",
     "programlayıcı", "programlayıcı.html", 
@@ -86,6 +79,7 @@ const protectedPages = [
 
 const path = window.location.pathname;
 const rawPageName = path.split("/").filter(Boolean).pop(); 
+//
 const currentPage = decodeURIComponent(rawPageName || "https://ituultimate.com/").split("?")[0];
 
 console.log("Algılanan Sayfa:", currentPage); 
@@ -93,23 +87,18 @@ console.log("Algılanan Sayfa:", currentPage);
 const urlParams = new URLSearchParams(window.location.search);
 const redirectTarget = urlParams.get('redirect') || '/';
 
-// ==========================================
-// 2. ARAYÜZ (NAVBAR & LOADING) YÖNETİMİ
-// ==========================================
-
 function updateUI(user) {
     const navMenu = document.querySelector('.nav-menu');
     const loadingOverlay = document.getElementById('loading-overlay');
     const mainContent = document.getElementById('main-content');
 
-    // --- A. NAVBAR GÜNCELLEME ---
     if (navMenu) {
         const existingUser = document.getElementById('user-menu-item');
         const existingLogin = document.getElementById('login-btn-item');
         if (existingUser) existingUser.remove();
         if (existingLogin) existingLogin.remove();
 
-        // YENİ KURAL: Kullanıcı var VE maili doğrulanmışsa giriş yapmış say
+
         if (user && user.emailVerified) {
             const li = document.createElement('li');
             li.className = 'nav-item';
@@ -137,6 +126,7 @@ function updateUI(user) {
                 const li = document.createElement('li');
                 li.className = 'nav-item';
                 li.id = 'login-btn-item';
+                //
                 li.innerHTML = `<a href="/login?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
                 navMenu.appendChild(li);
             }
@@ -146,7 +136,7 @@ function updateUI(user) {
     // --- B. YÜKLEME EKRANI VE İÇERİK ---
     const isProtected = protectedPages.includes(currentPage);
     
-    // YENİ KURAL: Korumalı sayfaya girmek için hem user olmalı hem maili onaylı olmalı
+    // Korumalı sayfaya girmek için hem user olmalı hem maili onaylı olmalı
     const isAuthorized = user && user.emailVerified;
 
     if (isAuthorized || !isProtected) {
@@ -159,10 +149,6 @@ function updateUI(user) {
     }
 }
 
-// ==========================================
-// 3. LOGIN & REGISTER FORM İŞLEMLERİ
-// ==========================================
-
 function setupAuthForms() {
     const errorDiv = document.getElementById('error-message');
     const googleBtn = document.getElementById('google-btn');
@@ -170,6 +156,7 @@ function setupAuthForms() {
     // Linkleri Güncelle
     const switchLink = document.querySelector('.toggle-link a') || document.querySelector('a[href*="register"], a[href*="login"]');
     if(switchLink && redirectTarget !== '/') {
+
         const targetPage = currentPage.includes("login") ? "/register" : "/login";
         switchLink.href = `${targetPage}?redirect=${encodeURIComponent(redirectTarget)}`;
     }
@@ -189,7 +176,7 @@ function setupAuthForms() {
 
                 signInWithEmailAndPassword(auth, email, password)
                     .then((userCredential) => {
-                        // YENİ: Mail doğrulaması kontrolü
+                        // Mail doğrulaması kontrolü
                         if (!userCredential.user.emailVerified) {
                             signOut(auth); // Girişi iptal et
                             throw { code: 'auth/email-not-verified' }; // Hata fırlat
@@ -221,7 +208,7 @@ function setupAuthForms() {
 
                 createUserWithEmailAndPassword(auth, email, password)
                     .then(async (userCredential) => {
-                        // YENİ: Doğrulama maili gönder
+                        // Doğrulama maili gönder
                         await sendEmailVerification(userCredential.user);
                         
                         // Kullanıcıyı bilgilendir ve çıkış yap (Login sayfasına at)
@@ -243,7 +230,7 @@ function setupAuthForms() {
         googleBtn.addEventListener('click', () => {
             signInWithPopup(auth, new GoogleAuthProvider())
                 .then(() => {
-                    // Google hesapları otomatik olarak "Doğrulanmış" sayılır, ekstra kontrole gerek yok
+                    // Google hesapları otomatik olarak "Doğrulanmış" sayılır
                     window.location.href = redirectTarget;
                 })
                 .catch((err) => showError(err, errorDiv));
@@ -255,7 +242,7 @@ function showError(error, element) {
     if (!element) return;
     let msg = "Hata: " + error.code;
     
-    // YENİ: Mail doğrulanmamış hatası
+    // Mail doğrulanmamış hatası
     if (error.code === 'auth/email-not-verified') msg = "Lütfen önce email adresinizi doğrulayın (Spam kutusuna bakın).";
     
     if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') msg = "Bilgiler hatalı.";
@@ -268,47 +255,19 @@ function showError(error, element) {
 }
 
 // ==========================================
-// 4. BAŞLATICI
+// 6. BAŞLATICI
 // ==========================================
 document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
+
 // ==========================================
-// KOD KORUMA SİSTEMİ (Sağ Tık & Kısayol Engelleyici)
+// 7. KOD KORUMA SİSTEMİ (Sağ Tık & Kısayol Engelleyici)
 // ==========================================
 
-// 1. Sağ Tık Menüsünü Engelle
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
-    // İstersen burada "Sağ tık yasak!" diye alert de verdirebilirsin ama kullanıcıyı darlar.
-    // alert("Bu sitede sağ tık kısıtlanmıştır."); 
 });
 
-// 2. Klavye Kısayollarını Engelle (F12, Ctrl+U, Ctrl+Shift+I vb.)
-document.onkeydown = function(e) {
-    // F12 Tuşu
-    if(e.keyCode == 123) {
-        return false;
-    }
-    // Ctrl+I (İncele)
-    if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-        return false;
-    }
-    // Ctrl+J (Konsol)
-    if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-        return false;
-    }
-    // Ctrl+U (Kaynağı Görüntüle)
-    if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-        return false;
-    }
-    // Ctrl+S (Sayfayı Kaydet) - İsteğe bağlı
-    if(e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) { // S tuşu
-         e.preventDefault();
-         return false;
-    }
-}
-
-
-
+document.onkeydown = function(
