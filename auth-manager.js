@@ -60,7 +60,7 @@ function updateUI(user) {
                     </span>
                     <div class="dropdown-content">
                         <a href="ituultimate.com/profil" class="dropdown-item">Profilim</a>
-                        <a href="ituultimate.com" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
+                        <a href="ituultimate.com/" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
                     </div>
                 </div>
             `;
@@ -69,7 +69,7 @@ function updateUI(user) {
             // Çıkış Butonu
             document.getElementById('global-logout-btn').addEventListener('click', (e) => {
                 e.preventDefault();
-                signOut(auth).then(() => window.location.href = "ituultimate.com");
+                signOut(auth).then(() => window.location.href = "ituultimate.com/");
             });
         } else {
             // Kullanıcı Yoksa (Login/Register sayfaları hariç buton ekle)
@@ -194,4 +194,5 @@ document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
+
 
