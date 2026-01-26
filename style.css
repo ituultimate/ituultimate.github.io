@@ -67,37 +67,57 @@ a {
 
 .navbar {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: space-between; /* Logo sola, Menü sağa */
+    align-items: center; /* Kapsayıcı içindeki her şeyi dikey ortalar */
     height: 80px;
+    padding: 0 20px; /* Kenarlara yapışmasın diye biraz boşluk iyidir */
 }
 
 .nav-logo {
+    display: flex;       /* EKLENDİ: İkon ve yazı yan yana düzgün dursun */
+    align-items: center; /* EKLENDİ: İkon ve yazı birbirine dikey ortalansın */
+    gap: 10px;           /* İkon ile yazı arası boşluk */
     font-family: 'Poppins', sans-serif;
     font-size: 1.8rem;
     font-weight: 700;
     color: var(--primary-color);
+    text-decoration: none; /* Logo link ise altı çizili olmasın */
+}
+
+/* Logo İkonu için (Eğer img kullanacaksan) */
+.nav-logo img {
+    height: 40px; /* Logonun yüksekliğini sabit tutar, taşmayı önler */
+    width: auto;
 }
 
 .nav-menu {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    align-items: center;      /* Linkleri ve Butonu dikey ortalar */
+    justify-content: flex-end; /* Sağa yaslar */
     list-style: none;
     gap: 2rem;
+    
+    /* --- KRİTİK DÜZELTME BURASI --- */
+    margin: 0;  /* Tarayıcının varsayılan dış boşluğunu siler */
+    padding: 0; /* Tarayıcının varsayılan iç boşluğunu siler */
+    height: 100%; /* Garanti olsun diye eklenebilir */
 }
 
 .nav-link {
     color: var(--text-color-dark);
     font-weight: 500;
+    text-decoration: none; /* Link alt çizgisini kaldırır */
     transition: var(--transition);
     position: relative;
+    display: flex; /* Link içindeki yazı dikey hizalansın */
+    align-items: center;
 }
 
 .nav-link:hover {
     color: var(--secondary-color);
 }
 
+/* Alt çizgi animasyonu aynen kalabilir */
 .nav-link::after {
     content: '';
     width: 0;
@@ -372,4 +392,5 @@ a {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
 
