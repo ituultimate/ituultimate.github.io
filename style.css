@@ -202,7 +202,7 @@ a {
 }
 
 .btn-primary:hover {
-    background-color: transparent;
+    background-color: #062a54;
     color: var(--secondary-color);
     transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(0, 168, 204, 0.3);
@@ -400,6 +400,7 @@ a {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
 
 
 
