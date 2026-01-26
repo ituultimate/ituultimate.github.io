@@ -132,6 +132,14 @@ a {
 .nav-link:hover::after {
     width: 100%;
 }
+/* --- Navbar İçindeki Buton Düzeltmesi --- */
+.nav-menu .btn-primary {
+    width: auto !important;       /* Genişliği 100% yapma, yazı kadar olsun */
+    margin-top: 0 !important;     /* Yukarıdan boşluğu sıfırla (Hizayı düzeltir) */
+    padding: 8px 20px !important; /* Navbar için biraz daha kibar boyut */
+    display: inline-block;        /* Yan yana durmasını sağlar */
+}
+
 
 .hamburger {
     display: none;
@@ -392,5 +400,6 @@ a {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
 
 
