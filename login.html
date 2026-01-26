@@ -70,7 +70,7 @@
                 <button type="submit" class="btn btn-primary btn-full">Giriş Yap</button>
             </form>
 
-            <div class="separator"></div>
+            <div class="separator">veya</div>
 
             <button id="google-btn" class="btn btn-google btn-full">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" alt="Google">
@@ -80,7 +80,7 @@
             <div id="error-message" class="error-msg"></div>
 
             <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
-                Hesabın yok mu? <a href="https://ituultimate.github.io/register?redirect=" + encodeURIComponent(currentPage); style="color: #00a8cc; font-weight: bold;">Kayıt Ol</a>
+                Hesabın yok mu? <a id="register-link" href="register.html" style="color: #00a8cc; font-weight: bold;">Kayıt Ol</a>
             </div>
         </div>
     </main>
@@ -89,11 +89,20 @@
         import { auth } from "./firebase-config.js";
         import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // --- YÖNLENDİRME MANTIĞI (YENİ) ---
-        // URL'den 'redirect' parametresini al (Örn: login.html?redirect=programlayici.html)
+        // --- YÖNLENDİRME MANTIĞI ---
         const urlParams = new URLSearchParams(window.location.search);
-        // Eğer redirect varsa oraya git, yoksa varsayılan olarak 'index.html'e git
-        const redirectPage = urlParams.get('redirect') || 'https://ituultimate.github.io/';
+        // Eğer redirect varsa (örn: programlayici.html), onu al. Yoksa anasayfaya yönlendir.
+        const redirectParam = urlParams.get('redirect');
+        const redirectPage = redirectParam || 'https://ituultimate.github.io/';
+
+        // --- DÜZELTME 2: "Kayıt Ol" Linkini Güncelleme ---
+        // Eğer bir redirect hedefimiz varsa, "Kayıt Ol" linkine de bunu ekleyelim
+        // Böylece kullanıcı kayıt sayfasına gittiğinde de bu bilgi kaybolmaz.
+        if (redirectParam) {
+            const registerLink = document.getElementById('register-link');
+            // Linki şöyle yapar: register.html?redirect=programlayici.html
+            registerLink.href = "register.html?redirect=" + encodeURIComponent(redirectParam);
+        }
 
         // --- Email Giriş ---
         const loginForm = document.getElementById('login-form');
@@ -110,7 +119,6 @@
 
             signInWithEmailAndPassword(auth, email, password)
                 .then(() => {
-                    // YENİ: Dinamik yönlendirme
                     window.location.href = redirectPage;
                 })
                 .catch((error) => {
@@ -127,8 +135,6 @@
         googleBtn.addEventListener('click', () => {
             signInWithPopup(auth, provider)
                 .then((result) => {
-                    console.log("Google girişi başarılı:", result.user);
-                    // YENİ: Dinamik yönlendirme
                     window.location.href = redirectPage;
                 })
                 .catch((error) => {
@@ -148,7 +154,3 @@
     </script>
 </body>
 </html>
-
-
-
-
