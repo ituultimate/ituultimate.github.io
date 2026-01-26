@@ -8,133 +8,138 @@ import {
     signInWithPopup 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// --- AYARLAR ---
-// Uzantısız ve uzantılı hallerini ekliyoruz ki hata olmasın
-const protectedPages = ["programlayici", "programlayici.html", "yts", "yts.html", "profil", "profil.html"];
+// ==========================================
+// 1. AYARLAR VE TANIMLAMALAR
+// ==========================================
 
-// Şu an hangi sayfadayız?
+// Korumalı sayfaların tüm varyasyonlarını yaz (Türkçe/İngilizce/Uzantılı/Uzantısız)
+const protectedPages = [
+    "programlayici", "programlayici.html",
+    "programlayıcı", "programlayıcı.html", 
+    "yts", "yts.html", 
+    "profil", "profil.html"
+];
+
+// Şu anki sayfa ismini güvenli şekilde bul
 const path = window.location.pathname;
-const rawPageName = path.split("/").pop();
-// "login.html?redirect=..." gibi durumlarda ?'den sonrasını temizleyip saf ismi alıyoruz
-const currentPage = decodeURIComponent(rawPageName).split("?")[0] || "index.html";
+// Boşlukları temizle, son parçayı al, decode et (Türkçe karakteri düzelt) ve ?parametreleri at
+const rawPageName = path.split("/").filter(Boolean).pop(); 
+const currentPage = decodeURIComponent(rawPageName || "index.html").split("?")[0];
 
-// Yönlendirme hedefi var mı? (URL'den ?redirect=... parametresini okur)
+console.log("Algılanan Sayfa:", currentPage); // Konsoldan kontrol edebilirsin
+
+// Yönlendirme hedefi (Login'den sonra nereye gidecek?)
 const urlParams = new URLSearchParams(window.location.search);
-const redirectTarget = urlParams.get('redirect') || 'index.html'; // Yoksa anasayfaya atar
+const redirectTarget = urlParams.get('redirect') || 'index.html';
 
-// --- NAVBAR GÜNCELLEME FONKSİYONU ---
-const navMenu = document.querySelector('.nav-menu');
+// ==========================================
+// 2. ARAYÜZ (NAVBAR & LOADING) YÖNETİMİ
+// ==========================================
 
-function updateNavbar(user) {
-    const existingUserMenu = document.getElementById('user-menu-item');
-    const existingLoginBtn = document.getElementById('login-btn-item');
-    if (existingUserMenu) existingUserMenu.remove();
-    if (existingLoginBtn) existingLoginBtn.remove();
+function updateUI(user) {
+    const navMenu = document.querySelector('.nav-menu');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const mainContent = document.getElementById('main-content');
 
-    if (user) {
-        // --- KULLANICI VARSA ---
-        const li = document.createElement('li');
-        li.className = 'nav-item';
-        li.id = 'user-menu-item';
-        li.innerHTML = `
-            <div class="user-dropdown">
-                <span class="nav-link user-email" style="cursor:pointer;">
-                    ${user.displayName || user.email.split('@')[0]} ▼
-                </span>
-                <div class="dropdown-content">
-                    <a href="profil.html" class="dropdown-item">Profilim</a>
-                    <a href="#" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
-                </div>
-            </div>
-        `;
-        if(navMenu) navMenu.appendChild(li);
+    // --- A. NAVBAR GÜNCELLEME ---
+    if (navMenu) {
+        const existingUser = document.getElementById('user-menu-item');
+        const existingLogin = document.getElementById('login-btn-item');
+        if (existingUser) existingUser.remove();
+        if (existingLogin) existingLogin.remove();
 
-        document.getElementById('global-logout-btn').addEventListener('click', (e) => {
-            e.preventDefault();
-            signOut(auth).then(() => window.location.href = "index.html");
-        });
-
-    } else {
-        // --- KULLANICI YOKSA ---
-        
-        // Eğer korumalı sayfadaysak -> Login'e yönlendir (Redirect parametresiyle)
-        if (protectedPages.includes(currentPage)) {
-            console.log("Korumalı sayfaya erişim engellendi. Yönlendiriliyor...");
-            window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
-            return;
-        }
-
-        // Login veya Register sayfasında değilsek "Giriş Yap" butonu koy
-        if (!currentPage.includes("login") && !currentPage.includes("register")) {
+        if (user) {
+            // Kullanıcı Giriş Yapmışsa
             const li = document.createElement('li');
             li.className = 'nav-item';
-            li.id = 'login-btn-item';
-            li.innerHTML = `<a href="login.html" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
-            if(navMenu) navMenu.appendChild(li);
+            li.id = 'user-menu-item';
+            li.innerHTML = `
+                <div class="user-dropdown">
+                    <span class="nav-link user-email" style="cursor:pointer;">
+                        ${user.displayName || user.email.split('@')[0]} ▼
+                    </span>
+                    <div class="dropdown-content">
+                        <a href="profil.html" class="dropdown-item">Profilim</a>
+                        <a href="#" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
+                    </div>
+                </div>
+            `;
+            navMenu.appendChild(li);
+
+            // Çıkış Butonu
+            document.getElementById('global-logout-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                signOut(auth).then(() => window.location.href = "index.html");
+            });
+        } else {
+            // Kullanıcı Yoksa (Login/Register sayfaları hariç buton ekle)
+            if (!currentPage.includes("login") && !currentPage.includes("register")) {
+                const li = document.createElement('li');
+                li.className = 'nav-item';
+                li.id = 'login-btn-item';
+                li.innerHTML = `<a href="login.html?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
+                navMenu.appendChild(li);
+            }
         }
+    }
+
+    // --- B. YÜKLEME EKRANI VE İÇERİK ---
+    // Eğer kullanıcı varsa VEYA sayfa korumalı değilse içeriği göster
+    const isProtected = protectedPages.includes(currentPage);
+    
+    if (user || !isProtected) {
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
+        if (mainContent) mainContent.style.display = 'block';
+    } else {
+        // Kullanıcı yok VE sayfa korumalı -> Yönlendir
+        console.warn("Erişim reddedildi. Yönlendiriliyor...");
+        window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
     }
 }
 
-// --- SAYFAYA ÖZEL İŞLEMLER (LOGIN & REGISTER) ---
+// ==========================================
+// 3. LOGIN & REGISTER FORM İŞLEMLERİ
+// ==========================================
+
 function setupAuthForms() {
-    
-    // 1. EĞER LOGİN SAYFASINDAYSAK
+    const errorDiv = document.getElementById('error-message');
+    const googleBtn = document.getElementById('google-btn');
+
+    // Linkleri Güncelle (Redirect parametresini korumak için)
+    // Örn: Login sayfasındaki "Kayıt Ol" linkine ?redirect=yts.html ekler
+    const switchLink = document.querySelector('.toggle-link a') || document.querySelector('a[href*="register"], a[href*="login"]');
+    if(switchLink && redirectTarget !== 'index.html') {
+        const targetPage = currentPage.includes("login") ? "register.html" : "login.html";
+        switchLink.href = `${targetPage}?redirect=${encodeURIComponent(redirectTarget)}`;
+    }
+
+    // --- LOGIN FORMU ---
     if (currentPage.includes("login")) {
         const loginForm = document.getElementById('login-form');
-        const googleBtn = document.getElementById('google-btn');
-        const errorDiv = document.getElementById('error-message');
-
-        // Email Giriş
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
                 const btn = loginForm.querySelector('button');
-
+                
                 btn.innerText = "Giriş yapılıyor...";
                 btn.disabled = true;
 
                 signInWithEmailAndPassword(auth, email, password)
-                    .then(() => {
-                        // Başarılıysa yönlendir
-                        window.location.href = redirectTarget;
-                    })
-                    .catch((error) => {
+                    .then(() => window.location.href = redirectTarget)
+                    .catch((err) => {
                         btn.innerText = "Giriş Yap";
                         btn.disabled = false;
-                        showAuthError(error, errorDiv);
+                        showError(err, errorDiv);
                     });
-            });
-        }
-
-        // Google Giriş
-        if (googleBtn) {
-            googleBtn.addEventListener('click', () => {
-                const provider = new GoogleAuthProvider();
-                signInWithPopup(auth, provider)
-                    .then(() => {
-                        window.location.href = redirectTarget;
-                    })
-                    .catch((error) => showAuthError(error, errorDiv));
             });
         }
     }
 
-    // 2. EĞER REGISTER SAYFASINDAYSAK
+    // --- REGISTER FORMU ---
     if (currentPage.includes("register")) {
         const registerForm = document.getElementById('register-form');
-        const googleBtn = document.getElementById('google-btn');
-        const errorDiv = document.getElementById('error-message');
-
-        // "Zaten hesabın var mı?" linkini güncelle (Redirect bilgisini korumak için)
-        // Eğer Login'e tıklarsa redirect bilgisi kaybolmasın
-        const loginLink = document.querySelector('a[href*="login"]'); 
-        if(loginLink && redirectTarget !== 'index.html') {
-             loginLink.href = `login.html?redirect=${encodeURIComponent(redirectTarget)}`;
-        }
-
-        // Kayıt Ol Formu
         if (registerForm) {
             registerForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -146,33 +151,46 @@ function setupAuthForms() {
                 btn.disabled = true;
 
                 createUserWithEmailAndPassword(auth, email, password)
-                    .then(() => {
-                        // Kayıt olunca da hedefe git
-                        window.location.href = redirectTarget;
-                    })
-                    .catch((error) => {
+                    .then(() => window.location.href = redirectTarget)
+                    .catch((err) => {
                         btn.innerText = "Kayıt Ol";
                         btn.disabled = false;
-                        showAuthError(error, errorDiv);
+                        showError(err, errorDiv);
                     });
             });
         }
-        
-        // Google ile Kayıt
-        if (googleBtn) {
-            googleBtn.addEventListener('click', () => {
-                const provider = new GoogleAuthProvider();
-                signInWithPopup(auth, provider)
-                    .then(() => {
-                        window.location.href = redirectTarget;
-                    })
-                    .catch((error) => showAuthError(error, errorDiv));
-            });
-        }
+    }
+
+    // --- GOOGLE GİRİŞ (Ortak) ---
+    if (googleBtn) {
+        googleBtn.addEventListener('click', () => {
+            signInWithPopup(auth, new GoogleAuthProvider())
+                .then(() => window.location.href = redirectTarget)
+                .catch((err) => showError(err, errorDiv));
+        });
     }
 }
 
-// Hata Mesajlarını Gösteren Yardımcı Fonksiyon
-function showAuthError(error, errorDiv) {
-    if(!errorDiv) return;
-    let msg
+function showError(error, element) {
+    if (!element) return;
+    let msg = "Hata: " + error.code;
+    if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') msg = "Bilgiler hatalı.";
+    if (error.code === 'auth/wrong-password') msg = "Şifre yanlış.";
+    if (error.code === 'auth/email-already-in-use') msg = "Bu email zaten kayıtlı.";
+    if (error.code === 'auth/weak-password') msg = "Şifre çok zayıf.";
+    
+    element.textContent = msg;
+    element.style.display = 'block';
+}
+
+// ==========================================
+// 4. BAŞLATICI (INITIALIZATION)
+// ==========================================
+
+// Formları hazırla (Login/Register sayfaları için)
+document.addEventListener('DOMContentLoaded', setupAuthForms);
+
+// Kullanıcı durumunu dinle (Ana Yönetici)
+onAuthStateChanged(auth, (user) => {
+    updateUI(user);
+});
