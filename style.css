@@ -81,6 +81,8 @@ a {
 
 .nav-menu {
     display: flex;
+    align-items: center;
+    justify-content: flex-end;
     list-style: none;
     gap: 2rem;
 }
@@ -370,3 +372,4 @@ a {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
