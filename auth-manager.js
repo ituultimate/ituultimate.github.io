@@ -59,7 +59,7 @@ function updateUI(user) {
                         ${user.displayName || user.email.split('@')[0]} ▼
                     </span>
                     <div class="dropdown-content">
-                        <a href="ituultimate.com/profil" class="dropdown-item">Profilim</a>
+                        <a href="profil" class="dropdown-item">Profilim</a>
                         <a href="ituultimate.com/" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
                     </div>
                 </div>
@@ -77,7 +77,7 @@ function updateUI(user) {
                 const li = document.createElement('li');
                 li.className = 'nav-item';
                 li.id = 'login-btn-item';
-                li.innerHTML = `<a href="ituultimate.com/login?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
+                li.innerHTML = `<a href="login?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
                 navMenu.appendChild(li);
             }
         }
@@ -194,5 +194,6 @@ document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
+
 
 
