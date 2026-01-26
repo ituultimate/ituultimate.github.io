@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilim | ITU UltiMate</title>
+    <link rel="stylesheet" href="attendance-style.css">
+
+    <style>
+        /* --- PROFİL SAYFASINA ÖZEL STİLLER --- */
+        
+        .profile-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Yukarıya yasla */
+            min-height: 85vh;
+            padding: 40px 20px;
+            background-color: #f8f9fa; /* Hafif gri arka plan */
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px; /* Kart genişliği */
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+            position: relative;
+        }
+
+        /* Üstteki Mavi Alan */
+        .profile-header-bg {
+            background: linear-gradient(135deg, #062a54 0%, #00a8cc 100%);
+            height: 120px;
+            width: 100%;
+        }
+
+        .profile-content {
+            padding: 0 30px 40px 30px;
+            text-align: center;
+            margin-top: -60px; /* Profil fotosunu yukarı çekmek için */
+        }
+
+        /* Profil Fotoğrafı */
+        .avatar-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px auto;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-placeholder {
+            font-size: 3rem;
+            color: #062a54;
+            font-weight: bold;
+        }
+
+        /* Yazılar */
+        .user-name {
+            color: #062a54;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .user-email {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+
+        /* Bilgi Kutucukları */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #00a8cc;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            display: block;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Butonlar */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #dc3545;
+            color: #dc3545;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-outline:hover {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <nav class="navbar container">
+            <a href="/" class="nav-logo">ITU UltiMate</a>
+            <ul class="nav-menu">
+                </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+        </div>
+
+        <section id="main-content" style="display: none;">
+            <div class="profile-wrapper">
+                
+                <div class="profile-card">
+                    <div class="profile-header-bg"></div>
+
+                    <div class="profile-content">
+                        <div class="avatar-container" id="avatar-container">
+                            <span class="avatar-placeholder">?</span>
+                        </div>
+
+                        <h2 class="user-name" id="display-name">Yükleniyor...</h2>
+                        <p class="user-email" id="display-email">...</p>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Üyelik Tarihi</span>
+                                <span class="info-value" id="join-date">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Hesap Türü</span>
+                                <span class="info-value">Standart Üye</span>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <a href="/programlayici.html" class="btn btn-primary btn-full">Ders Programıma Git</a>
+                            <button id="logout-btn-profile" class="btn-outline btn-full">Çıkış Yap</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="auth-manager.js"></script>
+
+    <script type="module">
+        import { auth } from "./firebase-config.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Auth Manager zaten giriş kontrolü yapıyor, biz burada sadece veriyi gösteriyoruz
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // 1. İsim Göster
+                const nameEl = document.getElementById('display-name');
+                const name = user.displayName || user.email.split('@')[0];
+                // İsmin ilk harflerini büyüt
+                nameEl.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+
+                // 2. Email Göster
+                document.getElementById('display-email').textContent = user.email;
+
+                // 3. Tarih Göster (Firebase creationTime)
+                const dateEl = document.getElementById('join-date');
+                if (user.metadata.creationTime) {
+                    const dateObj = new Date(user.metadata.creationTime);
+                    // Türkçe formatta tarih (Örn: 26 Ocak 2026)
+                    dateEl.textContent = dateObj.toLocaleDateString('tr-TR', { 
+                        day: 'numeric', month: 'long', year: 'numeric' 
+                    });
+                }
+
+                // 4. Profil Fotosu Göster
+                const avatarContainer = document.getElementById('avatar-container');
+                if (user.photoURL) {
+                    // Google fotosu varsa
+                    avatarContainer.innerHTML = `<img src="${user.photoURL}" alt="Profil" class="avatar-img">`;
+                } else {
+                    // Foto yoksa ismin baş harfini göster
+                    const initial = name.charAt(0).toUpperCase();
+                    avatarContainer.innerHTML = `<span class="avatar-placeholder">${initial}</span>`;
+                }
+            }
+        });
+
+        // Çıkış Butonu İşlevi
+        document.getElementById('logout-btn-profile').addEventListener('click', () => {
+            if(confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+                signOut(auth).then(() => {
+                    window.location.href = "/";
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
