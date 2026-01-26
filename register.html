@@ -93,6 +93,7 @@
         // --- Email Kayıt ---
         const registerForm = document.getElementById('register-form');
         const errorDiv = document.getElementById('error-message');
+        const redirectPage = urlParams.get('redirect') || 'https://ituultimate.github.io/';
 
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -142,5 +143,6 @@
 
 
 </html>
+
 
 
