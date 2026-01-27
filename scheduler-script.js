@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ============================================================= 
-    // FIREBASE CONFIG (DÜZELTİLDİ: Çakışma Önleyici Kontrol)
+    // FIREBASE CONFIG                                               
     // ============================================================= 
     const firebaseConfig = {
         apiKey: "AIzaSyBxoBmV6dJqcl6YaVJ8eYiEpDkQ1fB5Pfw",
@@ -11,14 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
         appId: "1:1000938340000:web:bd00e04ff5e74b1d3e93c5"
     };
 
-    // Eğer Firebase zaten başlatılmadıysa başlat (Hatayı önler)
+    // --- KRİTİK DÜZELTME: Çakışmayı Önle ---
+    // Eğer Auth Manager zaten başlattıysa tekrar başlatma
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.firestore();
 
     // ============================================================= 
-    // DOM ELEMENTS & CONSTANTS                                    
+    // DOM ELEMENTS & CONSTANTS                                       
     // ============================================================= 
     const subjectDropdownList = document.getElementById('subject-dropdown-list'); 
     const specificCourseSelect = document.getElementById('specific-course-select');
@@ -34,10 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const closePanelBtn = document.getElementById('close-panel-btn');
     const openPanelBtn = document.getElementById('open-panel-btn');
 
-    // Bu değişken tüm ders seçimi mantığı için hayati önem taşıyor
     let allCoursesNested = {};
 
-    // --- Color Management for Visual Grid ---
+    // --- Color Management ---
     const availableColors = ["rgb(252, 161, 241)", "rgb(91, 150, 210)", "rgb(115, 44, 196)", "rgb(135, 147, 61)", "rgb(178, 168, 144)", "rgb(196, 145, 145)", "rgb(53, 118, 161)", "rgb(184, 114, 106)", "rgb(17, 47, 137)", "rgb(27, 176, 139)", "rgb(175, 217, 239)", "rgb(114, 203, 180)"];
     const crnColors = {};
     let remainingColors = [...availableColors];
@@ -55,137 +55,106 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(isOpen));
     };
 
+    // --- CORE FUNCTIONS ---
     const getUserSchedule = () => JSON.parse(localStorage.getItem(USER_SCHEDULE_KEY)) || [];
     const saveUserSchedule = (schedule) => localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(schedule));
 
-    // ==========================================
-    // DERSLERİ ÇEK VE GRUPLA (FİNAL VERSİYON)
-    // ==========================================
-    async function fetchAndGroupCourses() {
+    // --- DERSLERİ ÇEKME FONKSİYONU (Senin Kodun + Hata Kontrolü) ---
+    const fetchAndGroupCourses = async () => {
         if (!subjectSearchInput || !subjectDropdownList) return;
 
         try {
-            const snapshot = await db.collection('courses').get();
+            // --- BURASI DÜZELTİLDİ: Senin koleksiyon ismin ---
+            const coursesCollection = await db.collection('2526-bahar').get();
             
-            if (snapshot.empty) {
-                subjectDropdownList.innerHTML = '<div style="padding:10px; color:red;">Veritabanı boş!</div>';
+            if(coursesCollection.empty) {
+                console.warn("Koleksiyon boş veya erişim yetkisi yok.");
+                subjectDropdownList.innerHTML = '<div style="padding:10px; color:red;">Ders bulunamadı (Veritabanı Boş)</div>';
                 return;
             }
 
-            const courses = [];
-            snapshot.forEach(doc => courses.push(doc.data()));
-
-            // 1. ADIM: allCoursesNested objesini doldur (Eski kodların çalışması için ŞART)
-            // Yapı: { "BLG": { "BLG 101": { "CRN1": [...] } } }
-            allCoursesNested = {}; 
-
-            courses.forEach(course => {
-                // Güvenli kod ayıklama
-                const fullCode = course.code || course.courseCode || course.dersKodu || "";
-                if (!fullCode) return;
-
-                const subjectPrefix = fullCode.split(' ')[0].trim(); // "BLG"
-                const courseTitle = fullCode; // "BLG 101"
-
-                if (!allCoursesNested[subjectPrefix]) {
-                    allCoursesNested[subjectPrefix] = {};
-                }
-                if (!allCoursesNested[subjectPrefix][courseTitle]) {
-                    allCoursesNested[subjectPrefix][courseTitle] = {};
-                }
-                if (!allCoursesNested[subjectPrefix][courseTitle][course.crn]) {
-                    allCoursesNested[subjectPrefix][courseTitle][course.crn] = [];
-                }
-                allCoursesNested[subjectPrefix][courseTitle][course.crn].push(course);
-            });
-
-            // 2. ADIM: Branş Listesini Oluştur
-            const subjects = Object.keys(allCoursesNested).sort();
-            console.log("Yüklenen Branşlar:", subjects);
-
-            // 3. ADIM: Listeyi Doldurma Fonksiyonu
-            const populateList = (filterText = "") => {
-                subjectDropdownList.innerHTML = ""; 
+            const courses = coursesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            allCoursesNested = courses.reduce((acc, course) => {
+                if (!course.code || !course.crn) return acc;
+                const prefix = course.code.trim().split(' ')[0];
+                const fullCode = course.code.trim();
+                const courseName = course.name || 'N/A';
+                const courseTitle = `${fullCode} - ${courseName}`;
+                const crn = course.crn;
                 
-                const filteredSubjects = subjects.filter(sub => 
-                    sub.toUpperCase().includes(filterText.toUpperCase())
-                );
+                if (!acc[prefix]) acc[prefix] = {};
+                if (!acc[prefix][courseTitle]) acc[prefix][courseTitle] = {};
+                if (!acc[prefix][courseTitle][crn]) acc[prefix][courseTitle][crn] = [];
+                
+                acc[prefix][courseTitle][crn].push(course);
+                return acc;
+            }, {});
 
-                filteredSubjects.forEach(subject => {
-                    const item = document.createElement('div');
-                    item.className = 'dropdown-item';
-                    item.textContent = subject;
-                    item.style.padding = "10px";
-                    item.style.cursor = "pointer";
-                    item.style.borderBottom = "1px solid #eee";
-
-                    item.addEventListener('click', () => {
-                        subjectSearchInput.value = subject; 
-                        toggleDropdown(false);
-                        // Seçim yapıldığında eski mantığı tetikle
-                        handleSubjectChange(subject);
-                    });
-
-                    subjectDropdownList.appendChild(item);
-                });
-
-                if (filteredSubjects.length === 0) {
-                    subjectDropdownList.innerHTML = '<div style="padding:10px; color:#999;">Sonuç bulunamadı</div>';
-                }
-            };
-
-            // İlk yükleme
-            populateList();
-
-            // Event Listenerlar
-            subjectSearchInput.addEventListener('input', (e) => {
-                populateList(e.target.value);
-                toggleDropdown(true);
-                if (e.target.value === "") {
-                    specificCourseSelect.disabled = true;
-                    specificCourseSelect.innerHTML = '<option value="" disabled selected>Please select a subject first.</option>';
-                }
-            });
-
-            subjectSearchInput.addEventListener('focus', () => {
-                populateList(subjectSearchInput.value);
-                toggleDropdown(true);
-            });
+            const sortedPrefixes = Object.keys(allCoursesNested).sort();
+            populateSubjectPrefixDropdown(sortedPrefixes);
+            
+            console.log("Dersler yüklendi:", sortedPrefixes.length, "Branş");
 
         } catch (error) {
-            console.error("Dersler çekilirken HATA:", error);
-            subjectDropdownList.innerHTML = `<div style="color:red; padding:10px;">Hata: ${error.message}</div>`;
+            console.error("Error fetching courses: ", error);
+            subjectDropdownList.innerHTML = `<div style="padding:10px; color:red;">Hata: ${error.message}</div>`;
         }
-    }
+    };
 
-    // Yardımcı Fonksiyon: Seçim yapıldığında diğer kutuları güncelle
+    // --- DROPDOWN DOLDURMA (Input Odaklı) ---
+    const populateSubjectPrefixDropdown = (prefixes, filterText = "") => {
+        subjectDropdownList.innerHTML = ''; 
+
+        // Filtreleme
+        const filtered = prefixes.filter(p => p.toUpperCase().includes(filterText.toUpperCase()));
+
+        filtered.forEach(prefix => {
+            const item = document.createElement('div');
+            item.className = 'dropdown-item';
+            item.textContent = prefix;
+            item.style.cursor = 'pointer'; // CSS'ten gelmiyorsa diye
+
+            item.addEventListener('click', () => {
+                subjectSearchInput.value = prefix; 
+                toggleDropdown(false); 
+                handleSubjectChange(prefix); 
+            });
+
+            subjectDropdownList.appendChild(item);
+        });
+
+        if(filtered.length === 0) {
+             subjectDropdownList.innerHTML = '<div style="padding:10px; color:#999;">Sonuç yok</div>';
+        }
+    };
+
     const handleSubjectChange = (selectedPrefix) => {
         specificCourseSelect.innerHTML = '<option value="" disabled selected>Select a course</option>';
         specificCourseSelect.disabled = true;
         crnSectionListContainer.innerHTML = '<p class="placeholder-text">Please select a course first.</p>';
 
-        if (selectedPrefix && allCoursesNested[selectedPrefix]) {
+        if (selectedPrefix) {
             populateSpecificCourseDropdown(selectedPrefix);
         }
     };
 
     const toggleDropdown = (show) => {
-        if (show) subjectDropdownList.classList.add('show'); // CSS'te .show olmayabilir ama display:block JS ile yapılıyor
-        else subjectDropdownList.style.display = 'none'; // Garanti kapatma
-        
-        // Senin CSS'inde .show yoksa manuel kontrol
-        subjectDropdownList.style.display = show ? 'block' : 'none';
+        // Hem class ekle hem display ayarla (Garanti olsun)
+        if (show) {
+            subjectDropdownList.classList.add('show');
+            subjectDropdownList.style.display = 'block';
+        } else {
+            subjectDropdownList.classList.remove('show');
+            subjectDropdownList.style.display = 'none';
+        }
     };
 
     const populateSpecificCourseDropdown = (selectedPrefix) => {
         specificCourseSelect.disabled = false;
         specificCourseSelect.innerHTML = '<option value="" disabled selected>Select a course</option>';
-        
         const coursesForPrefix = allCoursesNested[selectedPrefix];
-        if(!coursesForPrefix) return;
-
         const sortedCourseTitles = Object.keys(coursesForPrefix).sort();
-        
         sortedCourseTitles.forEach(title => {
             const option = document.createElement('option');
             option.value = title;
@@ -194,10 +163,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- Display CRN sections ---
+    // --- CRN SECTIONS ---
     const displayCrnSections = (selectedCourseTitle) => {
         crnSectionListContainer.innerHTML = '';
-        const selectedPrefix = subjectSearchInput.value;
+        const selectedPrefix = subjectSearchInput.value; 
         
         if (!allCoursesNested[selectedPrefix] || !allCoursesNested[selectedPrefix][selectedCourseTitle]) {
              crnSectionListContainer.innerHTML = '<p class="placeholder-text">Please re-select the subject.</p>';
@@ -210,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.entries(crnsForCourse).forEach(([crn, courseParts]) => {
             const isAlreadyAdded = courseParts.some(part => userSchedule.some(c => c.id === part.id));
 
-            // Sorting logic
             const dayOrder = { 'Pazartesi': 1, 'Salı': 2, 'Çarşamba': 3, 'Perşembe': 4, 'Cuma': 5 };
             const sortedParts = courseParts.sort((a, b) => {
                 const dayA = a.day || '';
@@ -245,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- RENDER SCHEDULE (Visual Grid) ---
+    // --- RENDER SCHEDULE ---
     const renderSchedule = () => {
         gridContainer.querySelectorAll('.event').forEach(event => event.remove());
 
@@ -320,11 +288,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     event.style.boxSizing = 'border-box';
 
                     event.innerHTML = `
-                        <div class="event-title">${course.code}</div>
-                        <div class="event-crn">${course.crn}</div>
-                        <div class="event-time">${course.time.start} - ${course.time.end}</div>
-                        <div class="event-location">${course.building} ${course.classroom}</div>
-                    `;
+    <div class="event-title">${course.code}</div>
+    <div class="event-crn">${course.crn}</div>
+    <div class="event-time">${course.time.start} - ${course.time.end}</div>
+    <div class="event-location">${course.building} ${course.classroom}</div>
+                `;
                     gridContainer.appendChild(event);
                 });
             });
@@ -355,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- ACTION FUNCTIONS ---
+    // --- ACTIONS ---
     const addCourseToSchedule = (e) => {
         if (e.target.classList.contains('add-course-btn') && !e.target.disabled) {
             const coursePartsToAdd = JSON.parse(e.target.dataset.courseParts);
@@ -376,12 +344,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropCourseByCrn = (crn) => {
         let userSchedule = getUserSchedule();
         userSchedule = userSchedule.filter(c => c.crn !== crn);
-        releaseColor(crn); // Rengi serbest bırak
+        releaseColor(crn);
         saveUserSchedule(userSchedule);
         renderSchedule();
         renderAddedCoursesList();
-        
-        // Eğer şu an o ders seçiliyse listeyi güncelle
         if(specificCourseSelect.value) {
             displayCrnSections(specificCourseSelect.value);
         }
@@ -405,8 +371,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- EVENT LISTENERS ---
-    
-    // Dışarı tıklandığında listeyi kapat
+
+    // 1. Arama Input Mantığı (Senin koduna entegre edildi)
+    subjectSearchInput.addEventListener('focus', () => {
+        // Dropdown aç, filtre uygula
+        const sortedPrefixes = Object.keys(allCoursesNested).sort();
+        populateSubjectPrefixDropdown(sortedPrefixes, subjectSearchInput.value);
+        toggleDropdown(true);
+    });
+
+    subjectSearchInput.addEventListener('input', (e) => {
+        const sortedPrefixes = Object.keys(allCoursesNested).sort();
+        populateSubjectPrefixDropdown(sortedPrefixes, e.target.value);
+        toggleDropdown(true);
+
+        if (e.target.value === "") {
+            specificCourseSelect.disabled = true;
+            specificCourseSelect.innerHTML = '<option value="" disabled selected>Please select a subject first.</option>';
+        }
+    });
+
     document.addEventListener('click', (e) => {
         if (!subjectSearchInput.contains(e.target) && !subjectDropdownList.contains(e.target)) {
             toggleDropdown(false);
@@ -433,26 +417,11 @@ document.addEventListener('DOMContentLoaded', () => {
     closePanelBtn.addEventListener('click', () => togglePanel(false));
     openPanelBtn.addEventListener('click', () => togglePanel(true));
 
-    const hamburger = document.querySelector(".hamburger");
-    const navMenu = document.querySelector(".nav-menu");
-    if(hamburger && navMenu) {
-        hamburger.addEventListener("click", () => {
-            hamburger.classList.toggle("active");
-            navMenu.classList.toggle("active");
-        });
-        document.querySelectorAll(".nav-link").forEach(n => n.addEventListener("click", () => {
-            hamburger.classList.remove("active");
-            navMenu.classList.remove("active");
-        }));
-    }
-
     // --- INITIAL LOAD ---
     initializeVisualGrid();
     renderSchedule();
     renderAddedCoursesList();
-    
-    // Dersleri çek
-    fetchAndGroupCourses();
+    fetchAndGroupCourses(); // ARTIK DOĞRU KOLEKSİYONU ÇAĞIRIYOR
 
     const savedPanelState = localStorage.getItem(PANEL_STATE_KEY);
     if (savedPanelState !== null) {
@@ -462,5 +431,18 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             schedulerContainer.style.transition = '';
         }, 50);
+    }
+
+    const hamburger = document.querySelector(".hamburger");
+    const navMenu = document.querySelector(".nav-menu");
+    if(hamburger) {
+        hamburger.addEventListener("click", () => {
+            hamburger.classList.toggle("active");
+            navMenu.classList.toggle("active");
+        });
+        document.querySelectorAll(".nav-link").forEach(n => n.addEventListener("click", () => {
+            hamburger.classList.remove("active");
+            navMenu.classList.remove("active");
+        }));
     }
 });
