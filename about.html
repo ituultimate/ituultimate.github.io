@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="ITU UltiMate" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hakkında & Gizlilik | ITU UltiMate</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="attendance-style.css">
+    
+    <style>
+        .content-section {
+            padding: 60px 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .policy-card {
+            background: var(--bg-color-light);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #e9ecef;
+        }
+        .policy-card h2 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+            display: inline-block;
+        }
+        .policy-card p, .policy-card li {
+            margin-bottom: 1rem;
+            color: var(--text-color-dark);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+        .policy-card ul {
+            padding-left: 20px;
+            margin-bottom: 1.5rem;
+        }
+        .last-update {
+            font-style: italic;
+            color: #777;
+            margin-bottom: 2rem;
+            display: block;
+        }
+        .contact-mail {
+            color: var(--secondary-color);
+            font-weight: 600;
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            .policy-card { padding: 20px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <nav class="navbar container">
+            <a href="https://ituultimate.github.io/" class="nav-logo">ITU UltiMate</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="https://ituultimate.github.io/" class="nav-link">Anasayfa</a></li>
+                <li class="nav-item"><a href="https://ituultimate.github.io/programlayici" class="nav-link">Programlayıcı</a></li>
+                <li class="nav-item"><a href="https://ituultimate.github.io/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
+                <li class="nav-item"><a href="https://ituultimate.github.io/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container content-section">
+        <div class="policy-card">
+            <h1 class="page-title" style="text-align: left; margin-bottom: 0.5rem;">Hakkında & Gizlilik</h1>
+            <span class="last-update">Son Güncelleme: 27 Ocak 2026</span>
+
+            <p>Hoş geldiniz! <strong>ITU UltiMate</strong>, İstanbul Teknik Üniversitesi öğrencilerinin akademik hayatlarını daha düzenli bir şekilde yönetebilmeleri amacıyla geliştirilmiş <strong>bağımsız bir öğrenci projesidir.</strong> Platformu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
+
+            <h2>1. Kurumsal Bağımsızlık</h2>
+            <p>ITU UltiMate; İstanbul Teknik Üniversitesi Rektörlüğü, Bilgi İşlem Daire Başkanlığı veya Öğrenci İşleri ile resmi bir bağı bulunmayan, tamamen gönüllü bir çabayla geliştirilmiş bir araçtır. Sitede kullanılan "İTÜ" ibaresi, projenin hedef kitlesini belirtmek amacıyla tanımlayıcı olarak kullanılmıştır.</p>
+
+            <h2>2. Veri Gizliliği (Privacy Policy)</h2>
+            <ul>
+                <li><strong>Google ile Giriş:</strong> Firebase Auth altyapısı kullanılır. Sadece e-posta, ad-soyad ve profil fotoğrafınıza erişilir. Google şifrenize erişmemiz teknik olarak mümkün değildir.</li>
+                <li><strong>Veri Saklama:</strong> Notlarınız ve program verileriniz, tarayıcı yerel hafızasında (LocalStorage) veya güvenli bulut veritabanımızda (Firebase Firestore) saklanır.</li>
+                <li><strong>Üçüncü Taraflar:</strong> Verileriniz asla reklam şirketleri veya üçüncü şahıslarla paylaşılmaz.</li>
+            </ul>
+
+            <h2>3. Sorumluluk Reddi</h2>
+            <p>Platformdaki hesaplama araçları bilgilendirme amaçlıdır. Sonuçların resmiyeti garanti edilmez; akademik kararlarınızda her zaman <strong>İTÜ SIS</strong> verilerini esas almalısınız. Teknik aksaklıklardan kaynaklanabilecek veri kayıplarından platform sorumlu tutulamaz.</p>
+
+            <h2>4. İletişim</h2>
+            <p>Öneri, şikayet veya iş birliği talepleriniz için geliştirici ekibimizle her zaman iletişime geçebilirsiniz:</p>
+            <p>📩 E-posta: <a href="mailto:ituultimate@outlook.com" class="contact-mail">ituultimate@outlook.com</a></p>
+            
+            <p style="margin-top: 30px; font-weight: 500; color: var(--primary-color);">İTÜ'lüden İTÜ'lüye sevgilerle... Arı gibi çalışmaya devam! 🐝</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 ITU Ultimate. Made with ❤️ for ITU Students.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Hamburger Menü Fonksiyonu (attendance-script'ten bağımsız çalışması için eklendi)
+        const hamburger = document.querySelector(".hamburger");
+        const navMenu = document.querySelector(".nav-menu");
+        if (hamburger && navMenu) {
+            hamburger.addEventListener("click", () => {
+                hamburger.classList.toggle("active");
+                navMenu.classList.toggle("active");
+            });
+        }
+    </script>
+</body>
+</html>
