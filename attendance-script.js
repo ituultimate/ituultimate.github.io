@@ -31,17 +31,26 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Render Function ---
-    const renderAttendanceTrackers = () => {
-        const courses = getCourses();
+const renderAttendanceTrackers = () => {
+    // 1. Önce kutuyu bulmaya çalışalım
+    // (Eğer globalde tanımlıysa bile burada tekrar kontrol etmek en güvenlisidir)
+    const attendanceContainer = document.getElementById('attendance-tracker-container'); // HTML'deki ID'n neyse onu yaz
 
-        if (courses.length === 0) {
-            attendanceContainer.innerHTML = `
-                <p class="no-courses-message">
-                    Henüz ders eklemedin. 
-                    <a href="https://ituultimate.github.io/programlayici">Programlayıcıya git</a> ve ekle!
-                </p>`;
-            return;
-        }
+    // 2. HATA ÖNLEYİCİ (GUARD CLAUSE) - İŞTE BU EKSİK
+    // Eğer kutu yoksa (yani YTS sayfasında değilsek), fonksiyonu hemen durdur.
+    if (!attendanceContainer) return;
+
+    // 3. Artık güvenle devam edebiliriz
+    const courses = getCourses();
+
+    if (courses.length === 0) {
+        attendanceContainer.innerHTML = `
+            <p class="no-courses-message">
+                Henüz ders eklemedin. 
+                <a href="/programlayici.html">Programlayıcıya git</a> ve ekle!
+            </p>`;
+        return;
+    }
 
         attendanceContainer.innerHTML = ''; // Clear previous content
 
@@ -152,4 +161,5 @@ document.addEventListener('DOMContentLoaded', () => {
         hamburger.classList.remove("active");
         navMenu.classList.remove("active");
     }));
+
 });
