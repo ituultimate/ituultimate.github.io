@@ -162,37 +162,67 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================= 
 
     // Tıklama Olayı (Event Delegation)
-    const handleCellClick = (e) => {
-        if (e.target.classList.contains('attendance-cell')) {
-            const crn = e.target.dataset.crn;
-            const weekIndex = parseInt(e.target.dataset.week, 10);
+   const handleCellClick = (e) => {
+    if (e.target.classList.contains('attendance-cell')) {
+        const crn = e.target.dataset.crn;
+        const weekIndex = parseInt(e.target.dataset.week, 10);
 
-            let attendanceData = getAttendanceData();
-            if (!attendanceData[crn]) {
-                attendanceData[crn] = new Array(14).fill(null);
-            }
-
-            const currentStatus = attendanceData[crn][weekIndex];
-            const newStatus = currentStatus === 'P' ? 'A' : (currentStatus === 'A' ? null : 'P');
-            attendanceData[crn][weekIndex] = newStatus;
-
-            saveAttendanceData(attendanceData);
-            
-            // UI'ı güncellemek için, o anki dersleri tekrar çizmemiz gerekebilir.
-            // Ancak sürekli fetch atmamak için DOM manipülasyonu veya basit reload yapılabilir.
-            // Şimdilik sadece hücreyi güncelleyelim veya sayfayı yeniletelim.
-            // En temizi: Basitçe hücre sınıfını ve içeriğini güncellemek, ama istatistikler için re-render iyidir.
-            // Veri zaten elimizde olduğu için tekrar fetch etmeye gerek yok, ama o veriyi saklamadık.
-            // Basit çözüm: Sayfayı yenilemeye gerek yok, hücreyi güncelle.
-            // İstatistik güncellemesi karmaşık olacağı için şimdilik:
-            e.target.textContent = newStatus || '';
-            e.target.className = `attendance-cell ${newStatus ? newStatus === 'P' ? 'present' : 'absent' : ''}`;
-            
-            // Eğer istatistiklerin anlık değişmesini istersen tam re-render lazım.
-            // Bunun için 'courses' verisini global bir değişkende tutabiliriz.
-            location.reload(); // En tembel ve kesin çözüm :)
+        let attendanceData = getAttendanceData();
+        if (!attendanceData[crn]) {
+            attendanceData[crn] = new Array(14).fill(null);
         }
-    };
+
+        const currentStatus = attendanceData[crn][weekIndex];
+        const newStatus = currentStatus === 'P' ? 'A' : (currentStatus === 'A' ? null : 'P');
+        attendanceData[crn][weekIndex] = newStatus;
+
+        saveAttendanceData(attendanceData);
+
+        // --- START OF NEW CODE ---
+
+        // 1. Find the parent card for the clicked cell
+        const card = e.target.closest('.attendance-card');
+        if (!card) return; // Safety check
+
+        // 2. Update the clicked cell's appearance (you already had this)
+        e.target.textContent = newStatus || '';
+        e.target.className = `attendance-cell ${newStatus ? (newStatus === 'P' ? 'present' : 'absent') : ''}`;
+
+        // 3. Recalculate the statistics for this course
+        const courseAttendance = attendanceData[crn] || new Array(14).fill(null);
+        const summary = {
+            totalHeld: courseAttendance.filter(s => s === 'P' || s === 'A').length,
+            totalPresent: courseAttendance.filter(s => s === 'P').length,
+            percentage: 0
+        };
+        if (summary.totalHeld > 0) {
+            summary.percentage = Math.round((summary.totalPresent / summary.totalHeld) * 100);
+        }
+
+        // 4. Update the statistics in the UI
+        const summaryValues = card.querySelectorAll('.summary-value');
+        summaryValues[0].textContent = summary.totalHeld; // Toplam
+        summaryValues[1].textContent = summary.totalPresent; // Katılınan
+        
+        const percentageElement = summaryValues[2]; // Yüzde
+        percentageElement.textContent = `${summary.percentage}%`;
+
+        // 5. Update the 'high-attendance' class on the card and percentage
+        const isHighAttendance = summary.percentage >= 70;
+        if (isHighAttendance) {
+            card.classList.add('high-attendance');
+            percentageElement.classList.add('high-percentage');
+        } else {
+            card.classList.remove('high-attendance');
+            percentageElement.classList.remove('high-percentage');
+        }
+
+        // --- END OF NEW CODE ---
+
+        // REMOVE THIS LINE:
+        // location.reload(); 
+    }
+};
 
     // Container'a tıklama dinleyicisi ekle
     const mainContainer = document.getElementById(CONTAINER_ID);
@@ -238,3 +268,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
     }
 });
+
