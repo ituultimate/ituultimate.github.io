@@ -111,46 +111,66 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ============================================================= 
-    // FETCH COURSES (Veritabanından Dersleri Çek)
-    // ============================================================= 
-    const fetchAndGroupCourses = async () => {
-        if (!subjectSearchInput || !subjectDropdownList) return;
+// FETCH COURSES (Veritabanından Dersleri Çek)
+// ============================================================= 
+const fetchAndGroupCourses = async () => {
+    if (!subjectSearchInput || !subjectDropdownList) return;
 
-        try {
-            const coursesCollection = await db.collection('2526-bahar').get();
-            
-            if(coursesCollection.empty) {
-                subjectDropdownList.innerHTML = '<div style="padding:10px; color:red;">Veritabanı Boş</div>';
-                return;
+    try {
+        const coursesCollection = await db.collection('2526-bahar').get();
+        
+        if(coursesCollection.empty) {
+            subjectDropdownList.innerHTML = '<div style="padding:10px; color:red;">Veritabanı Boş</div>';
+            return;
+        }
+
+        const courses = coursesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        allCoursesNested = courses.reduce((acc, course) => {
+            // --- DEBUGGING & ROBUSTNESS ---
+            // We'll check for the required fields and log a warning if they are missing.
+            if (!course.crn) {
+                console.warn(`SKIPPING course with ID "${course.id}": It is missing the 'crn' field.`, course);
+                return acc; // Skip this course
             }
 
-            const courses = coursesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Let's be more flexible with the 'code' field
+            const codeString = String(course.code || '').trim(); // Ensure it's a string and trim whitespace
+            if (!codeString) {
+                console.warn(`SKIPPING course with CRN "${course.crn}": It has an empty or invalid 'code' field.`, course);
+                return acc; // Skip this course
+            }
+
+            const prefix = codeString.split(' ')[0]; // Get the first part of the code (e.g., "BLM" from "BLM 3051")
+
+            if (!prefix) {
+                console.warn(`SKIPPING course with CRN "${course.crn}": Could not determine a prefix from code "${codeString}".`, course);
+                return acc; // Skip if prefix is empty
+            }
+            // --- END OF DEBUGGING ---
+
+            const fullCode = codeString;
+            const courseName = course.name || 'N/A';
+            const courseTitle = `${fullCode} - ${courseName}`;
+            const crn = course.crn;
             
-            allCoursesNested = courses.reduce((acc, course) => {
-                if (!course.code || !course.crn) return acc;
-                const prefix = course.code.trim().split(' ')[0];
-                const fullCode = course.code.trim();
-                const courseName = course.name || 'N/A';
-                const courseTitle = `${fullCode} - ${courseName}`;
-                const crn = course.crn;
-                
-                if (!acc[prefix]) acc[prefix] = {};
-                if (!acc[prefix][courseTitle]) acc[prefix][courseTitle] = {};
-                if (!acc[prefix][courseTitle][crn]) acc[prefix][courseTitle][crn] = [];
-                
-                acc[prefix][courseTitle][crn].push(course);
-                return acc;
-            }, {});
+            if (!acc[prefix]) acc[prefix] = {};
+            if (!acc[prefix][courseTitle]) acc[prefix][courseTitle] = {};
+            if (!acc[prefix][courseTitle][crn]) acc[prefix][courseTitle][crn] = [];
+            
+            acc[prefix][courseTitle][crn].push(course);
+            return acc;
+        }, {});
 
-            // Başlangıç listesi
-            const sortedPrefixes = Object.keys(allCoursesNested).sort();
-            populateSubjectPrefixDropdown(sortedPrefixes);
+        // Başlangıç listesi
+        const sortedPrefixes = Object.keys(allCoursesNested).sort();
+        populateSubjectPrefixDropdown(sortedPrefixes);
 
-        } catch (error) {
-            console.error("Error fetching courses: ", error);
-            subjectDropdownList.innerHTML = `<div style="padding:10px; color:red;">Hata: ${error.message}</div>`;
-        }
-    };
+    } catch (error) {
+        console.error("Error fetching courses: ", error);
+        subjectDropdownList.innerHTML = `<div style="padding:10px; color:red;">Hata: ${error.message}</div>`;
+    }
+};
 
     const populateSubjectPrefixDropdown = (prefixes, filterText = "") => {
         subjectDropdownList.innerHTML = ''; 
@@ -479,4 +499,5 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSchedule(); 
     });
 });
+
 
