@@ -60,78 +60,91 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
 // DERSLERİ ÇEK VE LİSTELE (Branş Kodu Kısmı)
 // ==========================================
+// ==========================================
+// DERSLERİ ÇEK VE LİSTELE (GÜNCELLENMİŞ - ROBUST VERSION)
+// ==========================================
 async function fetchAndGroupCourses() {
-    // SENİN HTML'İNE UYGUN ELEMENTLER:
     const subjectInput = document.getElementById('subject-search-input');
     const subjectListDiv = document.getElementById('subject-dropdown-list');
 
-    // Eğer bu elementler sayfada yoksa (başka sayfadaysak) durduralım ki hata vermesin
     if (!subjectInput || !subjectListDiv) return;
 
     try {
-        // 1. Firebase'den dersleri çek
+        // 1. Veritabanından dersleri çek
         const snapshot = await db.collection('courses').get();
+        
+        // --- DEBUG: Veri geliyor mu görelim ---
+        console.log("Veritabanından gelen ders sayısı:", snapshot.size);
+        if (snapshot.empty) {
+            console.warn("Veritabanı BOŞ! Hiçbir ders bulunamadı.");
+            subjectListDiv.innerHTML = '<div style="padding:10px; color:red;">Veritabanı boş!</div>';
+            return;
+        }
+
         const courses = [];
         snapshot.forEach(doc => courses.push(doc.data()));
 
-        // 2. Branş kodlarını (BLG, MAT, FIZ) ayrıştır ve benzersizleri al
-        const subjects = [...new Set(courses.map(c => c.subjectCode))].sort();
+        // --- DEBUG: İlk dersin verisini konsola yazdıralım ---
+        console.log("Örnek Ders Verisi:", courses[0]);
+
+        // 2. Branş kodlarını ayıkla (Örn: "BLG 101" -> "BLG")
+        const subjects = [...new Set(courses.map(c => {
+            // Veritabanında 'code', 'courseCode' veya 'name' olabilir. Hepsini dener.
+            const fullCode = c.code || c.courseCode || c.dersKodu || ""; 
+            
+            if (!fullCode) return null; // Kod yoksa geç
+            
+            // "BLG 101E" -> Boşluğa göre böl -> ["BLG", "101E"] -> İlki al: "BLG"
+            return fullCode.split(' ')[0].trim(); 
+        }))].filter(Boolean).sort(); // Boş olanları filtrele ve sırala
+
+        console.log("Bulunan Branşlar:", subjects); // Konsolda ["BLG", "MAT", "FIZ"] görmelisin
 
         // 3. Listeyi Doldurma Fonksiyonu
         const populateList = (filterText = "") => {
-            subjectListDiv.innerHTML = ""; // Listeyi temizle
+            subjectListDiv.innerHTML = ""; 
             
-            // Aramaya göre filtrele
             const filteredSubjects = subjects.filter(sub => 
                 sub.toUpperCase().includes(filterText.toUpperCase())
             );
 
-            // Her bir branş için liste elemanı oluştur
             filteredSubjects.forEach(subject => {
                 const item = document.createElement('div');
-                item.className = 'dropdown-item'; // CSS için sınıf
+                item.className = 'dropdown-item';
                 item.textContent = subject;
+                // Stil kodları CSS'te var ama garanti olsun diye inline da bırakabiliriz
                 item.style.padding = "10px";
                 item.style.cursor = "pointer";
                 item.style.borderBottom = "1px solid #eee";
 
-                // Tıklayınca ne olsun?
                 item.addEventListener('click', () => {
-                    subjectInput.value = subject; // Input'a yaz
-                    subjectListDiv.style.display = 'none'; // Listeyi kapat
-                    
-                    // --- KRİTİK: DİĞER FONKSİYONLARI TETİKLE ---
-                    // Burada, normalde <select> değişince çalışan fonksiyonu çağırıyoruz
+                    subjectInput.value = subject; 
+                    subjectListDiv.style.display = 'none'; 
                     populateSpecificCourses(subject, courses); 
                 });
 
                 subjectListDiv.appendChild(item);
             });
 
-            // Eğer hiç sonuç yoksa
             if (filteredSubjects.length === 0) {
                 subjectListDiv.innerHTML = '<div style="padding:10px; color:#999;">Sonuç bulunamadı</div>';
             }
         };
 
-        // 4. Sayfa açılınca listeyi ilk kez doldur
+        // 4. İlk yükleme
         populateList();
 
-        // 5. EVENT LISTENERS (Arama ve Tıklama Mantığı)
-        
-        // Input'a tıklandığında listeyi göster
+        // 5. Olay Dinleyicileri
         subjectInput.addEventListener('click', (e) => {
-            e.stopPropagation(); // Sayfa tıklamasını engelle
+            e.stopPropagation();
             subjectListDiv.style.display = 'block';
         });
 
-        // Yazı yazıldığında listeyi filtrele
         subjectInput.addEventListener('input', (e) => {
             populateList(e.target.value);
             subjectListDiv.style.display = 'block';
         });
 
-        // Sayfada boş bir yere tıklanırsa listeyi kapat
         document.addEventListener('click', (e) => {
             if (!subjectInput.contains(e.target) && !subjectListDiv.contains(e.target)) {
                 subjectListDiv.style.display = 'none';
@@ -139,10 +152,10 @@ async function fetchAndGroupCourses() {
         });
 
     } catch (error) {
-        console.error("Dersler çekilemedi:", error);
-        if(subjectListDiv) subjectListDiv.innerHTML = '<div style="color:red; padding:10px;">Veri alınamadı</div>';
+        console.error("Dersler çekilirken HATA:", error);
+        subjectListDiv.innerHTML = `<div style="color:red; padding:10px;">Hata: ${error.message}</div>`;
     }
-};
+}
 
     // Eski populateSubjectPrefixDropdown fonksiyonunu silin ve bunu yapıştırın:
     const populateSubjectPrefixDropdown = (prefixes) => {
@@ -534,4 +547,5 @@ async function fetchAndGroupCourses() {
     }));
 
 });
+
 
