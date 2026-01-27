@@ -11,12 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
         appId: "1:1000938340000:web:bd00e04ff5e74b1d3e93c5"
     };
 
-    // --- KRİTİK DÜZELTME: Çakışmayı Önle ---
-    // Eğer Auth Manager zaten başlattıysa tekrar başlatma
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.firestore();
+    const auth = firebase.auth(); // Auth servisini ekledik
 
     // ============================================================= 
     // DOM ELEMENTS & CONSTANTS                                       
@@ -36,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const openPanelBtn = document.getElementById('open-panel-btn');
 
     let allCoursesNested = {};
+    let currentUser = null; // Şu anki kullanıcıyı takip etmek için
+    let currentSchedule = []; // Programı hafızada tutmak için
 
     // --- Color Management ---
     const availableColors = ["rgb(252, 161, 241)", "rgb(91, 150, 210)", "rgb(115, 44, 196)", "rgb(135, 147, 61)", "rgb(178, 168, 144)", "rgb(196, 145, 145)", "rgb(53, 118, 161)", "rgb(184, 114, 106)", "rgb(17, 47, 137)", "rgb(27, 176, 139)", "rgb(175, 217, 239)", "rgb(114, 203, 180)"];
@@ -55,21 +56,67 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(isOpen));
     };
 
-    // --- CORE FUNCTIONS ---
-    const getUserSchedule = () => JSON.parse(localStorage.getItem(USER_SCHEDULE_KEY)) || [];
-    const saveUserSchedule = (schedule) => localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(schedule));
+    // ============================================================= 
+    // DATA MANAGEMENT (LOCAL & CLOUD HYBRID)
+    // ============================================================= 
+    
+    // 1. Programı Yükle (Giriş yaptıysa Cloud'dan, yapmadıysa Local'den)
+    const loadSchedule = async () => {
+        if (currentUser) {
+            // Kullanıcı giriş yapmış: Firebase'den çek
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                if (doc.exists && doc.data().schedule) {
+                    currentSchedule = doc.data().schedule;
+                } else {
+                    currentSchedule = [];
+                }
+            } catch (error) {
+                console.error("Program çekilirken hata:", error);
+                currentSchedule = [];
+            }
+        } else {
+            // Misafir kullanıcı: LocalStorage'dan çek
+            currentSchedule = JSON.parse(localStorage.getItem(USER_SCHEDULE_KEY)) || [];
+        }
+        
+        // Veriyi çektikten sonra ekrana bas
+        renderSchedule();
+        renderAddedCoursesList();
+    };
 
-    // --- DERSLERİ ÇEKME FONKSİYONU (Senin Kodun + Hata Kontrolü) ---
+    // 2. Programı Kaydet (Giriş yaptıysa Cloud'a, yapmadıysa Local'e)
+    const saveSchedule = async (newSchedule) => {
+        currentSchedule = newSchedule; // Önce hafızayı güncelle
+
+        if (currentUser) {
+            // Kullanıcı giriş yapmış: Firebase'e kaydet
+            try {
+                await db.collection('users').doc(currentUser.uid).set({
+                    schedule: newSchedule,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp() // Ne zaman güncellediğini de tutalım
+                }, { merge: true }); // Merge true: Varsa üzerine yazar, yoksa oluşturur
+            } catch (error) {
+                console.error("Program kaydedilirken hata:", error);
+                alert("Program kaydedilemedi! İnternet bağlantını kontrol et.");
+            }
+        } else {
+            // Misafir kullanıcı: LocalStorage'a kaydet
+            localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(newSchedule));
+        }
+    };
+
+    // ============================================================= 
+    // FETCH COURSES (Veritabanından Dersleri Çek)
+    // ============================================================= 
     const fetchAndGroupCourses = async () => {
         if (!subjectSearchInput || !subjectDropdownList) return;
 
         try {
-            // --- BURASI DÜZELTİLDİ: Senin koleksiyon ismin ---
             const coursesCollection = await db.collection('2526-bahar').get();
             
             if(coursesCollection.empty) {
-                console.warn("Koleksiyon boş veya erişim yetkisi yok.");
-                subjectDropdownList.innerHTML = '<div style="padding:10px; color:red;">Ders bulunamadı (Veritabanı Boş)</div>';
+                subjectDropdownList.innerHTML = '<div style="padding:10px; color:red;">Veritabanı Boş</div>';
                 return;
             }
 
@@ -91,10 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return acc;
             }, {});
 
+            // Başlangıç listesi
             const sortedPrefixes = Object.keys(allCoursesNested).sort();
             populateSubjectPrefixDropdown(sortedPrefixes);
-            
-            console.log("Dersler yüklendi:", sortedPrefixes.length, "Branş");
 
         } catch (error) {
             console.error("Error fetching courses: ", error);
@@ -102,52 +148,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- DROPDOWN DOLDURMA (Input Odaklı) ---
     const populateSubjectPrefixDropdown = (prefixes, filterText = "") => {
         subjectDropdownList.innerHTML = ''; 
-
-        // Filtreleme
         const filtered = prefixes.filter(p => p.toUpperCase().includes(filterText.toUpperCase()));
-
+        
         filtered.forEach(prefix => {
             const item = document.createElement('div');
             item.className = 'dropdown-item';
             item.textContent = prefix;
-            item.style.cursor = 'pointer'; // CSS'ten gelmiyorsa diye
-
             item.addEventListener('click', () => {
                 subjectSearchInput.value = prefix; 
                 toggleDropdown(false); 
                 handleSubjectChange(prefix); 
             });
-
             subjectDropdownList.appendChild(item);
         });
 
-        if(filtered.length === 0) {
-             subjectDropdownList.innerHTML = '<div style="padding:10px; color:#999;">Sonuç yok</div>';
-        }
+        if(filtered.length === 0) subjectDropdownList.innerHTML = '<div style="padding:10px; color:#999;">Sonuç yok</div>';
     };
 
     const handleSubjectChange = (selectedPrefix) => {
         specificCourseSelect.innerHTML = '<option value="" disabled selected>Select a course</option>';
         specificCourseSelect.disabled = true;
         crnSectionListContainer.innerHTML = '<p class="placeholder-text">Please select a course first.</p>';
-
-        if (selectedPrefix) {
-            populateSpecificCourseDropdown(selectedPrefix);
-        }
+        if (selectedPrefix) populateSpecificCourseDropdown(selectedPrefix);
     };
 
     const toggleDropdown = (show) => {
-        // Hem class ekle hem display ayarla (Garanti olsun)
-        if (show) {
-            subjectDropdownList.classList.add('show');
-            subjectDropdownList.style.display = 'block';
-        } else {
-            subjectDropdownList.classList.remove('show');
-            subjectDropdownList.style.display = 'none';
-        }
+        if (show) { subjectDropdownList.classList.add('show'); subjectDropdownList.style.display = 'block'; }
+        else { subjectDropdownList.classList.remove('show'); subjectDropdownList.style.display = 'none'; }
     };
 
     const populateSpecificCourseDropdown = (selectedPrefix) => {
@@ -163,7 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- CRN SECTIONS ---
     const displayCrnSections = (selectedCourseTitle) => {
         crnSectionListContainer.innerHTML = '';
         const selectedPrefix = subjectSearchInput.value; 
@@ -174,28 +202,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const crnsForCourse = allCoursesNested[selectedPrefix][selectedCourseTitle];
-        const userSchedule = getUserSchedule();
-
+        
         Object.entries(crnsForCourse).forEach(([crn, courseParts]) => {
-            const isAlreadyAdded = courseParts.some(part => userSchedule.some(c => c.id === part.id));
+            // currentSchedule kullanıyoruz artık (getUserSchedule yerine)
+            const isAlreadyAdded = courseParts.some(part => currentSchedule.some(c => c.id === part.id));
 
             const dayOrder = { 'Pazartesi': 1, 'Salı': 2, 'Çarşamba': 3, 'Perşembe': 4, 'Cuma': 5 };
-            const sortedParts = courseParts.sort((a, b) => {
-                const dayA = a.day || '';
-                const dayB = b.day || '';
-                return (dayOrder[dayA] || 99) - (dayOrder[dayB] || 99);
-            });
+            const sortedParts = courseParts.sort((a, b) => (dayOrder[a.day] || 99) - (dayOrder[b.day] || 99));
 
             const days = sortedParts.map(p => p.day).filter(Boolean).join(', ');
             const times = sortedParts.map(p => `${p.time?.start}-${p.time?.end}`).filter(Boolean).join(', ');
-            const locations = sortedParts.map(p => {
-                const buildingCode = p.building || '';
-                const room = p.classroom || '';
-                return room ? `${buildingCode} ${room}`.trim() : buildingCode;
-            }).filter(Boolean).join(', ');
-
-            const allInstructors = courseParts.map(p => p.instructor).join(', ');
-            const instructors = [...new Set(allInstructors.split(',').map(name => name.trim()).filter(Boolean))].join(', ');
+            const locations = sortedParts.map(p => `${p.building || ''} ${p.classroom || ''}`.trim()).filter(Boolean).join(', ');
+            const instructors = [...new Set(courseParts.map(p => p.instructor).join(', ').split(',').map(n => n.trim()).filter(Boolean))].join(', ');
 
             const crnSectionItem = document.createElement('div');
             crnSectionItem.className = 'crn-section-item';
@@ -217,13 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderSchedule = () => {
         gridContainer.querySelectorAll('.event').forEach(event => event.remove());
 
-        const userSchedule = getUserSchedule();
-        if (userSchedule.length === 0) return;
+        // currentSchedule kullanıyoruz
+        if (currentSchedule.length === 0) return;
 
-        const coursesByDay = userSchedule.reduce((acc, course) => {
-            const day = course.day;
-            if (!acc[day]) acc[day] = [];
-            acc[day].push(course);
+        const coursesByDay = currentSchedule.reduce((acc, course) => {
+            if (!acc[course.day]) acc[course.day] = [];
+            acc[course.day].push(course);
             return acc;
         }, {});
 
@@ -232,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         Object.keys(coursesByDay).forEach(day => {
             const dayCourses = coursesByDay[day];
-            if (dayCourses.length === 0) return;
             const dayStartLeft = dayLeftOffset[day];
             const processedCourses = new Set();
             const overlapGroups = [];
@@ -274,8 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const duration = end - start;
                     const topPosition = (start - 8) * 60;
                     const eventHeight = duration * 60;
-                    const groupSize = group.length;
-                    const eventWidth = dayWidth / groupSize;
+                    const eventWidth = dayWidth / group.length;
                     const eventLeft = dayStartLeft + (index * eventWidth);
 
                     const event = document.createElement('div');
@@ -286,13 +301,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     event.style.width = `${eventWidth}%`;
                     event.style.left = `${eventLeft}%`;
                     event.style.boxSizing = 'border-box';
-
                     event.innerHTML = `
-    <div class="event-title">${course.code}</div>
-    <div class="event-crn">${course.crn}</div>
-    <div class="event-time">${course.time.start} - ${course.time.end}</div>
-    <div class="event-location">${course.building} ${course.classroom}</div>
-                `;
+                        <div class="event-title">${course.code}</div>
+                        <div class="event-crn">${course.crn}</div>
+                        <div class="event-time">${course.time.start} - ${course.time.end}</div>
+                        <div class="event-location">${course.building} ${course.classroom}</div>
+                    `;
                     gridContainer.appendChild(event);
                 });
             });
@@ -300,12 +314,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderAddedCoursesList = () => {
-        const userSchedule = getUserSchedule();
-        if (userSchedule.length === 0) {
+        // currentSchedule kullanıyoruz
+        if (currentSchedule.length === 0) {
             addedCoursesList.innerHTML = '<li class="placeholder-text">Eklediğin dersler burada görünür.</li>';
             return;
         }
-        const scheduleByCrn = userSchedule.reduce((acc, course) => {
+        const scheduleByCrn = currentSchedule.reduce((acc, course) => {
             if (!acc[course.crn]) acc[course.crn] = [];
             acc[course.crn].push(course);
             return acc;
@@ -327,30 +341,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const addCourseToSchedule = (e) => {
         if (e.target.classList.contains('add-course-btn') && !e.target.disabled) {
             const coursePartsToAdd = JSON.parse(e.target.dataset.courseParts);
-            let userSchedule = getUserSchedule();
+            
+            // Yeni listeyi oluştur
+            const newSchedule = [...currentSchedule];
             coursePartsToAdd.forEach(part => {
-                if (!userSchedule.some(c => c.id === part.id)) {
-                    userSchedule.push(part);
+                if (!newSchedule.some(c => c.id === part.id)) {
+                    newSchedule.push(part);
                 }
             });
-            saveUserSchedule(userSchedule);
-            renderSchedule();
-            renderAddedCoursesList();
+
+            // saveSchedule fonksiyonu duruma göre (Local/Cloud) kaydeder
+            saveSchedule(newSchedule);
+            
+            // Buton durumunu güncelle
             e.target.textContent = 'Added';
             e.target.disabled = true;
+            
+            // Görünümü güncelle
+            renderSchedule();
+            renderAddedCoursesList();
         }
     };
 
     const dropCourseByCrn = (crn) => {
-        let userSchedule = getUserSchedule();
-        userSchedule = userSchedule.filter(c => c.crn !== crn);
+        // Listeden çıkar
+        const newSchedule = currentSchedule.filter(c => c.crn !== crn);
+        
         releaseColor(crn);
-        saveUserSchedule(userSchedule);
+        // Kaydet
+        saveSchedule(newSchedule);
+        
+        // Görünümü güncelle
         renderSchedule();
         renderAddedCoursesList();
-        if(specificCourseSelect.value) {
-            displayCrnSections(specificCourseSelect.value);
-        }
+        
+        if(specificCourseSelect.value) displayCrnSections(specificCourseSelect.value);
     };
 
     function initializeVisualGrid() {
@@ -371,10 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- EVENT LISTENERS ---
-
-    // 1. Arama Input Mantığı (Senin koduna entegre edildi)
     subjectSearchInput.addEventListener('focus', () => {
-        // Dropdown aç, filtre uygula
         const sortedPrefixes = Object.keys(allCoursesNested).sort();
         populateSubjectPrefixDropdown(sortedPrefixes, subjectSearchInput.value);
         toggleDropdown(true);
@@ -384,7 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const sortedPrefixes = Object.keys(allCoursesNested).sort();
         populateSubjectPrefixDropdown(sortedPrefixes, e.target.value);
         toggleDropdown(true);
-
         if (e.target.value === "") {
             specificCourseSelect.disabled = true;
             specificCourseSelect.innerHTML = '<option value="" disabled selected>Please select a subject first.</option>';
@@ -392,18 +413,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('click', (e) => {
-        if (!subjectSearchInput.contains(e.target) && !subjectDropdownList.contains(e.target)) {
-            toggleDropdown(false);
-        }
+        if (!subjectSearchInput.contains(e.target) && !subjectDropdownList.contains(e.target)) toggleDropdown(false);
     });
 
     specificCourseSelect.addEventListener('change', (e) => {
         const selectedCourseTitle = e.target.value;
-        if (selectedCourseTitle) {
-            displayCrnSections(selectedCourseTitle);
-        } else {
-            crnSectionListContainer.innerHTML = '<p class="placeholder-text">Please select a course first.</p>';
-        }
+        if (selectedCourseTitle) displayCrnSections(selectedCourseTitle);
+        else crnSectionListContainer.innerHTML = '<p class="placeholder-text">Please select a course first.</p>';
     });
 
     crnSectionListContainer.addEventListener('click', addCourseToSchedule);
@@ -417,22 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closePanelBtn.addEventListener('click', () => togglePanel(false));
     openPanelBtn.addEventListener('click', () => togglePanel(true));
 
-    // --- INITIAL LOAD ---
-    initializeVisualGrid();
-    renderSchedule();
-    renderAddedCoursesList();
-    fetchAndGroupCourses(); // ARTIK DOĞRU KOLEKSİYONU ÇAĞIRIYOR
-
-    const savedPanelState = localStorage.getItem(PANEL_STATE_KEY);
-    if (savedPanelState !== null) {
-        const isPanelOpen = JSON.parse(savedPanelState);
-        schedulerContainer.style.transition = 'none';
-        togglePanel(isPanelOpen);
-        setTimeout(() => {
-            schedulerContainer.style.transition = '';
-        }, 50);
-    }
-
     const hamburger = document.querySelector(".hamburger");
     const navMenu = document.querySelector(".nav-menu");
     if(hamburger) {
@@ -445,4 +445,33 @@ document.addEventListener('DOMContentLoaded', () => {
             navMenu.classList.remove("active");
         }));
     }
+
+    // ============================================================= 
+    // INITIAL LOAD & AUTH LISTENER (Kritik Bölüm)
+    // ============================================================= 
+    initializeVisualGrid();
+    fetchAndGroupCourses();
+
+    // Panel Durumunu Geri Yükle
+    const savedPanelState = localStorage.getItem(PANEL_STATE_KEY);
+    if (savedPanelState !== null) {
+        const isPanelOpen = JSON.parse(savedPanelState);
+        schedulerContainer.style.transition = 'none';
+        togglePanel(isPanelOpen);
+        setTimeout(() => { schedulerContainer.style.transition = ''; }, 50);
+    }
+
+    // KULLANICI GİRİŞ DURUMUNU DİNLE
+    // Bu kod her sayfa açıldığında veya giriş/çıkış yapıldığında çalışır.
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            console.log("Kullanıcı giriş yaptı:", user.email);
+            currentUser = user; // Global değişkene ata
+        } else {
+            console.log("Misafir kullanıcı");
+            currentUser = null;
+        }
+        // Giriş durumuna göre doğru yerden veriyi çek
+        loadSchedule(); 
+    });
 });
