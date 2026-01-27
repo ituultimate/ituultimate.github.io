@@ -210,3 +210,40 @@ document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
+
+// ==========================================
+// 5. GÜVENLİK (KLAVYE & SAĞ TIK ENGELLEME)
+// ==========================================
+
+function disableDevToolsShortcuts() {
+    // 1. Sağ tıklamayı (context menu) engelle
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+
+    // 2. Klavye kısayollarını engelle
+    document.addEventListener('keydown', (e) => {
+        // F12
+        if (e.key === 'F12') {
+            e.preventDefault();
+            return false;
+        }
+
+        // Ctrl + Shift + I (Inspect), Ctrl + Shift + J (Console)
+        // Mac için Ctrl yerine Cmd (metaKey) kontrolü de eklenebilir, 
+        // ancak talep üzerine Ctrl+Shift bazlı kontrol yapılmıştır.
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
+            e.preventDefault();
+            return false;
+        }
+
+        // Ctrl + U (View Source)
+        if (e.ctrlKey && e.key === 'U') {
+            e.preventDefault();
+            return false;
+        }
+    });
+}
+
+// Engelleme fonksiyonunu çalıştır
+disableDevToolsShortcuts();
