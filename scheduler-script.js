@@ -57,31 +57,92 @@ document.addEventListener('DOMContentLoaded', () => {
     const getUserSchedule = () => JSON.parse(localStorage.getItem(USER_SCHEDULE_KEY)) || [];
     const saveUserSchedule = (schedule) => localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(schedule));
 
-    const fetchAndGroupCourses = async () => {
-        const subjectPrefixSelect = document.getElementById('subject-prefix');
-        try {
-            const coursesCollection = await db.collection('2526-bahar').get();
-            const courses = coursesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            allCoursesNested = courses.reduce((acc, course) => {
-                if (!course.code || !course.crn) return acc;
-                const prefix = course.code.trim().split(' ')[0];
-                const fullCode = course.code.trim();
-                const courseName = course.name || 'N/A';
-                const courseTitle = `${fullCode} - ${courseName}`;
-                const crn = course.crn;
-                if (!acc[prefix]) acc[prefix] = {};
-                if (!acc[prefix][courseTitle]) acc[prefix][courseTitle] = {};
-                if (!acc[prefix][courseTitle][crn]) acc[prefix][courseTitle][crn] = [];
-                acc[prefix][courseTitle][crn].push(course);
-                return acc;
-            }, {});
-            const sortedPrefixes = Object.keys(allCoursesNested).sort();
-            populateSubjectPrefixDropdown(sortedPrefixes);
-        } catch (error) {
-            console.error("Error fetching courses: ", error);
-            subjectPrefixSelect.innerHTML = '<option value="">Error loading courses</option>';
-        }
-    };
+    // ==========================================
+// DERSLERİ ÇEK VE LİSTELE (Branş Kodu Kısmı)
+// ==========================================
+async function fetchAndGroupCourses() {
+    // SENİN HTML'İNE UYGUN ELEMENTLER:
+    const subjectInput = document.getElementById('subject-search-input');
+    const subjectListDiv = document.getElementById('subject-dropdown-list');
+
+    // Eğer bu elementler sayfada yoksa (başka sayfadaysak) durduralım ki hata vermesin
+    if (!subjectInput || !subjectListDiv) return;
+
+    try {
+        // 1. Firebase'den dersleri çek
+        const snapshot = await db.collection('courses').get();
+        const courses = [];
+        snapshot.forEach(doc => courses.push(doc.data()));
+
+        // 2. Branş kodlarını (BLG, MAT, FIZ) ayrıştır ve benzersizleri al
+        const subjects = [...new Set(courses.map(c => c.subjectCode))].sort();
+
+        // 3. Listeyi Doldurma Fonksiyonu
+        const populateList = (filterText = "") => {
+            subjectListDiv.innerHTML = ""; // Listeyi temizle
+            
+            // Aramaya göre filtrele
+            const filteredSubjects = subjects.filter(sub => 
+                sub.toUpperCase().includes(filterText.toUpperCase())
+            );
+
+            // Her bir branş için liste elemanı oluştur
+            filteredSubjects.forEach(subject => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item'; // CSS için sınıf
+                item.textContent = subject;
+                item.style.padding = "10px";
+                item.style.cursor = "pointer";
+                item.style.borderBottom = "1px solid #eee";
+
+                // Tıklayınca ne olsun?
+                item.addEventListener('click', () => {
+                    subjectInput.value = subject; // Input'a yaz
+                    subjectListDiv.style.display = 'none'; // Listeyi kapat
+                    
+                    // --- KRİTİK: DİĞER FONKSİYONLARI TETİKLE ---
+                    // Burada, normalde <select> değişince çalışan fonksiyonu çağırıyoruz
+                    populateSpecificCourses(subject, courses); 
+                });
+
+                subjectListDiv.appendChild(item);
+            });
+
+            // Eğer hiç sonuç yoksa
+            if (filteredSubjects.length === 0) {
+                subjectListDiv.innerHTML = '<div style="padding:10px; color:#999;">Sonuç bulunamadı</div>';
+            }
+        };
+
+        // 4. Sayfa açılınca listeyi ilk kez doldur
+        populateList();
+
+        // 5. EVENT LISTENERS (Arama ve Tıklama Mantığı)
+        
+        // Input'a tıklandığında listeyi göster
+        subjectInput.addEventListener('click', (e) => {
+            e.stopPropagation(); // Sayfa tıklamasını engelle
+            subjectListDiv.style.display = 'block';
+        });
+
+        // Yazı yazıldığında listeyi filtrele
+        subjectInput.addEventListener('input', (e) => {
+            populateList(e.target.value);
+            subjectListDiv.style.display = 'block';
+        });
+
+        // Sayfada boş bir yere tıklanırsa listeyi kapat
+        document.addEventListener('click', (e) => {
+            if (!subjectInput.contains(e.target) && !subjectListDiv.contains(e.target)) {
+                subjectListDiv.style.display = 'none';
+            }
+        });
+
+    } catch (error) {
+        console.error("Dersler çekilemedi:", error);
+        if(subjectListDiv) subjectListDiv.innerHTML = '<div style="color:red; padding:10px;">Veri alınamadı</div>';
+    }
+};
 
     // Eski populateSubjectPrefixDropdown fonksiyonunu silin ve bunu yapıştırın:
     const populateSubjectPrefixDropdown = (prefixes) => {
@@ -473,3 +534,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
 
 });
+
