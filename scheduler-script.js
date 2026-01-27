@@ -477,34 +477,37 @@ const fetchAndGroupCourses = async () => {
     }
 
     // ============================================================= 
-    // INITIAL LOAD & AUTH LISTENER (Kritik Bölüm)
-    // ============================================================= 
-    initializeVisualGrid();
-    fetchAndGroupCourses();
+// INITIAL LOAD & AUTH LISTENER (Kritik Bölüm)
+// ============================================================= 
+initializeVisualGrid();
 
-    // Panel Durumunu Geri Yükle
-    const savedPanelState = localStorage.getItem(PANEL_STATE_KEY);
-    if (savedPanelState !== null) {
-        const isPanelOpen = JSON.parse(savedPanelState);
-        schedulerContainer.style.transition = 'none';
-        togglePanel(isPanelOpen);
-        setTimeout(() => { schedulerContainer.style.transition = ''; }, 50);
+// Panel Durumunu Geri Yükle
+const savedPanelState = localStorage.getItem(PANEL_STATE_KEY);
+if (savedPanelState !== null) {
+    const isPanelOpen = JSON.parse(savedPanelState);
+    schedulerContainer.style.transition = 'none';
+    togglePanel(isPanelOpen);
+    setTimeout(() => { schedulerContainer.style.transition = ''; }, 50);
+}
+
+// KULLANICI GİRİŞ DURUMUNU DİNLE
+// This listener now controls the ENTIRE initialization flow.
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        console.log("Kullanıcı giriş yaptı:", user.email);
+        currentUser = user;
+    } else {
+        console.log("Misafir kullanıcı");
+        currentUser = null;
     }
 
-    // KULLANICI GİRİŞ DURUMUNU DİNLE
-    // Bu kod her sayfa açıldığında veya giriş/çıkış yapıldığında çalışır.
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            console.log("Kullanıcı giriş yaptı:", user.email);
-            currentUser = user; // Global değişkene ata
-        } else {
-            console.log("Misafir kullanıcı");
-            currentUser = null;
-        }
-        // Giriş durumuna göre doğru yerden veriyi çek
-        loadSchedule(); 
-    });
+    // --- CRITICAL CHANGE ---
+    // Now, we only fetch courses and load the schedule AFTER we know the user's state.
+    // This prevents any potential race conditions.
+    fetchAndGroupCourses(); // <--- MOVED HERE
+    loadSchedule(); 
 });
+
 
 
 
