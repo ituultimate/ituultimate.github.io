@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ============================================================= -->
-    // FIREBASE CONFIG                                               -->
-    // ============================================================= -->
+    // ============================================================= 
+    // FIREBASE CONFIG (DÜZELTİLDİ: Çakışma Önleyici Kontrol)
+    // ============================================================= 
     const firebaseConfig = {
         apiKey: "AIzaSyBxoBmV6dJqcl6YaVJ8eYiEpDkQ1fB5Pfw",
         authDomain: "ituultimate-7d97f.firebaseapp.com",
@@ -11,14 +11,16 @@ document.addEventListener('DOMContentLoaded', () => {
         appId: "1:1000938340000:web:bd00e04ff5e74b1d3e93c5"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    // Eğer Firebase zaten başlatılmadıysa başlat (Hatayı önler)
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
 
-    // ============================================================= -->
-    // DOM ELEMENTS & CONSTANTS                                       -->
-    // ============================================================= -->
-    // const subjectPrefixSelect = ... (BUNU SİLİN)
-    const subjectDropdownList = document.getElementById('subject-dropdown-list'); // BUNU EKLEYİN
+    // ============================================================= 
+    // DOM ELEMENTS & CONSTANTS                                    
+    // ============================================================= 
+    const subjectDropdownList = document.getElementById('subject-dropdown-list'); 
     const specificCourseSelect = document.getElementById('specific-course-select');
     const crnSectionListContainer = document.getElementById('crn-section-list-container');
     const addedCoursesList = document.getElementById('added-courses-list');
@@ -32,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closePanelBtn = document.getElementById('close-panel-btn');
     const openPanelBtn = document.getElementById('open-panel-btn');
 
+    // Bu değişken tüm ders seçimi mantığı için hayati önem taşıyor
     let allCoursesNested = {};
 
     // --- Color Management for Visual Grid ---
@@ -49,133 +52,111 @@ document.addEventListener('DOMContentLoaded', () => {
             schedulerContainer.classList.add('panel-closed');
             openPanelBtn.classList.add('visible');
         }
-        // Save the state to localStorage
         localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(isOpen));
     };
 
-    // --- CORE FUNCTIONS ---
     const getUserSchedule = () => JSON.parse(localStorage.getItem(USER_SCHEDULE_KEY)) || [];
     const saveUserSchedule = (schedule) => localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(schedule));
 
     // ==========================================
-// DERSLERİ ÇEK VE LİSTELE (Branş Kodu Kısmı)
-// ==========================================
-// ==========================================
-// DERSLERİ ÇEK VE LİSTELE (GÜNCELLENMİŞ - ROBUST VERSION)
-// ==========================================
-async function fetchAndGroupCourses() {
-    const subjectInput = document.getElementById('subject-search-input');
-    const subjectListDiv = document.getElementById('subject-dropdown-list');
+    // DERSLERİ ÇEK VE GRUPLA (FİNAL VERSİYON)
+    // ==========================================
+    async function fetchAndGroupCourses() {
+        if (!subjectSearchInput || !subjectDropdownList) return;
 
-    if (!subjectInput || !subjectListDiv) return;
-
-    try {
-        // 1. Veritabanından dersleri çek
-        const snapshot = await db.collection('courses').get();
-        
-        // --- DEBUG: Veri geliyor mu görelim ---
-        console.log("Veritabanından gelen ders sayısı:", snapshot.size);
-        if (snapshot.empty) {
-            console.warn("Veritabanı BOŞ! Hiçbir ders bulunamadı.");
-            subjectListDiv.innerHTML = '<div style="padding:10px; color:red;">Veritabanı boş!</div>';
-            return;
-        }
-
-        const courses = [];
-        snapshot.forEach(doc => courses.push(doc.data()));
-
-        // --- DEBUG: İlk dersin verisini konsola yazdıralım ---
-        console.log("Örnek Ders Verisi:", courses[0]);
-
-        // 2. Branş kodlarını ayıkla (Örn: "BLG 101" -> "BLG")
-        const subjects = [...new Set(courses.map(c => {
-            // Veritabanında 'code', 'courseCode' veya 'name' olabilir. Hepsini dener.
-            const fullCode = c.code || c.courseCode || c.dersKodu || ""; 
+        try {
+            const snapshot = await db.collection('courses').get();
             
-            if (!fullCode) return null; // Kod yoksa geç
-            
-            // "BLG 101E" -> Boşluğa göre böl -> ["BLG", "101E"] -> İlki al: "BLG"
-            return fullCode.split(' ')[0].trim(); 
-        }))].filter(Boolean).sort(); // Boş olanları filtrele ve sırala
+            if (snapshot.empty) {
+                subjectDropdownList.innerHTML = '<div style="padding:10px; color:red;">Veritabanı boş!</div>';
+                return;
+            }
 
-        console.log("Bulunan Branşlar:", subjects); // Konsolda ["BLG", "MAT", "FIZ"] görmelisin
+            const courses = [];
+            snapshot.forEach(doc => courses.push(doc.data()));
 
-        // 3. Listeyi Doldurma Fonksiyonu
-        const populateList = (filterText = "") => {
-            subjectListDiv.innerHTML = ""; 
-            
-            const filteredSubjects = subjects.filter(sub => 
-                sub.toUpperCase().includes(filterText.toUpperCase())
-            );
+            // 1. ADIM: allCoursesNested objesini doldur (Eski kodların çalışması için ŞART)
+            // Yapı: { "BLG": { "BLG 101": { "CRN1": [...] } } }
+            allCoursesNested = {}; 
 
-            filteredSubjects.forEach(subject => {
-                const item = document.createElement('div');
-                item.className = 'dropdown-item';
-                item.textContent = subject;
-                // Stil kodları CSS'te var ama garanti olsun diye inline da bırakabiliriz
-                item.style.padding = "10px";
-                item.style.cursor = "pointer";
-                item.style.borderBottom = "1px solid #eee";
+            courses.forEach(course => {
+                // Güvenli kod ayıklama
+                const fullCode = course.code || course.courseCode || course.dersKodu || "";
+                if (!fullCode) return;
 
-                item.addEventListener('click', () => {
-                    subjectInput.value = subject; 
-                    subjectListDiv.style.display = 'none'; 
-                    populateSpecificCourses(subject, courses); 
+                const subjectPrefix = fullCode.split(' ')[0].trim(); // "BLG"
+                const courseTitle = fullCode; // "BLG 101"
+
+                if (!allCoursesNested[subjectPrefix]) {
+                    allCoursesNested[subjectPrefix] = {};
+                }
+                if (!allCoursesNested[subjectPrefix][courseTitle]) {
+                    allCoursesNested[subjectPrefix][courseTitle] = {};
+                }
+                if (!allCoursesNested[subjectPrefix][courseTitle][course.crn]) {
+                    allCoursesNested[subjectPrefix][courseTitle][course.crn] = [];
+                }
+                allCoursesNested[subjectPrefix][courseTitle][course.crn].push(course);
+            });
+
+            // 2. ADIM: Branş Listesini Oluştur
+            const subjects = Object.keys(allCoursesNested).sort();
+            console.log("Yüklenen Branşlar:", subjects);
+
+            // 3. ADIM: Listeyi Doldurma Fonksiyonu
+            const populateList = (filterText = "") => {
+                subjectDropdownList.innerHTML = ""; 
+                
+                const filteredSubjects = subjects.filter(sub => 
+                    sub.toUpperCase().includes(filterText.toUpperCase())
+                );
+
+                filteredSubjects.forEach(subject => {
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item';
+                    item.textContent = subject;
+                    item.style.padding = "10px";
+                    item.style.cursor = "pointer";
+                    item.style.borderBottom = "1px solid #eee";
+
+                    item.addEventListener('click', () => {
+                        subjectSearchInput.value = subject; 
+                        toggleDropdown(false);
+                        // Seçim yapıldığında eski mantığı tetikle
+                        handleSubjectChange(subject);
+                    });
+
+                    subjectDropdownList.appendChild(item);
                 });
 
-                subjectListDiv.appendChild(item);
+                if (filteredSubjects.length === 0) {
+                    subjectDropdownList.innerHTML = '<div style="padding:10px; color:#999;">Sonuç bulunamadı</div>';
+                }
+            };
+
+            // İlk yükleme
+            populateList();
+
+            // Event Listenerlar
+            subjectSearchInput.addEventListener('input', (e) => {
+                populateList(e.target.value);
+                toggleDropdown(true);
+                if (e.target.value === "") {
+                    specificCourseSelect.disabled = true;
+                    specificCourseSelect.innerHTML = '<option value="" disabled selected>Please select a subject first.</option>';
+                }
             });
 
-            if (filteredSubjects.length === 0) {
-                subjectListDiv.innerHTML = '<div style="padding:10px; color:#999;">Sonuç bulunamadı</div>';
-            }
-        };
+            subjectSearchInput.addEventListener('focus', () => {
+                populateList(subjectSearchInput.value);
+                toggleDropdown(true);
+            });
 
-        // 4. İlk yükleme
-        populateList();
-
-        // 5. Olay Dinleyicileri
-        subjectInput.addEventListener('click', (e) => {
-            e.stopPropagation();
-            subjectListDiv.style.display = 'block';
-        });
-
-        subjectInput.addEventListener('input', (e) => {
-            populateList(e.target.value);
-            subjectListDiv.style.display = 'block';
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!subjectInput.contains(e.target) && !subjectListDiv.contains(e.target)) {
-                subjectListDiv.style.display = 'none';
-            }
-        });
-
-    } catch (error) {
-        console.error("Dersler çekilirken HATA:", error);
-        subjectListDiv.innerHTML = `<div style="color:red; padding:10px;">Hata: ${error.message}</div>`;
+        } catch (error) {
+            console.error("Dersler çekilirken HATA:", error);
+            subjectDropdownList.innerHTML = `<div style="color:red; padding:10px;">Hata: ${error.message}</div>`;
+        }
     }
-}
-
-    // Eski populateSubjectPrefixDropdown fonksiyonunu silin ve bunu yapıştırın:
-    const populateSubjectPrefixDropdown = (prefixes) => {
-        subjectDropdownList.innerHTML = ''; // Listeyi temizle
-
-        prefixes.forEach(prefix => {
-            const item = document.createElement('div');
-            item.className = 'dropdown-item';
-            item.textContent = prefix;
-
-            // Elemana tıklandığında ne olacak?
-            item.addEventListener('click', () => {
-                subjectSearchInput.value = prefix; // Seçilen dersi inputa yaz
-                toggleDropdown(false); // Listeyi kapat
-                handleSubjectChange(prefix); // Seçim mantığını tetikle
-            });
-
-            subjectDropdownList.appendChild(item);
-        });
-    };
 
     // Yardımcı Fonksiyon: Seçim yapıldığında diğer kutuları güncelle
     const handleSubjectChange = (selectedPrefix) => {
@@ -183,25 +164,28 @@ async function fetchAndGroupCourses() {
         specificCourseSelect.disabled = true;
         crnSectionListContainer.innerHTML = '<p class="placeholder-text">Please select a course first.</p>';
 
-        if (selectedPrefix) {
+        if (selectedPrefix && allCoursesNested[selectedPrefix]) {
             populateSpecificCourseDropdown(selectedPrefix);
         }
     };
 
-    // Yardımcı Fonksiyon: Listeyi aç/kapa
     const toggleDropdown = (show) => {
-        if (show) {
-            subjectDropdownList.classList.add('show');
-        } else {
-            subjectDropdownList.classList.remove('show');
-        }
+        if (show) subjectDropdownList.classList.add('show'); // CSS'te .show olmayabilir ama display:block JS ile yapılıyor
+        else subjectDropdownList.style.display = 'none'; // Garanti kapatma
+        
+        // Senin CSS'inde .show yoksa manuel kontrol
+        subjectDropdownList.style.display = show ? 'block' : 'none';
     };
 
     const populateSpecificCourseDropdown = (selectedPrefix) => {
         specificCourseSelect.disabled = false;
         specificCourseSelect.innerHTML = '<option value="" disabled selected>Select a course</option>';
+        
         const coursesForPrefix = allCoursesNested[selectedPrefix];
+        if(!coursesForPrefix) return;
+
         const sortedCourseTitles = Object.keys(coursesForPrefix).sort();
+        
         sortedCourseTitles.forEach(title => {
             const option = document.createElement('option');
             option.value = title;
@@ -210,33 +194,30 @@ async function fetchAndGroupCourses() {
         });
     };
 
-    // --- Display CRN sections for a selected course (UPDATED FOR SORTING) ---
+    // --- Display CRN sections ---
     const displayCrnSections = (selectedCourseTitle) => {
         crnSectionListContainer.innerHTML = '';
-        const selectedPrefix = subjectSearchInput.value;   // <-- YENİSİ
-        const crnsForCourse = allCoursesNested[selectedPrefix][selectedCourseTitle];
-        if (!crnsForCourse || Object.keys(crnsForCourse).length === 0) {
-            crnSectionListContainer.innerHTML = '<p class="placeholder-text">No sections found for this course.</p>';
-            return;
+        const selectedPrefix = subjectSearchInput.value;
+        
+        if (!allCoursesNested[selectedPrefix] || !allCoursesNested[selectedPrefix][selectedCourseTitle]) {
+             crnSectionListContainer.innerHTML = '<p class="placeholder-text">Please re-select the subject.</p>';
+             return;
         }
 
+        const crnsForCourse = allCoursesNested[selectedPrefix][selectedCourseTitle];
         const userSchedule = getUserSchedule();
 
         Object.entries(crnsForCourse).forEach(([crn, courseParts]) => {
             const isAlreadyAdded = courseParts.some(part => userSchedule.some(c => c.id === part.id));
 
-            // --- THIS IS THE FIX ---
-            // 1. Define the order of the days for sorting
+            // Sorting logic
             const dayOrder = { 'Pazartesi': 1, 'Salı': 2, 'Çarşamba': 3, 'Perşembe': 4, 'Cuma': 5 };
-
-            // 2. Sort the course parts based on the day order
             const sortedParts = courseParts.sort((a, b) => {
                 const dayA = a.day || '';
                 const dayB = b.day || '';
                 return (dayOrder[dayA] || 99) - (dayOrder[dayB] || 99);
             });
 
-            // 3. Extract the information in the new, sorted order
             const days = sortedParts.map(p => p.day).filter(Boolean).join(', ');
             const times = sortedParts.map(p => `${p.time?.start}-${p.time?.end}`).filter(Boolean).join(', ');
             const locations = sortedParts.map(p => {
@@ -245,10 +226,8 @@ async function fetchAndGroupCourses() {
                 return room ? `${buildingCode} ${room}`.trim() : buildingCode;
             }).filter(Boolean).join(', ');
 
-            // Instructors can remain unsorted as they are just a list
             const allInstructors = courseParts.map(p => p.instructor).join(', ');
             const instructors = [...new Set(allInstructors.split(',').map(name => name.trim()).filter(Boolean))].join(', ');
-            // --- END OF FIX ---
 
             const crnSectionItem = document.createElement('div');
             crnSectionItem.className = 'crn-section-item';
@@ -266,53 +245,39 @@ async function fetchAndGroupCourses() {
         });
     };
 
-    // --- RENDER FUNCTIONS ---
-    // --- UPDATED Render Schedule Function with Collision Handling ---
-    // --- CORRECTED Render Schedule Function with Collision Handling ---
+    // --- RENDER SCHEDULE (Visual Grid) ---
     const renderSchedule = () => {
-        // Clear existing events from the grid
         gridContainer.querySelectorAll('.event').forEach(event => event.remove());
 
         const userSchedule = getUserSchedule();
         if (userSchedule.length === 0) return;
 
-        // --- Step 1: Group courses by day for easier processing ---
         const coursesByDay = userSchedule.reduce((acc, course) => {
             const day = course.day;
-            if (!acc[day]) {
-                acc[day] = [];
-            }
+            if (!acc[day]) acc[day] = [];
             acc[day].push(course);
             return acc;
         }, {});
 
-        // --- Step 2: Define the starting position for each day column ---
         const dayLeftOffset = { 'Pazartesi': 0, 'Salı': 20, 'Çarşamba': 40, 'Perşembe': 60, 'Cuma': 80 };
-        const dayWidth = 20; // Each day column is 20% of the grid width
+        const dayWidth = 20;
 
-        // --- Step 3: Process each day's courses to handle overlaps ---
         Object.keys(coursesByDay).forEach(day => {
             const dayCourses = coursesByDay[day];
             if (dayCourses.length === 0) return;
-
             const dayStartLeft = dayLeftOffset[day];
-
-            // --- Step 4: Find all overlapping groups of courses ---
             const processedCourses = new Set();
             const overlapGroups = [];
 
             dayCourses.forEach(course => {
                 if (processedCourses.has(course.id)) return;
-
                 const currentGroup = [course];
                 processedCourses.add(course.id);
-
                 let foundNewOverlap = true;
                 while (foundNewOverlap) {
                     foundNewOverlap = false;
                     dayCourses.forEach(otherCourse => {
                         if (processedCourses.has(otherCourse.id)) return;
-
                         const overlaps = currentGroup.some(groupCourse => {
                             const start1 = parseFloat(groupCourse.time.start.replace(':', '.'));
                             const end1 = parseFloat(groupCourse.time.end.replace(':', '.'));
@@ -320,7 +285,6 @@ async function fetchAndGroupCourses() {
                             const end2 = parseFloat(otherCourse.time.end.replace(':', '.'));
                             return (start1 < end2 && start2 < end1);
                         });
-
                         if (overlaps) {
                             currentGroup.push(otherCourse);
                             processedCourses.add(otherCourse.id);
@@ -331,13 +295,10 @@ async function fetchAndGroupCourses() {
                 overlapGroups.push(currentGroup);
             });
 
-            // --- Step 5: Render each group of overlapping courses ---
             overlapGroups.forEach(group => {
                 group.sort((a, b) => a.time.start.localeCompare(b.time.start));
-
                 group.forEach((course, index) => {
                     if (!crnColors[course.crn]) crnColors[course.crn] = getNextColor();
-
                     const [startHour, startMin] = course.time.start.split(':').map(Number);
                     const [endHour, endMin] = course.time.end.split(':').map(Number);
                     const start = startHour + startMin / 60;
@@ -345,15 +306,12 @@ async function fetchAndGroupCourses() {
                     const duration = end - start;
                     const topPosition = (start - 8) * 60;
                     const eventHeight = duration * 60;
-
-                    // --- THE FIX IS HERE ---
-                    // Calculate width and left position relative to the day column
                     const groupSize = group.length;
-                    const eventWidth = dayWidth / groupSize; // e.g., 20 / 2 = 10%
-                    const eventLeft = dayStartLeft + (index * eventWidth); // e.g., 20 + (1 * 10) = 30%
+                    const eventWidth = dayWidth / groupSize;
+                    const eventLeft = dayStartLeft + (index * eventWidth);
 
                     const event = document.createElement('div');
-                    event.className = `event`; // No longer need day-specific classes
+                    event.className = `event`;
                     event.style.backgroundColor = crnColors[course.crn];
                     event.style.top = `${topPosition}px`;
                     event.style.height = `${eventHeight}px`;
@@ -362,11 +320,11 @@ async function fetchAndGroupCourses() {
                     event.style.boxSizing = 'border-box';
 
                     event.innerHTML = `
-    <div class="event-title">${course.code}</div>
-    <div class="event-crn">${course.crn}</div>
-    <div class="event-time">${course.time.start} - ${course.time.end}</div>
-    <div class="event-location">${course.building} ${course.classroom}</div>
-                `;
+                        <div class="event-title">${course.code}</div>
+                        <div class="event-crn">${course.crn}</div>
+                        <div class="event-time">${course.time.start} - ${course.time.end}</div>
+                        <div class="event-location">${course.building} ${course.classroom}</div>
+                    `;
                     gridContainer.appendChild(event);
                 });
             });
@@ -416,17 +374,19 @@ async function fetchAndGroupCourses() {
     };
 
     const dropCourseByCrn = (crn) => {
-
         let userSchedule = getUserSchedule();
         userSchedule = userSchedule.filter(c => c.crn !== crn);
+        releaseColor(crn); // Rengi serbest bırak
         saveUserSchedule(userSchedule);
         renderSchedule();
         renderAddedCoursesList();
-        displayCrnSections(specificCourseSelect.value);
-
+        
+        // Eğer şu an o ders seçiliyse listeyi güncelle
+        if(specificCourseSelect.value) {
+            displayCrnSections(specificCourseSelect.value);
+        }
     };
 
-    // --- VISUAL GRID INITIALIZATION ---
     function initializeVisualGrid() {
         const startHour = 8; const endHour = 18; const hourHeight = 60;
         const totalHeight = (endHour - startHour) * hourHeight;
@@ -445,54 +405,13 @@ async function fetchAndGroupCourses() {
     }
 
     // --- EVENT LISTENERS ---
-    /* --- YENİ SEARCH INPUT MANTIĞI --- */
-
-    // 1. Inputa tıklandığında veya odaklanıldığında listeyi aç
-    subjectSearchInput.addEventListener('focus', () => {
-        // Filtreleme yapmadan tüm listeyi göster veya mevcut aramayı koru
-        filterDropdown(subjectSearchInput.value);
-        toggleDropdown(true);
-    });
-
-    // 2. Yazı yazıldığında listeyi filtrele
-    subjectSearchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toUpperCase(); // Büyük harfe çevir
-        filterDropdown(searchTerm);
-        toggleDropdown(true);
-
-        // Eğer kullanıcı elle geçerli bir şey yazıp sildiyse alt kutuları sıfırla
-        if (searchTerm === "") {
-            specificCourseSelect.disabled = true;
-            specificCourseSelect.innerHTML = '<option value="" disabled selected>Please select a subject first.</option>';
-        }
-    });
-
-    // 3. Dışarı tıklandığında listeyi kapat
+    
+    // Dışarı tıklandığında listeyi kapat
     document.addEventListener('click', (e) => {
-        // Eğer tıklanan yer input veya liste değilse kapat
         if (!subjectSearchInput.contains(e.target) && !subjectDropdownList.contains(e.target)) {
             toggleDropdown(false);
         }
     });
-
-    // Yardımcı Fonksiyon: Listeyi kelimeye göre süz
-    function filterDropdown(searchTerm) {
-        const items = subjectDropdownList.querySelectorAll('.dropdown-item');
-        let hasMatch = false;
-
-        items.forEach(item => {
-            const text = item.textContent.toUpperCase();
-            if (text.includes(searchTerm)) {
-                item.style.display = 'block';
-                hasMatch = true;
-            } else {
-                item.style.display = 'none';
-            }
-        });
-
-        // Hiç eşleşme yoksa listeyi gizleyebiliriz veya "Sonuç yok" diyebiliriz
-        // Şimdilik sadece boş görünmesini engellemek yeterli
-    }
 
     specificCourseSelect.addEventListener('change', (e) => {
         const selectedCourseTitle = e.target.value;
@@ -511,41 +430,37 @@ async function fetchAndGroupCourses() {
         }
     });
 
-    // --- NEW: Event Listeners for Panel Toggle ---
     closePanelBtn.addEventListener('click', () => togglePanel(false));
     openPanelBtn.addEventListener('click', () => togglePanel(true));
+
+    const hamburger = document.querySelector(".hamburger");
+    const navMenu = document.querySelector(".nav-menu");
+    if(hamburger && navMenu) {
+        hamburger.addEventListener("click", () => {
+            hamburger.classList.toggle("active");
+            navMenu.classList.toggle("active");
+        });
+        document.querySelectorAll(".nav-link").forEach(n => n.addEventListener("click", () => {
+            hamburger.classList.remove("active");
+            navMenu.classList.remove("active");
+        }));
+    }
 
     // --- INITIAL LOAD ---
     initializeVisualGrid();
     renderSchedule();
     renderAddedCoursesList();
+    
+    // Dersleri çek
     fetchAndGroupCourses();
 
-    // --- NEW: Restore panel state on load ---
     const savedPanelState = localStorage.getItem(PANEL_STATE_KEY);
     if (savedPanelState !== null) {
         const isPanelOpen = JSON.parse(savedPanelState);
-        // Set initial state without transition
         schedulerContainer.style.transition = 'none';
         togglePanel(isPanelOpen);
-        // Re-enable transition after a short delay
         setTimeout(() => {
             schedulerContainer.style.transition = '';
         }, 50);
     }
-
-    // --- HAMBURGER MENU LOGIC ---
-    const hamburger = document.querySelector(".hamburger");
-    const navMenu = document.querySelector(".nav-menu");
-    hamburger.addEventListener("click", () => {
-        hamburger.classList.toggle("active");
-        navMenu.classList.toggle("active");
-    });
-    document.querySelectorAll(".nav-link").forEach(n => n.addEventListener("click", () => {
-        hamburger.classList.remove("active");
-        navMenu.classList.remove("active");
-    }));
-
 });
-
-
