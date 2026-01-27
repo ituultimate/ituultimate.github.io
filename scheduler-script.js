@@ -110,8 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ============================================================= 
-// FETCH COURSES (Veritabanından Dersleri Çek)
+// ============================================================= 
+// FETCH COURSES (TEMPORARY DEBUGGING VERSION)
 // ============================================================= 
 const fetchAndGroupCourses = async () => {
     if (!subjectSearchInput || !subjectDropdownList) return;
@@ -125,35 +125,37 @@ const fetchAndGroupCourses = async () => {
         }
 
         const courses = coursesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log("--- STEP 1: All courses fetched from Firebase ---", courses);
         
         allCoursesNested = courses.reduce((acc, course) => {
-            // --- DEBUGGING & ROBUSTNESS ---
-            // We'll check for the required fields and log a warning if they are missing.
+            console.log("--- Processing course ---", course);
+
+            // --- Let's be very strict and check everything ---
             if (!course.crn) {
-                console.warn(`SKIPPING course with ID "${course.id}": It is missing the 'crn' field.`, course);
-                return acc; // Skip this course
+                console.error(`FILTERING OUT: Course with ID "${course.id}" is missing the 'crn' field.`);
+                return acc;
             }
 
-            // Let's be more flexible with the 'code' field
-            const codeString = String(course.code || '').trim(); // Ensure it's a string and trim whitespace
+            const codeString = String(course.code || '').trim();
             if (!codeString) {
-                console.warn(`SKIPPING course with CRN "${course.crn}": It has an empty or invalid 'code' field.`, course);
-                return acc; // Skip this course
+                console.error(`FILTERING OUT: Course with CRN "${course.crn}" has an empty or invalid 'code' field.`);
+                return acc;
             }
 
-            const prefix = codeString.split(' ')[0]; // Get the first part of the code (e.g., "BLM" from "BLM 3051")
-
+            const prefix = codeString.split(' ')[0];
             if (!prefix) {
-                console.warn(`SKIPPING course with CRN "${course.crn}": Could not determine a prefix from code "${codeString}".`, course);
-                return acc; // Skip if prefix is empty
+                console.error(`FILTERING OUT: Course with CRN "${course.crn}" and code "${codeString}" has no prefix.`);
+                return acc;
             }
-            // --- END OF DEBUGGING ---
+            // --- End of checks ---
 
             const fullCode = codeString;
             const courseName = course.name || 'N/A';
             const courseTitle = `${fullCode} - ${courseName}`;
             const crn = course.crn;
             
+            console.log(`--- Adding course: Prefix="${prefix}", Title="${courseTitle}", CRN="${crn}" ---`);
+
             if (!acc[prefix]) acc[prefix] = {};
             if (!acc[prefix][courseTitle]) acc[prefix][courseTitle] = {};
             if (!acc[prefix][courseTitle][crn]) acc[prefix][courseTitle][crn] = [];
@@ -162,8 +164,12 @@ const fetchAndGroupCourses = async () => {
             return acc;
         }, {});
 
+        console.log("--- STEP 2: Final nested data structure ---", allCoursesNested);
+
         // Başlangıç listesi
         const sortedPrefixes = Object.keys(allCoursesNested).sort();
+        console.log("--- STEP 3: Final list of prefixes for dropdown ---", sortedPrefixes);
+
         populateSubjectPrefixDropdown(sortedPrefixes);
 
     } catch (error) {
@@ -499,5 +505,6 @@ const fetchAndGroupCourses = async () => {
         loadSchedule(); 
     });
 });
+
 
 
