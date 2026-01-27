@@ -56,11 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(isOpen));
     };
 
-    // ============================================================= 
-    // DATA MANAGEMENT (LOCAL & CLOUD HYBRID)
+   // ============================================================= 
+    // DATA MANAGEMENT (SYNC FIX)
     // ============================================================= 
     
-    // 1. Programı Yükle (Giriş yaptıysa Cloud'dan, yapmadıysa Local'den)
+    // 1. Programı Yükle
     const loadSchedule = async () => {
         if (currentUser) {
             // Kullanıcı giriş yapmış: Firebase'den çek
@@ -68,12 +68,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const doc = await db.collection('users').doc(currentUser.uid).get();
                 if (doc.exists && doc.data().schedule) {
                     currentSchedule = doc.data().schedule;
+                    
+                    // --- KRİTİK EKLEME: Firebase'den geleni LocalStorage'a da yaz ---
+                    // Böylece YTS sayfası bu veriyi okuyabilir.
+                    localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(currentSchedule));
                 } else {
                     currentSchedule = [];
                 }
             } catch (error) {
                 console.error("Program çekilirken hata:", error);
-                currentSchedule = [];
+                // Hata olursa localden devam etmeye çalış
+                currentSchedule = JSON.parse(localStorage.getItem(USER_SCHEDULE_KEY)) || [];
             }
         } else {
             // Misafir kullanıcı: LocalStorage'dan çek
@@ -85,24 +90,23 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAddedCoursesList();
     };
 
-    // 2. Programı Kaydet (Giriş yaptıysa Cloud'a, yapmadıysa Local'e)
+    // 2. Programı Kaydet
     const saveSchedule = async (newSchedule) => {
-        currentSchedule = newSchedule; // Önce hafızayı güncelle
+        currentSchedule = newSchedule; 
+        
+        // --- HER ZAMAN LocalStorage'ı güncelle (YTS için şart) ---
+        localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(newSchedule));
 
         if (currentUser) {
-            // Kullanıcı giriş yapmış: Firebase'e kaydet
+            // Kullanıcı giriş yapmışsa Firebase'e de yedekle
             try {
                 await db.collection('users').doc(currentUser.uid).set({
                     schedule: newSchedule,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp() // Ne zaman güncellediğini de tutalım
-                }, { merge: true }); // Merge true: Varsa üzerine yazar, yoksa oluşturur
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
             } catch (error) {
                 console.error("Program kaydedilirken hata:", error);
-                alert("Program kaydedilemedi! İnternet bağlantını kontrol et.");
             }
-        } else {
-            // Misafir kullanıcı: LocalStorage'a kaydet
-            localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(newSchedule));
         }
     };
 
@@ -475,3 +479,4 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSchedule(); 
     });
 });
+
