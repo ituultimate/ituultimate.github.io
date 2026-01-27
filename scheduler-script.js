@@ -198,9 +198,9 @@ const fetchAndGroupCourses = async () => {
     };
 
     const handleSubjectChange = (selectedPrefix) => {
-        specificCourseSelect.innerHTML = '<option value="" disabled selected>Select a course</option>';
+        specificCourseSelect.innerHTML = '<option value="" disabled selected>Ders seçin</option>';
         specificCourseSelect.disabled = true;
-        crnSectionListContainer.innerHTML = '<p class="placeholder-text">Please select a course first.</p>';
+        crnSectionListContainer.innerHTML = '<p class="placeholder-text">Önce ders seçmelisiniz</p>';
         if (selectedPrefix) populateSpecificCourseDropdown(selectedPrefix);
     };
 
@@ -505,5 +505,6 @@ const fetchAndGroupCourses = async () => {
         loadSchedule(); 
     });
 });
+
 
 
