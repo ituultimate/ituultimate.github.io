@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeLabelsContainer = document.getElementById('timeLabels');
     const gridContainer = document.getElementById('grid');
     const USER_SCHEDULE_KEY = 'ituUltimateUserSchedule';
+    const PANEL_STATE_KEY = 'itu_scheduler_panel_state';
 
     const schedulerContainer = document.getElementById('scheduler-container');
     const closePanelBtn = document.getElementById('close-panel-btn');
@@ -57,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveUserSchedule = (schedule) => localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(schedule));
 
     const fetchAndGroupCourses = async () => {
+        const subjectPrefixSelect = document.getElementById('subject-prefix');
         try {
             const coursesCollection = await db.collection('2526-bahar').get();
             const courses = coursesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -469,4 +471,5 @@ document.addEventListener('DOMContentLoaded', () => {
         hamburger.classList.remove("active");
         navMenu.classList.remove("active");
     }));
+
 });
