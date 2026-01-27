@@ -216,34 +216,28 @@ onAuthStateChanged(auth, (user) => {
 // ==========================================
 
 function disableDevToolsShortcuts() {
-    // 1. Sağ tıklamayı (context menu) engelle
-    document.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-    });
 
-    // 2. Klavye kısayollarını engelle
+    //document.addEventListener('contextmenu', (e) => {
+    //    e.preventDefault();
+    //});
+
     document.addEventListener('keydown', (e) => {
-        // F12
+
         if (e.key === 'F12') {
             e.preventDefault();
             return false;
         }
 
-        // Ctrl + Shift + I (Inspect), Ctrl + Shift + J (Console)
-        // Mac için Ctrl yerine Cmd (metaKey) kontrolü de eklenebilir, 
-        // ancak talep üzerine Ctrl+Shift bazlı kontrol yapılmıştır.
-        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
+        if (e.ctrlKey && e.shiftKey && (e.code === 'KeyI' || e.code === 'KeyJ' || e.code === 'KeyC')) {
             e.preventDefault();
             return false;
         }
 
-        // Ctrl + U (View Source)
-        if (e.ctrlKey && e.key === 'U') {
+
+        if (e.ctrlKey && e.code === 'KeyU') {
             e.preventDefault();
             return false;
         }
     });
 }
-
-// Engelleme fonksiyonunu çalıştır
 disableDevToolsShortcuts();
