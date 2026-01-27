@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 YTS Script Başlatıldı");
+
     // ============================================================= 
-    // 1. FIREBASE CONFIG (Scheduler ile AYNI olmalı)
+    // 1. FIREBASE CONFIG
     // ============================================================= 
     const firebaseConfig = {
         apiKey: "AIzaSyBxoBmV6dJqcl6YaVJ8eYiEpDkQ1fB5Pfw",
@@ -11,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
         appId: "1:1000938340000:web:bd00e04ff5e74b1d3e93c5"
     };
 
-    // Firebase'i başlat (Zaten başlatılmadıysa)
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
@@ -19,222 +20,171 @@ document.addEventListener('DOMContentLoaded', () => {
     const auth = firebase.auth();
 
     // ============================================================= 
-    // 2. SABİTLER VE DEĞİŞKENLER
+    // 2. SABİTLER
     // ============================================================= 
     const CONTAINER_ID = 'attendance-tracker-container'; 
-    const ATTENDANCE_DATA_KEY = 'ituUltimateAttendance'; // Yoklama durumları (P/A) hala localde kalsın
-    let currentUser = null;
+    const ATTENDANCE_DATA_KEY = 'ituUltimateAttendance'; 
 
     // ============================================================= 
-    // 3. VERİ YÖNETİMİ
+    // 3. CORE FONKSİYONLAR
     // ============================================================= 
-
-    // --- A. Dersleri Getir (Firebase'den) ---
-    const fetchCoursesFromCloud = async (user) => {
-        const attendanceContainer = document.getElementById(CONTAINER_ID);
-        if (!attendanceContainer) return;
-
-        // Yükleniyor mesajı verelim
-        attendanceContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">Dersler buluttan yükleniyor...</div>';
-
-        try {
-            const doc = await db.collection('users').doc(user.uid).get();
-            
-            if (doc.exists && doc.data().schedule && doc.data().schedule.length > 0) {
-                // Veri bulundu, çizelim
-                renderAttendanceTrackers(doc.data().schedule);
-            } else {
-                // Veri yok
-                renderEmptyState(attendanceContainer);
-            }
-        } catch (error) {
-            console.error("Dersler çekilirken hata:", error);
-            attendanceContainer.innerHTML = '<p style="color:red; text-align:center;">Dersler yüklenirken hata oluştu.</p>';
-        }
-    };
-
-    // --- B. Yoklama Durumunu Getir (Local Storage) ---
-    // Not: Tikleri de buluta taşımak istersen burayı da değiştirmemiz gerekir.
-    // Şimdilik dersler buluttan, tikler cihazdan gelsin.
+    
+    // Yoklama Tiklerini (Local) Getir
     const getAttendanceData = () => {
-        const attendanceData = localStorage.getItem(ATTENDANCE_DATA_KEY);
-        if (!attendanceData) return {};
-        return JSON.parse(attendanceData);
+        const data = localStorage.getItem(ATTENDANCE_DATA_KEY);
+        return data ? JSON.parse(data) : {};
     };
 
+    // Yoklama Tiklerini Kaydet
     const saveAttendanceData = (data) => {
         localStorage.setItem(ATTENDANCE_DATA_KEY, JSON.stringify(data));
     };
 
-    // ============================================================= 
-    // 4. RENDER (ÇİZİM) FONKSİYONLARI
-    // ============================================================= 
-    
-    const renderEmptyState = (container) => {
-        container.innerHTML = `
-            <p class="no-courses-message">
-                Kayıtlı ders bulunamadı. 
-                <a href="/programlayici.html">Programlayıcıya git</a> ve derslerini buluta kaydet!
-            </p>`;
-    };
-
+    // Dersleri Çiz
     const renderAttendanceTrackers = (courses) => {
-        const attendanceContainer = document.getElementById(CONTAINER_ID);
-        if (!attendanceContainer) return;
+        console.log("🎨 Dersler çiziliyor...", courses.length, "adet ders var.");
+        const container = document.getElementById(CONTAINER_ID);
+        if (!container) {
+            console.error("❌ HATA: Container bulunamadı! Sayfa YTS değil mi?");
+            return;
+        }
 
-        attendanceContainer.innerHTML = ''; // Temizle
+        container.innerHTML = ''; // Temizle
 
-        // Dersleri CRN'e göre grupla
-        const coursesByCrn = courses.reduce((acc, course) => {
-            if (!acc[course.crn]) acc[course.crn] = [];
-            acc[course.crn].push(course);
+        if (courses.length === 0) {
+            container.innerHTML = `<p class="no-courses-message">Kayıtlı ders yok. Programlayıcı'dan ekle!</p>`;
+            return;
+        }
+
+        // Gruplama
+        const coursesByCrn = courses.reduce((acc, c) => {
+            if (!acc[c.crn]) acc[c.crn] = [];
+            acc[c.crn].push(c);
             return acc;
         }, {});
 
-        // Kartları Oluştur
-        Object.entries(coursesByCrn).forEach(([crn, courseParts]) => {
-            const firstPart = courseParts[0];
+        // HTML Oluşturma
+        Object.entries(coursesByCrn).forEach(([crn, parts]) => {
+            const firstPart = parts[0];
             const attendanceData = getAttendanceData();
-            const courseAttendance = attendanceData[crn] || new Array(14).fill(null);
+            const statusArray = attendanceData[crn] || Array(14).fill(null);
 
-            // İstatistik Hesaplama
-            const summary = {
-                totalHeld: courseAttendance.filter(s => s === 'P' || s === 'A').length,
-                totalPresent: courseAttendance.filter(s => s === 'P').length,
-                percentage: 0
-            };
-            if (summary.totalHeld > 0) {
-                summary.percentage = Math.round((summary.totalPresent / summary.totalHeld) * 100);
-            }
-
-            const isHighAttendance = summary.percentage >= 70;
+            // İstatistikler
+            const totalHeld = statusArray.filter(s => s === 'P' || s === 'A').length;
+            const totalPresent = statusArray.filter(s => s === 'P').length;
+            const percentage = totalHeld > 0 ? Math.round((totalPresent / totalHeld) * 100) : 0;
+            const isHigh = percentage >= 70;
 
             const card = document.createElement('div');
-            card.className = `attendance-card ${isHighAttendance ? 'high-attendance' : ''}`;
+            card.className = `attendance-card ${isHigh ? 'high-attendance' : ''}`;
+            
+            // Tablo HTML'i
+            let tableHtml = `<table class="attendance-grid"><thead><tr><th>Hafta</th>`;
+            for(let i=1; i<=14; i++) tableHtml += `<th>${i}</th>`;
+            tableHtml += `</tr></thead><tbody><tr><td>Durum</td>`;
+            
+            statusArray.forEach((status, i) => {
+                const className = status === 'P' ? 'present' : (status === 'A' ? 'absent' : '');
+                tableHtml += `<td class="attendance-cell ${className}" data-crn="${crn}" data-week="${i}">${status || ''}</td>`;
+            });
+            tableHtml += `</tr></tbody></table>`;
 
-            // HTML Yapısı
             card.innerHTML = `
                 <div class="attendance-card-header">
                     <div class="attendance-card-title">${firstPart.code}</div>
-                    <div class="attendance-card-subtitle">${firstPart.crn} | ${firstPart.name || 'Ders'}</div>
+                    <div class="attendance-card-subtitle">${firstPart.crn}</div>
                 </div>
                 <div class="attendance-card-body">
-                    <table class="attendance-grid">
-                        <thead>
-                            <tr>
-                                <th>Hafta</th>
-                                ${[...Array(14)].map((_, i) => `<th>${i + 1}</th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Durum</td>
-                                ${courseAttendance.map((status, i) => `
-                                    <td class="attendance-cell ${status ? status === 'P' ? 'present' : 'absent' : ''}" data-crn="${crn}" data-week="${i}">
-                                        ${status || ''}
-                                    </td>
-                                `).join('')}
-                            </tr>
-                        </tbody>
-                    </table>
+                    ${tableHtml}
                     <div class="attendance-summary">
-                        <div class="summary-item">
-                            <div class="summary-value">${summary.totalHeld}</div>
-                            <div class="summary-label">Toplam</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="summary-value">${summary.totalPresent}</div>
-                            <div class="summary-label">Katılınan</div>
-                        </div>
-                        <div class="summary-item percentage">
-                            <div class="summary-value ${isHighAttendance ? 'high-percentage' : ''}">${summary.percentage}%</div>
-                            <div class="summary-label">Yüzde</div>
-                        </div>
+                         <div>Toplam: ${totalHeld}</div>
+                         <div>Katılım: ${totalPresent}</div>
+                         <div>%: ${percentage}</div>
                     </div>
                 </div>
             `;
-            attendanceContainer.appendChild(card);
+            container.appendChild(card);
         });
     };
 
     // ============================================================= 
-    // 5. EVENT LISTENERS
+    // 4. VERİ ÇEKME (KRİTİK KISIM)
     // ============================================================= 
+    const fetchCourses = async (user) => {
+        console.log("📡 Veritabanına bağlanılıyor...", user.uid);
+        const container = document.getElementById(CONTAINER_ID);
+        if(container) container.innerHTML = "<p>Yükleniyor...</p>";
 
-    // Tıklama Olayı (Event Delegation)
-    const handleCellClick = (e) => {
-        if (e.target.classList.contains('attendance-cell')) {
-            const crn = e.target.dataset.crn;
-            const weekIndex = parseInt(e.target.dataset.week, 10);
-
-            let attendanceData = getAttendanceData();
-            if (!attendanceData[crn]) {
-                attendanceData[crn] = new Array(14).fill(null);
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            
+            if (doc.exists) {
+                console.log("✅ Kullanıcı dokümanı bulundu.");
+                const data = doc.data();
+                if (data.schedule && data.schedule.length > 0) {
+                    console.log("📚 Ders listesi bulundu:", data.schedule);
+                    renderAttendanceTrackers(data.schedule);
+                } else {
+                    console.warn("⚠️ Doküman var ama 'schedule' boş!");
+                    if(container) container.innerHTML = "<p>Listen boş. Programlayıcıdan ders ekle.</p>";
+                }
+            } else {
+                console.warn("⚠️ Kullanıcı dokümanı HİÇ YOK (Programlayıcıda hiç kaydet tuşuna basılmamış).");
+                if(container) container.innerHTML = "<p>Veri bulunamadı. Programlayıcı sayfasına gidip bir ders ekleyip çıkararak kaydı tetikle.</p>";
             }
-
-            const currentStatus = attendanceData[crn][weekIndex];
-            const newStatus = currentStatus === 'P' ? 'A' : (currentStatus === 'A' ? null : 'P');
-            attendanceData[crn][weekIndex] = newStatus;
-
-            saveAttendanceData(attendanceData);
-            
-            // UI'ı güncellemek için, o anki dersleri tekrar çizmemiz gerekebilir.
-            // Ancak sürekli fetch atmamak için DOM manipülasyonu veya basit reload yapılabilir.
-            // Şimdilik sadece hücreyi güncelleyelim veya sayfayı yeniletelim.
-            // En temizi: Basitçe hücre sınıfını ve içeriğini güncellemek, ama istatistikler için re-render iyidir.
-            // Veri zaten elimizde olduğu için tekrar fetch etmeye gerek yok, ama o veriyi saklamadık.
-            // Basit çözüm: Sayfayı yenilemeye gerek yok, hücreyi güncelle.
-            // İstatistik güncellemesi karmaşık olacağı için şimdilik:
-            e.target.textContent = newStatus || '';
-            e.target.className = `attendance-cell ${newStatus ? newStatus === 'P' ? 'present' : 'absent' : ''}`;
-            
-            // Eğer istatistiklerin anlık değişmesini istersen tam re-render lazım.
-            // Bunun için 'courses' verisini global bir değişkende tutabiliriz.
-            location.reload(); // En tembel ve kesin çözüm :)
+        } catch (error) {
+            console.error("🔥 Veri çekme hatası:", error);
+            if(container) container.innerHTML = `<p style="color:red">Hata: ${error.message}</p>`;
         }
     };
 
-    // Container'a tıklama dinleyicisi ekle
-    const mainContainer = document.getElementById(CONTAINER_ID);
-    if (mainContainer) {
-        mainContainer.addEventListener('click', handleCellClick);
-    }
-
     // ============================================================= 
-    // 6. BAŞLATMA & AUTH KONTROLÜ
+    // 5. EVENT LISTENER & AUTH
     // ============================================================= 
     
-    // Kullanıcı giriş durumunu dinle
+    // Tıklama Olayı
+    const container = document.getElementById(CONTAINER_ID);
+    if (container) {
+        container.addEventListener('click', (e) => {
+            if (e.target.classList.contains('attendance-cell')) {
+                const crn = e.target.dataset.crn;
+                const week = e.target.dataset.week;
+                
+                let data = getAttendanceData();
+                if(!data[crn]) data[crn] = Array(14).fill(null);
+                
+                const current = data[crn][week];
+                data[crn][week] = current === 'P' ? 'A' : (current === 'A' ? null : 'P');
+                
+                saveAttendanceData(data);
+                
+                // Basit UI Güncellemesi (Tekrar fetch yapmadan)
+                e.target.className = `attendance-cell ${data[crn][week] === 'P' ? 'present' : (data[crn][week] === 'A' ? 'absent' : '')}`;
+                e.target.innerText = data[crn][week] || '';
+            }
+        });
+    }
+
+    // Auth Dinleyicisi
     auth.onAuthStateChanged((user) => {
-        const attendanceContainer = document.getElementById(CONTAINER_ID);
-        if (!attendanceContainer) return; // Programlayıcı sayfasındaysak çalışma
+        if (!document.getElementById(CONTAINER_ID)) return; // YTS sayfası değilse çık
 
         if (user) {
-            console.log("YTS: Kullanıcı giriş yaptı, dersler çekiliyor...", user.email);
-            currentUser = user;
-            fetchCoursesFromCloud(user);
+            console.log("👤 Giriş yapıldı:", user.email);
+            fetchCourses(user);
         } else {
-            console.log("YTS: Kullanıcı giriş yapmamış.");
-            attendanceContainer.innerHTML = `
-                <p class="no-courses-message">
-                    Derslerini görmek için lütfen giriş yap.
-                    <br><br>
-                    (Misafir girişi için LocalStorage kullanılabilir ancak şu an Bulut modu aktif.)
-                </p>`;
+            console.log("👤 Çıkış yapıldı / Misafir");
+            if(container) container.innerHTML = "<p>Lütfen giriş yapın.</p>";
         }
     });
 
-    // Hamburger Menü
+    // Hamburger Menü (Varsa)
     const hamburger = document.querySelector(".hamburger");
     const navMenu = document.querySelector(".nav-menu");
-    if (hamburger && navMenu) {
+    if(hamburger && navMenu) {
         hamburger.addEventListener("click", () => {
             hamburger.classList.toggle("active");
             navMenu.classList.toggle("active");
         });
-        document.querySelectorAll(".nav-link").forEach(n => n.addEventListener("click", () => {
-            hamburger.classList.remove("active");
-            navMenu.classList.remove("active");
-        }));
     }
 });
