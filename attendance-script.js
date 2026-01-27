@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================= 
     // 2. SABİTLER
     // ============================================================= 
-    const CONTAINER_ID = 'attendance-tracker-container'; 
+    const CONTAINER_ID = 'attendance-container'; 
     const ATTENDANCE_DATA_KEY = 'ituUltimateAttendance'; 
 
     // ============================================================= 
@@ -188,3 +188,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
