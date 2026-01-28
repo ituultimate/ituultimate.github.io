@@ -18,5 +18,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 navMenu.classList.remove("active");
             });
         });
+
+        // Handle user dropdown on mobile
+        const userDropdown = document.querySelector(".user-dropdown");
+        const userEmail = document.querySelector(".user-email");
+
+        if (userDropdown && userEmail) {
+            userEmail.addEventListener("click", (e) => {
+                // Only toggle dropdown on mobile (when hamburger is visible)
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    userDropdown.classList.toggle("active");
+                }
+            });
+        }
     }
 });

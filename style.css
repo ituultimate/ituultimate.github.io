@@ -19,14 +19,8 @@
 
 /* --- Hero Section --- */
 .hero {
-    /* Gradient overlay + optional background image */
-    background:
-        linear-gradient(135deg, rgba(6, 42, 84, 0.92) 0%, rgba(10, 61, 111, 0.88) 100%),
-        url('assets/images/hero-bg.webp');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    /* Fallback for missing image */
+    /* Gradient background */
+    background: linear-gradient(135deg, rgba(6, 42, 84, 0.95) 0%, rgba(10, 61, 111, 0.9) 100%);
     background-color: var(--primary-color);
     color: var(--text-color-light);
     padding: 100px 0;
