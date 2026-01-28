@@ -232,34 +232,3 @@ document.addEventListener('DOMContentLoaded', setupAuthForms);
 onAuthStateChanged(auth, (user) => {
     updateUI(user);
 });
-
-// ==========================================
-// 5. GÜVENLİK (KLAVYE & SAĞ TIK ENGELLEME)
-// ==========================================
-
-function disableDevToolsShortcuts() {
-
-    //document.addEventListener('contextmenu', (e) => {
-    //    e.preventDefault();
-    //});
-
-    document.addEventListener('keydown', (e) => {
-
-        if (e.key === 'F12') {
-            e.preventDefault();
-            return false;
-        }
-
-        if (e.ctrlKey && e.shiftKey && (e.code === 'KeyI' || e.code === 'KeyJ' || e.code === 'KeyC')) {
-            e.preventDefault();
-            return false;
-        }
-
-
-        if (e.ctrlKey && e.code === 'KeyU') {
-            e.preventDefault();
-            return false;
-        }
-    });
-}
-disableDevToolsShortcuts();

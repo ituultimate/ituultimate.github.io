@@ -543,3 +543,100 @@
         min-width: auto;
     }
 }
+
+/* Mobile Responsive for Schedule Grid */
+@media (max-width: 768px) {
+    .scheduler-section {
+        padding: 15px 0 100px 0;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+    }
+
+    /* Make schedule scrollable horizontally on mobile */
+    .schedule-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .schedule-wrapper {
+        min-width: 600px; /* Force minimum width for schedule table */
+    }
+
+    .schedule-container {
+        --hour-height: 50px; /* Reduce hour height on mobile */
+    }
+
+    .day-header {
+        font-size: 0.8rem;
+        padding: 10px 3px;
+    }
+
+    .event {
+        font-size: 0.75em;
+        padding: 4px;
+        margin: 0 2px;
+    }
+
+    .event-title {
+        font-size: 0.85em;
+    }
+
+    .event-time,
+    .event-crn,
+    .event-location {
+        font-size: 0.75em;
+    }
+
+    /* Panel adjustments for mobile */
+    .available-courses-panel {
+        padding: 1rem;
+        border-radius: 8px;
+    }
+
+    .panel-toggle-btn {
+        top: 5px;
+        right: 5px;
+        font-size: 0.8rem;
+        padding: 4px 6px;
+    }
+
+    /* Open panel button adjustments */
+    .open-panel-btn {
+        top: auto;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 8px;
+        padding: 12px 20px;
+        writing-mode: horizontal-tb;
+        text-orientation: mixed;
+        border: none;
+    }
+
+    .open-panel-btn:hover {
+        transform: translateX(-50%) translateY(-2px);
+        padding-right: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .schedule-wrapper {
+        min-width: 550px;
+    }
+
+    .event {
+        font-size: 0.7em;
+        padding: 3px;
+    }
+
+    .event-title {
+        font-size: 0.8em;
+    }
+
+    .day-header {
+        font-size: 0.7rem;
+        padding: 8px 2px;
+    }
+}
