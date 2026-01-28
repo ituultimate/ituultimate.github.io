@@ -77,6 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        // Helper function to check if in mobile mode
+        function isMobileMode() {
+            const isPortraitMobile = window.innerWidth <= 768;
+            const isLandscapeSmallHeight = window.innerHeight <= 500 && window.matchMedia('(orientation: landscape)').matches;
+            return isPortraitMobile || isLandscapeSmallHeight;
+        }
+
         // Handle user dropdown on mobile
         const userDropdown = document.querySelector(".user-dropdown");
         const userEmail = document.querySelector(".user-email");
@@ -84,23 +91,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (userDropdown && userEmail) {
             userEmail.addEventListener("click", (e) => {
                 // Only toggle dropdown on mobile (when hamburger is visible)
-<<<<<<< HEAD
-                if (window.innerWidth <= 768 || (window.innerWidth <= 1024 && window.innerHeight <= 500)) {
-=======
-                if (window.innerWidth <= 768) {
->>>>>>> 5e870017e9182c2772140f004dab62acd73c4b24
+                if (isMobileMode()) {
                     e.preventDefault();
                     e.stopPropagation();
                     userDropdown.classList.toggle("active");
                 }
             });
         }
-<<<<<<< HEAD
 
         // Handle orientation changes
         window.addEventListener("orientationchange", () => {
             setTimeout(() => {
-                if (window.innerWidth > 768 && window.innerHeight > 500) {
+                if (!isMobileMode()) {
                     // Close menu if switching to desktop view
                     toggleMenu(false);
                 }
@@ -112,15 +114,18 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener("resize", () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
-                if (window.innerWidth > 768 && window.innerHeight > 500) {
-                    // Close menu if switching to desktop view
+                if (!isMobileMode()) {
+                    // Close menu and reset display if switching to desktop view
                     if (navMenu.classList.contains("active")) {
                         toggleMenu(false);
                     }
+                    // Ensure nav-menu display is reset for desktop
+                    navMenu.style.display = '';
+                } else {
+                    // Ensure nav-menu display is set for mobile
+                    navMenu.style.display = '';
                 }
             }, 250);
         });
-=======
->>>>>>> 5e870017e9182c2772140f004dab62acd73c4b24
     }
 });
