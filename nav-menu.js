@@ -84,13 +84,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (userDropdown && userEmail) {
             userEmail.addEventListener("click", (e) => {
                 // Only toggle dropdown on mobile (when hamburger is visible)
+<<<<<<< HEAD
                 if (window.innerWidth <= 768 || (window.innerWidth <= 1024 && window.innerHeight <= 500)) {
+=======
+                if (window.innerWidth <= 768) {
+>>>>>>> 5e870017e9182c2772140f004dab62acd73c4b24
                     e.preventDefault();
                     e.stopPropagation();
                     userDropdown.classList.toggle("active");
                 }
             });
         }
+<<<<<<< HEAD
 
         // Handle orientation changes
         window.addEventListener("orientationchange", () => {
@@ -115,5 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, 250);
         });
+=======
+>>>>>>> 5e870017e9182c2772140f004dab62acd73c4b24
     }
 });
