@@ -1,9 +1,10 @@
-// Firebase SDK'larını import ediyoruz
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+/**
+ * Shared Firebase Configuration
+ * Consolidated from multiple files for single source of truth
+ */
 
-// Firebase konsolundan aldığın config objesini buraya yapıştır
-const firebaseConfig = {
+// Firebase configuration object
+export const firebaseConfig = {
     apiKey: "AIzaSyBxoBmV6dJqcl6YaVJ8eYiEpDkQ1fB5Pfw",
     authDomain: "ituultimate-7d97f.firebaseapp.com",
     projectId: "ituultimate-7d97f",
@@ -12,6 +13,14 @@ const firebaseConfig = {
     appId: "1:1000938340000:web:bd00e04ff5e74b1d3e93c5"
 };
 
-// Uygulamayı başlat
+// Modern ES Module imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Export initialized services
 export const auth = getAuth(app);
+export const db = getFirestore(app);

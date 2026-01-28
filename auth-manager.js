@@ -1,10 +1,10 @@
 import { auth } from "./firebase-config.js";
-import { 
-    onAuthStateChanged, 
+import {
+    onAuthStateChanged,
     signOut,
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
-    GoogleAuthProvider, 
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    GoogleAuthProvider,
     signInWithPopup,
     sendEmailVerification // YENİ: Mail gönderme fonksiyonu eklendi
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -15,19 +15,30 @@ import {
 
 const protectedPages = [
     "programlayici", "programlayici.html",
-    "programlayıcı", "programlayıcı.html", 
-    "yts", "yts.html", 
+    "programlayıcı", "programlayıcı.html",
+    "yts", "yts.html",
     "profil", "profil.html"
 ];
 
 const path = window.location.pathname;
-const rawPageName = path.split("/").filter(Boolean).pop(); 
+const rawPageName = path.split("/").filter(Boolean).pop();
 const currentPage = decodeURIComponent(rawPageName || "https://ituultimate.com/").split("?")[0];
 
-console.log("Algılanan Sayfa:", currentPage); 
+console.log("Algılanan Sayfa:", currentPage);
+
+// Security: Whitelist allowed redirect targets
+const ALLOWED_REDIRECTS = [
+    '/programlayici', 'programlayici',
+    '/yts', 'yts',
+    '/profil', 'profil',
+    '/ortalamahesaplayici', 'ortalamahesaplayici',
+    '/duyurular', 'duyurular',
+    '/'
+];
 
 const urlParams = new URLSearchParams(window.location.search);
-const redirectTarget = urlParams.get('redirect') || '/';
+const rawRedirect = urlParams.get('redirect') || '/';
+const redirectTarget = ALLOWED_REDIRECTS.includes(rawRedirect) ? rawRedirect : '/';
 
 // ==========================================
 // 2. ARAYÜZ (NAVBAR & LOADING) YÖNETİMİ
@@ -50,14 +61,25 @@ function updateUI(user) {
             const li = document.createElement('li');
             li.className = 'nav-item';
             li.id = 'user-menu-item';
+
+            // Get user initial for fallback avatar
+            const userName = user.displayName || user.email.split('@')[0];
+            const userInitial = userName.charAt(0).toUpperCase();
+
+            // Check if user has a photo URL
+            const avatarHTML = user.photoURL
+                ? `<img src="${user.photoURL}" alt="Avatar" class="user-avatar" onerror="this.outerHTML='<span class=\\'avatar-fallback\\'>${userInitial}</span>'">`
+                : `<span class="avatar-fallback">${userInitial}</span>`;
+
             li.innerHTML = `
                 <div class="user-dropdown">
                     <span class="nav-link user-email" style="cursor:pointer;">
-                        ${user.displayName || user.email.split('@')[0]} ▼
+                        ${avatarHTML}
+                        ${userName} ▼
                     </span>
                     <div class="dropdown-content">
-                        <a href="/profil" class="dropdown-item">Profilim</a>
-                        <a href="#" id="global-logout-btn" class="dropdown-item logout">Çıkış Yap</a>
+                        <a href="/profil" class="dropdown-item"><i class="fas fa-user"></i> Profilim</a>
+                        <a href="#" id="global-logout-btn" class="dropdown-item logout"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a>
                     </div>
                 </div>
             `;
@@ -73,7 +95,7 @@ function updateUI(user) {
                 const li = document.createElement('li');
                 li.className = 'nav-item';
                 li.id = 'login-btn-item';
-                li.innerHTML = `<a href="/login?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
+                li.innerHTML = `<a href="/login.html?redirect=${encodeURIComponent(currentPage)}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Giriş Yap</a>`;
                 navMenu.appendChild(li);
             }
         }
@@ -81,7 +103,7 @@ function updateUI(user) {
 
     // --- B. YÜKLEME EKRANI VE İÇERİK ---
     const isProtected = protectedPages.includes(currentPage);
-    
+
     // YENİ KURAL: Korumalı sayfaya girmek için hem user olmalı hem maili onaylı olmalı
     const isAuthorized = user && user.emailVerified;
 
@@ -91,7 +113,7 @@ function updateUI(user) {
     } else {
         // Yetkisiz erişim varsa yönlendir
         console.warn("Erişim reddedildi (Mail onayı yok veya giriş yapılmadı).");
-        window.location.href = `/login?redirect=${encodeURIComponent(currentPage)}`;
+        window.location.href = `/login.html?redirect=${encodeURIComponent(currentPage)}`;
     }
 }
 
@@ -105,8 +127,8 @@ function setupAuthForms() {
 
     // Linkleri Güncelle
     const switchLink = document.querySelector('.toggle-link a') || document.querySelector('a[href*="register"], a[href*="login"]');
-    if(switchLink && redirectTarget !== '/') {
-        const targetPage = currentPage.includes("login") ? "/register" : "/login";
+    if (switchLink && redirectTarget !== '/') {
+        const targetPage = currentPage.includes("login") ? "/register.html" : "/login.html";
         switchLink.href = `${targetPage}?redirect=${encodeURIComponent(redirectTarget)}`;
     }
 
@@ -119,7 +141,7 @@ function setupAuthForms() {
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
                 const btn = loginForm.querySelector('button');
-                
+
                 btn.innerText = "Giriş yapılıyor...";
                 btn.disabled = true;
 
@@ -159,11 +181,11 @@ function setupAuthForms() {
                     .then(async (userCredential) => {
                         // YENİ: Doğrulama maili gönder
                         await sendEmailVerification(userCredential.user);
-                        
+
                         // Kullanıcıyı bilgilendir ve çıkış yap (Login sayfasına at)
                         alert("Kayıt başarılı! Lütfen email adresinize gönderilen doğrulama linkine tıklayın. (Spam klasörünüzü kontrol etmeyi unutmayın.)");
                         await signOut(auth);
-                        window.location.href = "/login";
+                        window.location.href = "/login.html";
                     })
                     .catch((err) => {
                         btn.innerText = "Kayıt Ol";
@@ -190,15 +212,15 @@ function setupAuthForms() {
 function showError(error, element) {
     if (!element) return;
     let msg = "Hata: " + error.code;
-    
+
     // YENİ: Mail doğrulanmamış hatası
     if (error.code === 'auth/email-not-verified') msg = "Lütfen önce email adresinizi doğrulayın (Spam kutusuna bakın).";
-    
+
     if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') msg = "Bilgiler hatalı.";
     if (error.code === 'auth/wrong-password') msg = "Şifre yanlış.";
     if (error.code === 'auth/email-already-in-use') msg = "Bu email zaten kayıtlı.";
     if (error.code === 'auth/weak-password') msg = "Şifre çok zayıf.";
-    
+
     element.textContent = msg;
     element.style.display = 'block';
 }

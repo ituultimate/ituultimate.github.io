@@ -5,10 +5,10 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YYGVJKPCM"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-3YYGVJKPCM');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-3YYGVJKPCM');
     </script>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -19,18 +19,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profilim | ITU UltiMate</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome & Stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="base.css">
     <link rel="stylesheet" href="attendance-style.css">
 
     <style>
         /* --- PROFİL SAYFASINA ÖZEL STİLLER --- */
-        
+
         .profile-wrapper {
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Yukarıya yasla */
+            align-items: flex-start;
+            /* Yukarıya yasla */
             min-height: 85vh;
             padding: 40px 20px;
-            background-color: #f8f9fa; /* Hafif gri arka plan */
+            background-color: #f8f9fa;
+            /* Hafif gri arka plan */
         }
 
         .profile-card {
@@ -38,7 +51,8 @@
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             width: 100%;
-            max-width: 500px; /* Kart genişliği */
+            max-width: 500px;
+            /* Kart genişliği */
             overflow: hidden;
             border: 1px solid #e9ecef;
             position: relative;
@@ -54,7 +68,8 @@
         .profile-content {
             padding: 0 30px 40px 30px;
             text-align: center;
-            margin-top: -60px; /* Profil fotosunu yukarı çekmek için */
+            margin-top: -60px;
+            /* Profil fotosunu yukarı çekmek için */
         }
 
         /* Profil Fotoğrafı */
@@ -64,7 +79,7 @@
             margin: 0 auto 15px auto;
             border-radius: 50%;
             border: 5px solid white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             background-color: #fff;
             display: flex;
             align-items: center;
@@ -162,7 +177,16 @@
         <nav class="navbar container">
             <a href="/" class="nav-logo">ITU UltiMate</a>
             <ul class="nav-menu">
-                </ul>
+                <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
+                <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
+                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
+                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
         </nav>
     </header>
 
@@ -173,7 +197,7 @@
 
         <section id="main-content" style="display: none;">
             <div class="profile-wrapper">
-                
+
                 <div class="profile-card">
                     <div class="profile-header-bg"></div>
 
@@ -230,8 +254,8 @@
                 if (user.metadata.creationTime) {
                     const dateObj = new Date(user.metadata.creationTime);
                     // Türkçe formatta tarih (Örn: 26 Ocak 2026)
-                    dateEl.textContent = dateObj.toLocaleDateString('tr-TR', { 
-                        day: 'numeric', month: 'long', year: 'numeric' 
+                    dateEl.textContent = dateObj.toLocaleDateString('tr-TR', {
+                        day: 'numeric', month: 'long', year: 'numeric'
                     });
                 }
 
@@ -250,7 +274,7 @@
 
         // Çıkış Butonu İşlevi
         document.getElementById('logout-btn-profile').addEventListener('click', () => {
-            if(confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+            if (confirm("Çıkış yapmak istediğinize emin misiniz?")) {
                 signOut(auth).then(() => {
                     window.location.href = "/";
                 });
@@ -258,5 +282,31 @@
         });
     </script>
 
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-left">
+                <a href="/about" class="footer-link">Hakkında & Gizlilik</a>
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/ituultimate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/company/itu-ultimate" target="_blank" rel="noopener"
+                        class="social-icon">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@ITUUltiMate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-right">
+                <p>&copy; 2025 ITU UltiMate. Made with ❤️ for ITU Students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="nav-menu.js"></script>
+
 </body>
+
 </html>

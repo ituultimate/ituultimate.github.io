@@ -5,17 +5,20 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YYGVJKPCM"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-3YYGVJKPCM');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-3YYGVJKPCM');
     </script>
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-MKCJ22QK');</script>
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-MKCJ22QK');</script>
     <!-- End Google Tag Manager -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -30,16 +33,21 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
 
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="base.css">
     <link rel="stylesheet" href="attendance-style.css">
-    
+
     <style>
         .content-section {
             padding: 60px 0;
             max-width: 800px;
             margin: 0 auto;
         }
+
         .policy-card {
             background: var(--bg-color-light);
             padding: 40px;
@@ -47,6 +55,7 @@
             box-shadow: var(--card-shadow);
             border: 1px solid #e9ecef;
         }
+
         .policy-card h2 {
             color: var(--primary-color);
             margin-top: 2rem;
@@ -55,47 +64,55 @@
             border-bottom: 2px solid var(--secondary-color);
             display: inline-block;
         }
-        .policy-card p, .policy-card li {
+
+        .policy-card p,
+        .policy-card li {
             margin-bottom: 1rem;
             color: var(--text-color-dark);
             font-size: 1rem;
             line-height: 1.8;
         }
+
         .policy-card ul {
             padding-left: 20px;
             margin-bottom: 1.5rem;
         }
+
         .last-update {
             font-style: italic;
             color: #777;
             margin-bottom: 2rem;
             display: block;
         }
+
         .contact-mail {
             color: var(--secondary-color);
             font-weight: 600;
             text-decoration: underline;
         }
+
         @media (max-width: 768px) {
-            .policy-card { padding: 20px; }
+            .policy-card {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 
 <body>
     <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKCJ22QK"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKCJ22QK" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
     <header class="header">
         <nav class="navbar container">
-            <a href="https://ituultimate.github.io/" class="nav-logo">ITU UltiMate</a>
+            <a href="/" class="nav-logo">ITU UltiMate</a>
             <ul class="nav-menu">
-                <li class="nav-item"><a href="https://ituultimate.github.io/" class="nav-link">Anasayfa</a></li>
-                <li class="nav-item"><a href="https://ituultimate.github.io/programlayici" class="nav-link">Programlayıcı</a></li>
-                <li class="nav-item"><a href="https://ituultimate.github.io/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
-                <li class="nav-item"><a href="https://ituultimate.github.io/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
+                <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
+                <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
+                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
+                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
             </ul>
             <div class="hamburger">
                 <span class="bar"></span>
@@ -110,65 +127,64 @@
             <h1 class="page-title" style="text-align: left; margin-bottom: 0.5rem;">Hakkında & Gizlilik</h1>
             <span class="last-update">Son Güncelleme: 27 Ocak 2026</span>
 
-            <p>Hoş geldiniz! <strong>ITU UltiMate</strong>, İstanbul Teknik Üniversitesi öğrencilerinin akademik hayatlarını daha düzenli bir şekilde yönetebilmeleri amacıyla geliştirilmiş <strong>bağımsız bir öğrenci projesidir.</strong> Platformu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
+            <p>Hoş geldiniz! <strong>ITU UltiMate</strong>, İstanbul Teknik Üniversitesi öğrencilerinin akademik
+                hayatlarını daha düzenli bir şekilde yönetebilmeleri amacıyla geliştirilmiş <strong>bağımsız bir öğrenci
+                    projesidir.</strong> Platformu kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
 
             <h2>1. Kurumsal Bağımsızlık</h2>
-            <p>ITU UltiMate; İstanbul Teknik Üniversitesi Rektörlüğü, Bilgi İşlem Daire Başkanlığı veya Öğrenci İşleri ile resmi bir bağı bulunmayan, tamamen gönüllü bir çabayla geliştirilmiş bir araçtır. Sitede kullanılan "İTÜ" ibaresi, projenin hedef kitlesini belirtmek amacıyla tanımlayıcı olarak kullanılmıştır.</p>
+            <p>ITU UltiMate; İstanbul Teknik Üniversitesi Rektörlüğü, Bilgi İşlem Daire Başkanlığı veya Öğrenci İşleri
+                ile resmi bir bağı bulunmayan, tamamen gönüllü bir çabayla geliştirilmiş bir araçtır. Sitede kullanılan
+                "İTÜ" ibaresi, projenin hedef kitlesini belirtmek amacıyla tanımlayıcı olarak kullanılmıştır.</p>
 
             <h2>2. Veri Gizliliği (Privacy Policy)</h2>
             <ul>
-                <li><strong>Google ile Giriş:</strong> Firebase Auth altyapısı kullanılır. Sadece e-posta, ad-soyad ve profil fotoğrafınıza erişilir. Google şifrenize erişmemiz teknik olarak mümkün değildir.</li>
-                <li><strong>Veri Saklama:</strong> Notlarınız ve program verileriniz, tarayıcı yerel hafızasında (LocalStorage) veya güvenli bulut veritabanımızda (Firebase Firestore) saklanır.</li>
-                <li><strong>Üçüncü Taraflar:</strong> Verileriniz asla reklam şirketleri veya üçüncü şahıslarla paylaşılmaz.</li>
+                <li><strong>Google ile Giriş:</strong> Firebase Auth altyapısı kullanılır. Sadece e-posta, ad-soyad ve
+                    profil fotoğrafınıza erişilir. Google şifrenize erişmemiz teknik olarak mümkün değildir.</li>
+                <li><strong>Veri Saklama:</strong> Notlarınız ve program verileriniz, tarayıcı yerel hafızasında
+                    (LocalStorage) veya güvenli bulut veritabanımızda (Firebase Firestore) saklanır.</li>
+                <li><strong>Üçüncü Taraflar:</strong> Verileriniz asla reklam şirketleri veya üçüncü şahıslarla
+                    paylaşılmaz.</li>
             </ul>
 
             <h2>3. Sorumluluk Reddi</h2>
-            <p>Platformdaki hesaplama araçları bilgilendirme amaçlıdır. Sonuçların resmiyeti garanti edilmez; akademik kararlarınızda her zaman <strong>İTÜ SIS</strong> verilerini esas almalısınız. Teknik aksaklıklardan kaynaklanabilecek veri kayıplarından platform sorumlu tutulamaz.</p>
+            <p>Platformdaki hesaplama araçları bilgilendirme amaçlıdır. Sonuçların resmiyeti garanti edilmez; akademik
+                kararlarınızda her zaman <strong>İTÜ SIS</strong> verilerini esas almalısınız. Teknik aksaklıklardan
+                kaynaklanabilecek veri kayıplarından platform sorumlu tutulamaz.</p>
 
             <h2>4. İletişim</h2>
-            <p>Öneri, şikayet veya iş birliği talepleriniz için geliştirici ekibimizle her zaman iletişime geçebilirsiniz:</p>
+            <p>Öneri, şikayet veya iş birliği talepleriniz için geliştirici ekibimizle her zaman iletişime
+                geçebilirsiniz:</p>
             <p>📩 E-posta: <a href="mailto:ituultimate@outlook.com" class="contact-mail">ituultimate@outlook.com</a></p>
-            
+
             <p style="margin-top: 30px; font-weight: 500; color: var(--primary-color);">İTÜ'lülere sevgilerle...</p>
         </div>
     </main>
 
     <footer class="footer">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-        
-        <div class="footer-left" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
-            <a href="about.html" style="color: var(--text-color-light); text-decoration: none; font-size: 0.85rem; opacity: 0.8; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">Hakkında & Gizlilik</a>
-            
-            <div class="social-icons" style="display: flex; gap: 15px;">
-                <a href="https://www.instagram.com/ituultimate" target="_blank" style="color: white; font-size: 1.1rem; opacity: 0.8; transition: transform 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
-                    <i class="fab fa-instagram"></i>
-                </a>
-                <a href="https://www.linkedin.com/company/itu-ultimate" target="_blank" style="color: white; font-size: 1.1rem; opacity: 0.8; transition: transform 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
-                    <i class="fab fa-linkedin-in"></i>
-                </a>
-                <a href="https://www.youtube.com/@ITUUltiMate" target="_blank" style="color: white; font-size: 1.1rem; opacity: 0.8; transition: transform 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
-                    <i class="fab fa-youtube"></i>
-                </a>
+        <div class="container">
+            <div class="footer-left">
+                <a href="/about" class="footer-link">Hakkında & Gizlilik</a>
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/ituultimate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/company/itu-ultimate" target="_blank" rel="noopener"
+                        class="social-icon">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@ITUUltiMate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-right">
+                <p>&copy; 2025 ITU UltiMate. Made with ❤️ for ITU Students.</p>
             </div>
         </div>
+    </footer>
 
-        <div class="footer-right">
-            <p style="margin: 0;">&copy; 2024 ITU Ultimate. Made with ❤️ for ITU Students.</p>
-        </div>
-        
-    </div>
-</footer>
-
-    <script>
-        // Hamburger Menü Fonksiyonu (attendance-script'ten bağımsız çalışması için eklendi)
-        const hamburger = document.querySelector(".hamburger");
-        const navMenu = document.querySelector(".nav-menu");
-        if (hamburger && navMenu) {
-            hamburger.addEventListener("click", () => {
-                hamburger.classList.toggle("active");
-                navMenu.classList.toggle("active");
-            });
-        }
-    </script>
+    <script src="nav-menu.js"></script>
+    <script type="module" src="auth-manager.js"></script>
 </body>
+
 </html>

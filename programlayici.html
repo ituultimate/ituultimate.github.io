@@ -5,17 +5,20 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YYGVJKPCM"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-3YYGVJKPCM');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-3YYGVJKPCM');
     </script>
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-MKCJ22QK');</script>
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-MKCJ22QK');</script>
     <!-- End Google Tag Manager -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -35,27 +38,25 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap"
         rel="stylesheet">
 
-    <!-- Stylesheet -->
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="base.css">
     <link rel="stylesheet" href="scheduler-style.css">
 </head>
 
 <body>
     <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKCJ22QK"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKCJ22QK" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
     <header class="header">
         <nav class="navbar container">
-            <a href="https://ituultimate.github.io/" class="nav-logo">ITU UltiMate</a>
+            <a href="/" class="nav-logo">ITU UltiMate</a>
             <ul class="nav-menu">
-                <li class="nav-item"><a href="https://ituultimate.github.io/" class="nav-link">Anasayfa</a></li>
-                <li class="nav-item"><a href="https://ituultimate.github.io/programlayici"
-                        class="nav-link">Programlayıcı</a></li>
-                <li class="nav-item"><a href="https://ituultimate.github.io/yts" class="nav-link">Yoklama Takip
-                        Sistemi</a></li>
-                <li class="nav-item"><a href="https://ituultimate.github.io/ortalamahesaplayici"
-                        class="nav-link">Ortalama Hesaplayıcı</a></li>
+                <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
+                <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
+                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
+                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
             </ul>
             <div class="hamburger">
                 <span class="bar"></span>
@@ -67,8 +68,8 @@
 
     <main>
         <div id="loading-overlay" class="loading-overlay">
-    <div class="spinner"></div>
-</div>
+            <div class="spinner"></div>
+        </div>
         <section id="main-content" class="scheduler-section">
             <div class="container">
                 <h1 class="page-title">Programım</h1>
@@ -138,47 +139,35 @@
     </button>
 
     <footer class="footer">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-        
-        <div class="footer-left" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
-            <a href="about.html" style="color: var(--text-color-light); text-decoration: none; font-size: 0.85rem; opacity: 0.8; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">Hakkında & Gizlilik</a>
-            
-            <div class="social-icons" style="display: flex; gap: 15px;">
-                <a href="https://www.instagram.com/ituultimate" target="_blank" style="color: white; font-size: 1.1rem; opacity: 0.8; transition: transform 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
-                    <i class="fab fa-instagram"></i>
-                </a>
-                <a href="https://www.linkedin.com/company/itu-ultimate" target="_blank" style="color: white; font-size: 1.1rem; opacity: 0.8; transition: transform 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
-                    <i class="fab fa-linkedin-in"></i>
-                </a>
-                <a href="https://www.youtube.com/@ITUUltiMate" target="_blank" style="color: white; font-size: 1.1rem; opacity: 0.8; transition: transform 0.2s;" onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'" onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'">
-                    <i class="fab fa-youtube"></i>
-                </a>
+        <div class="container">
+
+            <div class="footer-left">
+                <a href="/about" class="footer-link">Hakkında & Gizlilik</a>
+
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/ituultimate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/company/itu-ultimate" target="_blank" rel="noopener"
+                        class="social-icon">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@ITUUltiMate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <div class="footer-right">
-            <p style="margin: 0;">&copy; 2024 ITU Ultimate. Made with ❤️ for ITU Students.</p>
-        </div>
-        
-    </div>
-</footer>
+            <div class="footer-right">
+                <p>&copy; 2025 ITU UltiMate. Made with ❤️ for ITU Students.</p>
+            </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
-    <script src="scheduler-script.js"></script>
+        </div>
+    </footer>
+
+    <script src="nav-menu.js"></script>
+    <script type="module" src="scheduler-script.js"></script>
     <script type="module" src="auth-manager.js"></script>
-    <script src="attendance-script.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
-</body>
-</html>
 </body>
 
 </html>
-
-
-
-
-
-
-
