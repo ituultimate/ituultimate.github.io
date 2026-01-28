@@ -6,7 +6,11 @@ import {
     createUserWithEmailAndPassword,
     GoogleAuthProvider,
     signInWithPopup,
-    sendEmailVerification // YENİ: Mail gönderme fonksiyonu eklendi
+    sendEmailVerification,
+    setPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence,
+    sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 // ==========================================
@@ -140,12 +144,17 @@ function setupAuthForms() {
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
+                const rememberMe = document.getElementById('remember-me')?.checked ?? true;
                 const btn = loginForm.querySelector('button');
 
                 btn.innerText = "Giriş yapılıyor...";
                 btn.disabled = true;
 
-                signInWithEmailAndPassword(auth, email, password)
+                // Set persistence based on Remember Me checkbox
+                const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+
+                setPersistence(auth, persistence)
+                    .then(() => signInWithEmailAndPassword(auth, email, password))
                     .then((userCredential) => {
                         // YENİ: Mail doğrulaması kontrolü
                         if (!userCredential.user.emailVerified) {
@@ -160,6 +169,15 @@ function setupAuthForms() {
                         btn.disabled = false;
                         showError(err, errorDiv);
                     });
+            });
+        }
+
+        // --- ŞİFREMİ UNUTTUM ---
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        if (forgotPasswordLink) {
+            forgotPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                handlePasswordReset(errorDiv);
             });
         }
     }
@@ -223,6 +241,42 @@ function showError(error, element) {
 
     element.textContent = msg;
     element.style.display = 'block';
+}
+
+// ==========================================
+// 5. ŞİFRE SIFIRLAMA
+// ==========================================
+
+function handlePasswordReset(errorDiv) {
+    const emailInput = document.getElementById('email');
+    const email = prompt(
+        'Şifre sıfırlama linki göndermek için email adresinizi girin:',
+        emailInput?.value || ''
+    );
+
+    if (!email || !email.trim()) return;
+
+    sendPasswordResetEmail(auth, email.trim())
+        .then(() => {
+            alert('Şifre sıfırlama linki gönderildi! Email kutunuzu kontrol edin. (Spam klasörüne de bakın.)');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+        })
+        .catch((error) => {
+            let msg = 'Hata: ' + error.code;
+
+            if (error.code === 'auth/user-not-found') msg = 'Bu email adresi kayıtlı değil.';
+            if (error.code === 'auth/invalid-email') msg = 'Geçersiz email adresi.';
+            if (error.code === 'auth/too-many-requests') msg = 'Çok fazla deneme. Lütfen daha sonra tekrar deneyin.';
+
+            if (errorDiv) {
+                errorDiv.textContent = msg;
+                errorDiv.style.display = 'block';
+            } else {
+                alert(msg);
+            }
+        });
 }
 
 // ==========================================

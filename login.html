@@ -66,6 +66,42 @@
             text-align: center;
             display: none;
         }
+
+        /* Remember Me & Forgot Password */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #555;
+            user-select: none;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #00a8cc;
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            color: #00a8cc;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .forgot-link:hover {
+            color: #0096b3;
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -86,6 +122,14 @@
 
                 <label style="font-weight: 600; display:block; margin-bottom:5px;">Şifre</label>
                 <input type="password" id="password" class="form-input" placeholder="********" required>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="remember-me" checked>
+                        Beni Hatırla
+                    </label>
+                    <a href="#" id="forgot-password-link" class="forgot-link">Şifremi Unuttum</a>
+                </div>
 
                 <button type="submit" class="btn btn-primary btn-full">Giriş Yap</button>
             </form>
@@ -112,9 +156,9 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
                     .then((registration) => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                        // ServiceWorker registration successful
                     }, (err) => {
-                        console.log('ServiceWorker registration failed: ', err);
+                        // ServiceWorker registration failed
                     });
             });
         }
