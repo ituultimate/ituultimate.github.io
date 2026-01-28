@@ -44,6 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 400);
         }
 
+        // Helper function to check if in mobile mode
+        function isMobileMode() {
+            const isPortraitMobile = window.innerWidth <= 768;
+            const isLandscapeSmallHeight = window.innerHeight <= 600 && window.innerWidth <= 1024;
+            return isPortraitMobile || isLandscapeSmallHeight;
+        }
+
         // Hamburger click handler
         hamburger.addEventListener("click", () => {
             const isOpen = navMenu.classList.contains("active");
@@ -77,13 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Helper function to check if in mobile mode
-        function isMobileMode() {
-            const isPortraitMobile = window.innerWidth <= 768;
-            const isLandscapeSmallHeight = window.innerHeight <= 500 && window.matchMedia('(orientation: landscape)').matches;
-            return isPortraitMobile || isLandscapeSmallHeight;
-        }
-
         // Handle user dropdown on mobile
         const userDropdown = document.querySelector(".user-dropdown");
         const userEmail = document.querySelector(".user-email");
@@ -102,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Handle orientation changes
         window.addEventListener("orientationchange", () => {
             setTimeout(() => {
+                // Close menu if switching to desktop view
                 if (!isMobileMode()) {
-                    // Close menu if switching to desktop view
                     toggleMenu(false);
                 }
             }, 100);
@@ -114,16 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener("resize", () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
-                if (!isMobileMode()) {
-                    // Close menu and reset display if switching to desktop view
-                    if (navMenu.classList.contains("active")) {
-                        toggleMenu(false);
-                    }
-                    // Ensure nav-menu display is reset for desktop
-                    navMenu.style.display = '';
-                } else {
-                    // Ensure nav-menu display is set for mobile
-                    navMenu.style.display = '';
+                // Close menu if switching to desktop view
+                if (!isMobileMode() && navMenu.classList.contains("active")) {
+                    toggleMenu(false);
                 }
             }, 250);
         });
