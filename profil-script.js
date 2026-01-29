@@ -17,7 +17,8 @@ import {
     deleteDoc,
     documentId,
     arrayRemove,
-    arrayUnion
+    arrayUnion,
+    writeBatch
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 // --- State Variables ---
@@ -306,21 +307,53 @@ window.handleToggleFavorite = async function (event, noteId) {
 async function updateUserProfile(displayName) {
     if (!currentUser) return;
 
+    const saveBtn = document.getElementById('save-profile-btn');
+    const originalText = saveBtn ? saveBtn.textContent : 'Kaydet';
+
     try {
-        // Update Firebase Auth
+        // Show loading state
+        if (saveBtn) {
+            saveBtn.textContent = 'Kaydediliyor...';
+            saveBtn.disabled = true;
+        }
+
+        // 1. Update Firebase Auth
         await updateProfile(currentUser, { displayName });
 
-        // Update Firestore user document
+        // 2. Update Firestore user document
         const userDocRef = doc(db, 'users', currentUser.uid);
         await updateDoc(userDocRef, { displayName });
 
-        // Update UI
+        // 3. Batch update all user's notes with new uploader name
+        const notesRef = collection(db, 'notes');
+        const q = query(notesRef, where('uploaderID', '==', currentUser.uid));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+            const batch = writeBatch(db);
+
+            snapshot.forEach((noteDoc) => {
+                const noteRef = doc(db, 'notes', noteDoc.id);
+                batch.update(noteRef, { uploader: displayName });
+            });
+
+            await batch.commit();
+            console.log(`Updated ${snapshot.size} notes with new display name.`);
+        }
+
+        // 4. Update UI
         document.getElementById('display-name').textContent = displayName;
 
-        alert('Profil güncellendi!');
+        alert('Profil ve tüm notlarınız güncellendi!');
     } catch (error) {
         console.error('Error updating profile:', error);
         alert('Profil güncellenirken hata oluştu.');
+    } finally {
+        // Reset button state
+        if (saveBtn) {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+        }
     }
 }
 
