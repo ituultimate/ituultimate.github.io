@@ -31,11 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeBtn.style.display = 'none';
                 document.body.style.overflow = '';
 
-                // Close dropdown if open
+                // Close user dropdown if open
                 const userDropdown = document.querySelector(".user-dropdown");
                 if (userDropdown) {
                     userDropdown.classList.remove("active");
                 }
+
+                // Close nav dropdowns if open
+                document.querySelectorAll(".nav-dropdown.active").forEach(d => {
+                    d.classList.remove("active");
+                });
             }
 
             // Reset animation lock after transition completes
@@ -98,6 +103,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // Handle nav dropdown on mobile (Not Defteri, etc.)
+        document.querySelectorAll(".nav-dropdown").forEach(dropdown => {
+            const trigger = dropdown.querySelector(".nav-dropdown-trigger");
+            if (trigger) {
+                trigger.addEventListener("click", (e) => {
+                    if (isMobileMode()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Close other dropdowns first
+                        document.querySelectorAll(".nav-dropdown.active").forEach(d => {
+                            if (d !== dropdown) d.classList.remove("active");
+                        });
+                        dropdown.classList.toggle("active");
+                    }
+                });
+            }
+        });
+
+        // Close nav dropdowns when clicking dropdown links on mobile
+        document.querySelectorAll(".nav-dropdown-content a").forEach(link => {
+            link.addEventListener("click", () => {
+                if (isMobileMode()) {
+                    toggleMenu(false);
+                }
+            });
+        });
 
         // Handle orientation changes
         window.addEventListener("orientationchange", () => {

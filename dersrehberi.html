@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YYGVJKPCM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-3YYGVJKPCM');
+    </script>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-MKCJ22QK');</script>
+    <!-- End Google Tag Manager -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="ITU UltiMate" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Rehberleri | ITU UltiMate</title>
+    <meta name="description"
+        content="İTÜ dersleri için rehberler ve ipuçları. Derslerin içerikleri, öneriler ve başarı stratejileri.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Patrick+Hand&display=swap"
+        rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="dersnotlari-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKCJ22QK" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <header class="header">
+        <nav class="navbar container">
+            <a href="/" class="nav-logo">ITU UltiMate</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
+                <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
+                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
+                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
+                <li class="nav-item nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        Not Defteri <i class="fas fa-chevron-down"></i>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/dersnotlari"><i class="fas fa-book"></i> Ders Notları</a>
+                        <a href="/dersrehberi"><i class="fas fa-compass"></i> Ders Rehberleri</a>
+                        <a href="/dersprogramarsiv"><i class="fas fa-archive"></i> Ders Programı Arşivi</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+        </div>
+
+        <section id="main-content" style="display: none;">
+            <div class="notes-page-wrapper">
+
+                <!-- Page Header -->
+                <div class="notes-page-header">
+                    <h1 class="notes-page-title">Ders Rehberleri</h1>
+                    <p class="notes-page-subtitle">Derslerin içerikleri, öneriler ve başarı stratejileri</p>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="subject-filter">Bölüm</label>
+                        <select id="subject-filter">
+                            <option value="">Tüm Bölümler</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="course-filter">Ders</label>
+                        <select id="course-filter" disabled>
+                            <option value="">Önce bölüm seçin</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="sort-filter">Sırala</label>
+                        <select id="sort-filter">
+                            <option value="newest">En Yeni</option>
+                            <option value="popular">En Popüler</option>
+                            <option value="oldest">En Eski</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Results Status -->
+                <div class="filter-status" id="filter-status">
+                    <span id="result-count">0</span> rehber bulundu
+                </div>
+
+                <!-- Notes Grid -->
+                <div class="notes-grid" id="notes-grid">
+                    <!-- Cards will be rendered by JavaScript -->
+                </div>
+
+                <!-- Load More Button -->
+                <div class="load-more-container" id="load-more-container" style="display: none;">
+                    <button class="load-more-btn" id="load-more-btn">
+                        <i class="fas fa-chevron-down"></i> Daha Fazla Göster
+                    </button>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="fab-upload" aria-label="Rehber Yükle">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="upload-modal">
+        <div class="upload-modal-overlay"></div>
+        <div class="upload-modal-content">
+            <button class="modal-close-btn" id="modal-close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">Ders Rehberi Yükle</h2>
+            <form id="upload-form" class="upload-form">
+                <div class="form-group">
+                    <label for="upload-title">Rehber Başlığı *</label>
+                    <input type="text" id="upload-title" placeholder="Örn: MAT103 Final Hazırlık Rehberi" required>
+                </div>
+                <div class="form-group">
+                    <label for="upload-subject">Bölüm *</label>
+                    <select id="upload-subject" required>
+                        <option value="">Bölüm Seçin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="upload-course">Ders *</label>
+                    <select id="upload-course" required disabled>
+                        <option value="">Önce bölüm seçin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="upload-url">Rehber Linki *</label>
+                    <input type="url" id="upload-url" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label for="upload-description">Açıklama</label>
+                    <textarea id="upload-description" rows="3"
+                        placeholder="Rehber hakkında kısa bir açıklama..."></textarea>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="upload-anonymous">
+                    <label for="upload-anonymous">Anonim olarak yükle</label>
+                </div>
+                <button type="submit" class="upload-submit-btn">
+                    <i class="fas fa-upload"></i> Rehberi Paylaş
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-left">
+                <a href="/about" class="footer-link">Hakkında & Gizlilik</a>
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/ituultimate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/company/itu-ultimate" target="_blank" rel="noopener"
+                        class="social-icon">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@ITUUltiMate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-right">
+                <p>&copy; 2025 ITU UltiMate. Made with ❤️ for ITU Students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="nav-menu.js"></script>
+    <script type="module" src="auth-manager.js"></script>
+    <script type="module">
+        // Placeholder - will need dersrehberi-script.js for full functionality
+        import { auth } from './firebase-config.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+        // Show main content after auth check
+        onAuthStateChanged(auth, () => {
+            document.getElementById('loading-overlay').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        });
+    </script>
+</body>
+
+</html>
