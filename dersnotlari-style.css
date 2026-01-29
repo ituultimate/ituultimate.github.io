@@ -1033,7 +1033,10 @@
 .delete-btn:hover i {
     color: #dc3545;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 }
 
 /* ===========================================
@@ -1650,5 +1653,8 @@ button.fab i {
     .schedule-table td:nth-child(8) {
         display: none;
     }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }
