@@ -15,7 +15,9 @@ import {
     limit,
     doc,
     updateDoc,
-    increment
+    increment,
+    addDoc,
+    serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 // --- State Variables ---
@@ -296,24 +298,29 @@ function formatDate(timestamp) {
 function updateFilterStatus(count) {
     const statusElement = document.getElementById('filter-status');
     const clearBtn = document.getElementById('clear-filters');
+    const pageTitle = document.getElementById('page-title');
     if (!statusElement) return;
 
     if (!currentFilters.subjectCode && !currentFilters.courseCode) {
         // Scenario A: No filter - Top 9 globally
-        statusElement.innerHTML = '🔥 En Popüler 9 Not';
+        // Show sub-header, keep main title
+        statusElement.style.display = 'flex';
+        statusElement.innerHTML = '🔥 En popüler 9 not gösteriliyor';
         statusElement.classList.remove('filtered');
+        if (pageTitle) pageTitle.textContent = '📓 Ders Notları';
         if (clearBtn) clearBtn.style.display = 'none';
     } else if (currentFilters.courseCode) {
-        // Scenario B: Course selected - show course code in heading
-        // Remove spaces from courseCode for display (e.g., "MAT 103" -> "MAT103")
+        // Scenario B: Course selected
+        // HIDE sub-header, update main title to course
+        statusElement.style.display = 'none';
         const displayCode = currentFilters.courseCode.replace(/\s+/g, '');
-        statusElement.innerHTML = `📚 ${displayCode} Notları`;
-        statusElement.classList.add('filtered');
+        if (pageTitle) pageTitle.textContent = `📚 ${displayCode} Notları`;
         if (clearBtn) clearBtn.style.display = 'flex';
     } else {
-        // Scenario B: Subject selected - show subject code in heading
-        statusElement.innerHTML = `📚 ${currentFilters.subjectCode} Notları`;
-        statusElement.classList.add('filtered');
+        // Scenario B: Subject selected
+        // HIDE sub-header, update main title to subject
+        statusElement.style.display = 'none';
+        if (pageTitle) pageTitle.textContent = `📚 ${currentFilters.subjectCode} Notları`;
         if (clearBtn) clearBtn.style.display = 'flex';
     }
 }
@@ -426,13 +433,142 @@ function clearFilters() {
     fetchNotes();
 }
 
-// --- Upload Button Handler ---
+// =============================================================
+// UPLOAD MODAL HANDLERS
+// =============================================================
+
+// --- Open Upload Modal ---
+function openUploadModal() {
+    const modal = document.getElementById('upload-modal');
+    if (!modal) return;
+
+    // Populate modal dropdowns
+    populateUploadSubjectDropdown();
+
+    // Reset form
+    document.getElementById('upload-form').reset();
+    document.getElementById('upload-course').disabled = true;
+    document.getElementById('upload-course').innerHTML = '<option value="">Önce branş seçin...</option>';
+
+    // Show modal
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+// --- Close Upload Modal ---
+function closeUploadModal() {
+    const modal = document.getElementById('upload-modal');
+    if (!modal) return;
+
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// --- Populate Upload Subject Dropdown ---
+function populateUploadSubjectDropdown() {
+    const subjectSelect = document.getElementById('upload-subject');
+    if (!subjectSelect) return;
+
+    const subjects = Object.keys(allCoursesNested).sort();
+    let options = '<option value="">Branş seçin...</option>';
+
+    subjects.forEach(subject => {
+        options += `<option value="${subject}">${subject}</option>`;
+    });
+
+    subjectSelect.innerHTML = options;
+}
+
+// --- Populate Upload Course Dropdown ---
+function populateUploadCourseDropdown(subjectCode) {
+    const courseSelect = document.getElementById('upload-course');
+    if (!courseSelect) return;
+
+    if (!subjectCode || !allCoursesNested[subjectCode]) {
+        courseSelect.innerHTML = '<option value="">Önce branş seçin...</option>';
+        courseSelect.disabled = true;
+        return;
+    }
+
+    const courses = Object.keys(allCoursesNested[subjectCode]).sort();
+    let options = '<option value="">Ders seçin...</option>';
+
+    courses.forEach(courseCode => {
+        options += `<option value="${courseCode}">${courseCode}</option>`;
+    });
+
+    courseSelect.innerHTML = options;
+    courseSelect.disabled = false;
+}
+
+// --- Handle Upload Form Submit ---
+async function handleUploadSubmit(event) {
+    event.preventDefault();
+
+    const submitBtn = document.getElementById('upload-submit-btn');
+    const originalText = submitBtn.innerHTML;
+
+    // Get form values
+    const subjectCode = document.getElementById('upload-subject').value;
+    const courseCode = document.getElementById('upload-course').value;
+    const instructor = document.getElementById('upload-instructor').value.trim();
+    const link = document.getElementById('upload-link').value.trim();
+    const description = document.getElementById('upload-description').value.trim();
+
+    // Validation
+    if (!subjectCode || !courseCode || !link || !description) {
+        alert('Lütfen tüm zorunlu alanları doldurun!');
+        return;
+    }
+
+    // Disable button and show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yükleniyor...';
+
+    try {
+        // Create note document
+        const noteData = {
+            subjectCode: subjectCode,
+            courseCode: courseCode,
+            title: `${courseCode} Notu`,
+            description: description,
+            instructor: instructor || null,
+            externalUrl: link,
+            uploader: currentUser.displayName || currentUser.email.split('@')[0],
+            uploaderID: currentUser.uid,
+            uploaderEmail: currentUser.email,
+            likes: 0,
+            dislikes: 0,
+            netLikes: 0,
+            createdAt: serverTimestamp(),
+            date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
+        };
+
+        // Add to Firestore
+        await addDoc(collection(db, 'notes'), noteData);
+
+        // Success
+        alert('Not başarıyla yüklendi! ✅');
+        closeUploadModal();
+
+        // Refresh notes if viewing that course/subject
+        fetchNotes();
+
+    } catch (error) {
+        console.error('Error uploading note:', error);
+        alert('Yükleme sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+}
+
+// --- FAB Upload Button Handler ---
 function handleUploadClick() {
     if (!isUserLoggedIn) {
         alert('Ders notu yüklemek için lütfen giriş yapın!');
     } else {
-        console.log('Opening upload modal...');
-        // TODO: Implement upload modal
+        openUploadModal();
     }
 }
 
@@ -440,7 +576,7 @@ function handleUploadClick() {
 // INITIALIZATION
 // =============================================================
 document.addEventListener('DOMContentLoaded', async function () {
-    // Add event listeners
+    // Filter event listeners
     const subjectSelect = document.getElementById('subject-filter');
     const courseSelect = document.getElementById('course-filter');
     const clearBtn = document.getElementById('clear-filters');
@@ -450,6 +586,30 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (courseSelect) courseSelect.addEventListener('change', handleCourseChange);
     if (clearBtn) clearBtn.addEventListener('click', clearFilters);
     if (fabButton) fabButton.addEventListener('click', handleUploadClick);
+
+    // Upload modal event listeners
+    const uploadModal = document.getElementById('upload-modal');
+    const uploadModalClose = document.getElementById('upload-modal-close');
+    const uploadForm = document.getElementById('upload-form');
+    const uploadSubject = document.getElementById('upload-subject');
+
+    if (uploadModalClose) uploadModalClose.addEventListener('click', closeUploadModal);
+    if (uploadModal) {
+        uploadModal.addEventListener('click', (e) => {
+            if (e.target === uploadModal) closeUploadModal();
+        });
+    }
+    if (uploadForm) uploadForm.addEventListener('submit', handleUploadSubmit);
+    if (uploadSubject) {
+        uploadSubject.addEventListener('change', (e) => {
+            populateUploadCourseDropdown(e.target.value);
+        });
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeUploadModal();
+    });
 
     // Fetch courses for dropdown
     await fetchAndGroupCourses();
