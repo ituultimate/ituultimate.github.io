@@ -44,6 +44,9 @@ const urlParams = new URLSearchParams(window.location.search);
 const rawRedirect = urlParams.get('redirect') || '/';
 const redirectTarget = ALLOWED_REDIRECTS.includes(rawRedirect) ? rawRedirect : '/';
 
+// Guard flag to prevent redundant redirects during auth state changes
+let isRedirecting = false;
+
 // ==========================================
 // 2. ARAYÜZ (NAVBAR & LOADING) YÖNETİMİ
 // ==========================================
@@ -91,7 +94,7 @@ function updateUI(user) {
 
             document.getElementById('global-logout-btn').addEventListener('click', (e) => {
                 e.preventDefault();
-                signOut(auth).then(() => window.location.href = "/");
+                signOut(auth).then(() => window.location.replace("/"));
             });
         } else {
             // Kullanıcı yoksa veya mailini doğrulamamışsa "Giriş Yap" göster
@@ -116,8 +119,20 @@ function updateUI(user) {
         if (mainContent) mainContent.style.display = 'block';
     } else {
         // Yetkisiz erişim varsa yönlendir
+        // Skip if already on login/register page to prevent loops
+        if (currentPage.includes("login") || currentPage.includes("register")) {
+            if (loadingOverlay) loadingOverlay.style.display = 'none';
+            if (mainContent) mainContent.style.display = 'block';
+            return;
+        }
+
+        // Prevent redundant redirects
+        if (isRedirecting) return;
+        isRedirecting = true;
+
         console.warn("Erişim reddedildi (Mail onayı yok veya giriş yapılmadı).");
-        window.location.href = `/login.html?redirect=${encodeURIComponent(currentPage)}`;
+        // Use replace() instead of href to prevent back button loop
+        window.location.replace(`/login?redirect=${encodeURIComponent(currentPage)}`);
     }
 }
 
@@ -161,8 +176,8 @@ function setupAuthForms() {
                             signOut(auth); // Girişi iptal et
                             throw { code: 'auth/email-not-verified' }; // Hata fırlat
                         }
-                        // Doğrulanmışsa devam et
-                        window.location.href = redirectTarget;
+                        // Doğrulanmışsa devam et - use replace to avoid back button issues
+                        window.location.replace(redirectTarget);
                     })
                     .catch((err) => {
                         btn.innerText = "Giriş Yap";
@@ -203,7 +218,7 @@ function setupAuthForms() {
                         // Kullanıcıyı bilgilendir ve çıkış yap (Login sayfasına at)
                         alert("Kayıt başarılı! Lütfen email adresinize gönderilen doğrulama linkine tıklayın. (Spam klasörünüzü kontrol etmeyi unutmayın.)");
                         await signOut(auth);
-                        window.location.href = "/login.html";
+                        window.location.replace("/login");
                     })
                     .catch((err) => {
                         btn.innerText = "Kayıt Ol";
@@ -220,7 +235,7 @@ function setupAuthForms() {
             signInWithPopup(auth, new GoogleAuthProvider())
                 .then(() => {
                     // Google hesapları otomatik olarak "Doğrulanmış" sayılır, ekstra kontrole gerek yok
-                    window.location.href = redirectTarget;
+                    window.location.replace(redirectTarget);
                 })
                 .catch((err) => showError(err, errorDiv));
         });

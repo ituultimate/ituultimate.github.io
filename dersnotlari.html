@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YYGVJKPCM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-3YYGVJKPCM');
+    </script>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-MKCJ22QK');</script>
+    <!-- End Google Tag Manager -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="ITU UltiMate" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Notları | ITU UltiMate</title>
+    <meta name="description"
+        content="İTÜ öğrencileri için ders notları paylaşım platformu. Arkadaşlarınla notlarını paylaş, başkalarının notlarından faydalan.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Patrick+Hand&display=swap"
+        rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="dersnotlari-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKCJ22QK" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <header class="header">
+        <nav class="navbar container">
+            <a href="/" class="nav-logo">ITU UltiMate</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
+                <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
+                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
+                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+        </div>
+
+        <section id="main-content" style="display: none;">
+            <div class="notes-page-wrapper">
+
+                <!-- Page Header -->
+                <div class="notes-page-header">
+                    <h1 class="notes-page-title">📓 Ders Notları</h1>
+                    <p class="notes-page-subtitle">
+                        Arkadaşlarınla ders notlarını paylaş, başkalarının notlarından faydalan.
+                        Birlikte öğrenmek daha kolay!
+                    </p>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="notes-filter-section">
+                    <div class="filter-group">
+                        <label for="subject-filter" class="filter-label">
+                            <i class="fas fa-book"></i> Branş Kodu
+                        </label>
+                        <select id="subject-filter" class="filter-select">
+                            <option value="">Tümü</option>
+                            <!-- Options populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="course-filter" class="filter-label">
+                            <i class="fas fa-graduation-cap"></i> Ders Kodu
+                        </label>
+                        <select id="course-filter" class="filter-select" disabled>
+                            <option value="">Önce branş seçin</option>
+                            <!-- Options populated by JavaScript -->
+                        </select>
+                    </div>
+                    <button id="clear-filters" class="filter-clear-btn" style="display: none;">
+                        <i class="fas fa-times"></i> Filtreleri Temizle
+                    </button>
+                </div>
+
+                <!-- Filter Status -->
+                <div class="filter-status" id="filter-status">
+                    <i class="fas fa-fire"></i> En popüler 9 not gösteriliyor
+                </div>
+
+                <!-- Notes Grid -->
+                <div class="notes-grid" id="notes-grid">
+                    <!-- Notes will be rendered here by JavaScript -->
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Floating Action Button -->
+        <button class="fab-upload" id="fab-upload" aria-label="Not Yükle">
+            <i class="fas fa-plus"></i>
+        </button>
+        <span class="fab-tooltip">Not Yükle</span>
+
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-left">
+                <a href="/about" class="footer-link">Hakkında & Gizlilik</a>
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/ituultimate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/company/itu-ultimate" target="_blank" rel="noopener"
+                        class="social-icon">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@ITUUltiMate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-right">
+                <p>&copy; 2025 ITU UltiMate. Made with ❤️ for ITU Students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="nav-menu.js"></script>
+    <script type="module" src="auth-manager.js"></script>
+    <script src="dersnotlari-script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        // ServiceWorker registration successful
+                    }, (err) => {
+                        // ServiceWorker registration failed
+                    });
+            });
+        }
+    </script>
+</body>
+
+</html>

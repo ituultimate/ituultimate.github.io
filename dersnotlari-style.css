@@ -1,0 +1,525 @@
+/* ===========================================
+   DERS NOTLARI PAGE STYLES
+   Math Notebook Theme
+   =========================================== */
+
+/* --- Import Patrick Hand Font --- */
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+
+/* --- Graph Paper Background --- */
+.notes-page-wrapper {
+    min-height: 90vh;
+    padding: 40px 20px;
+    background-color: #ffffff;
+    background-image:
+        linear-gradient(rgba(200, 200, 230, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200, 200, 230, 0.3) 1px, transparent 1px);
+    background-size: 20px 20px;
+    position: relative;
+}
+
+/* --- Page Header --- */
+.notes-page-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.notes-page-title {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 3rem;
+    color: #062a54;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+.notes-page-subtitle {
+    font-family: 'Inter', sans-serif;
+    color: #6c757d;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* --- Filter Section --- */
+.notes-filter-section {
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 2px dashed #d0d0e0;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 200px;
+}
+
+.filter-label {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.1rem;
+    color: #062a54;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-label i {
+    color: #00a8cc;
+}
+
+.filter-select {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1rem;
+    padding: 10px 15px;
+    border: 2px solid #d0d0e0;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23062a54' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+}
+
+.filter-select:hover {
+    border-color: #00a8cc;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #00a8cc;
+    box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.2);
+}
+
+.filter-select:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.filter-clear-btn {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1rem;
+    padding: 10px 20px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-clear-btn:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+/* --- Filter Status --- */
+.filter-status {
+    max-width: 1200px;
+    margin: 0 auto 25px auto;
+    padding: 0 20px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.2rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-status i {
+    color: #ff6b35;
+}
+
+.filter-status.filtered i {
+    color: #00a8cc;
+}
+
+/* --- Notes Grid Container --- */
+.notes-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 0 20px;
+}
+
+/* --- Note Card Base Styles --- */
+.note-card {
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 25px 20px 20px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #f0f0f0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 320px;
+}
+
+.note-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Scotch Tape Effect --- */
+.note-card::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 25px;
+    background: linear-gradient(180deg,
+            rgba(255, 248, 220, 0.85) 0%,
+            rgba(245, 235, 200, 0.75) 50%,
+            rgba(255, 248, 220, 0.85) 100%);
+    border-radius: 2px;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+    opacity: 0.9;
+}
+
+/* --- Card Content --- */
+.note-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-top: 10px;
+}
+
+.note-subject {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.9rem;
+    color: #00a8cc;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.note-date {
+    font-size: 0.8rem;
+    color: #adb5bd;
+}
+
+.note-title {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.4rem;
+    color: #062a54;
+    margin-bottom: 10px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.note-description {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.note-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #6c757d;
+    padding-top: 10px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.note-author i {
+    color: #00a8cc;
+}
+
+/* --- Card Footer (Button + Likes) --- */
+.note-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 12px;
+}
+
+/* --- External Link Button --- */
+.note-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #062a54;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    position: relative;
+    z-index: 10;
+}
+
+.note-link-btn:hover {
+    background-color: #0a3d6f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 42, 84, 0.3);
+    color: white;
+}
+
+/* --- Like/Dislike System --- */
+.note-rating {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 10;
+}
+
+.rating-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 5px;
+    color: #6c757d;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rating-btn:hover {
+    transform: scale(1.2);
+}
+
+.rating-btn.like-btn:hover,
+.rating-btn.like-btn.active {
+    color: #28a745;
+}
+
+.rating-btn.dislike-btn:hover,
+.rating-btn.dislike-btn.active {
+    color: #dc3545;
+}
+
+.rating-count {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #495057;
+    min-width: 24px;
+    text-align: center;
+}
+
+.rating-count.positive {
+    color: #28a745;
+}
+
+.rating-count.negative {
+    color: #dc3545;
+}
+
+/* --- Floating Action Button (FAB) --- */
+.fab-upload {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #062a54 0%, #0a3d6f 100%);
+    color: white;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(6, 42, 84, 0.4);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.fab-upload:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 8px 25px rgba(6, 42, 84, 0.5);
+    background: linear-gradient(135deg, #00a8cc 0%, #0096b3 100%);
+}
+
+.fab-upload i {
+    transition: transform 0.3s ease;
+}
+
+/* --- Tooltip for FAB --- */
+.fab-tooltip {
+    position: fixed;
+    bottom: 45px;
+    right: 100px;
+    background: #333;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    z-index: 99;
+}
+
+.fab-tooltip::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left: 6px solid #333;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+}
+
+.fab-upload:hover+.fab-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* --- Empty State --- */
+.notes-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+    grid-column: 1 / -1;
+}
+
+.notes-empty-state i {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 20px;
+}
+
+.notes-empty-state h3 {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.5rem;
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+    .notes-page-wrapper {
+        padding: 30px 15px;
+    }
+
+    .notes-page-title {
+        font-size: 2.2rem;
+    }
+
+    .notes-page-subtitle {
+        font-size: 1rem;
+    }
+
+    .notes-filter-section {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .filter-group {
+        min-width: 100%;
+    }
+
+    .filter-clear-btn {
+        align-self: center;
+    }
+
+    .filter-status {
+        font-size: 1rem;
+        justify-content: center;
+    }
+
+    .notes-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        padding: 0 10px;
+    }
+
+    .note-card {
+        padding: 20px 15px 15px 15px;
+        height: 300px;
+    }
+
+    .fab-upload {
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        font-size: 1.6rem;
+    }
+
+    .fab-tooltip {
+        display: none;
+    }
+
+    .note-card-footer {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .note-rating {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 400px) {
+    .notes-page-title {
+        font-size: 1.8rem;
+    }
+
+    .note-title {
+        font-size: 1.2rem;
+    }
+
+    .note-card::before {
+        width: 60px;
+        height: 20px;
+    }
+
+    .note-card {
+        height: 320px;
+    }
+}
