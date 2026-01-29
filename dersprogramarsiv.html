@@ -30,7 +30,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ders Programı Arşivi | ITU UltiMate</title>
     <meta name="description"
+<<<<<<< Updated upstream
         content="İTÜ öğrencilerinin ders programlarını paylaştığı arşiv. Örnek programlardan ilham al.">
+=======
+        content="İTÜ ders programı arşivi. Dönem ve bölüm seçerek ders programlarını görüntüleyin.">
+>>>>>>> Stashed changes
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -64,6 +68,7 @@
                 <!-- Page Header -->
                 <div class="notes-page-header">
                     <h1 class="notes-page-title">Ders Programı Arşivi</h1>
+<<<<<<< Updated upstream
                     <p class="notes-page-subtitle">Öğrencilerin paylaştığı örnek ders programları</p>
                 </div>
 
@@ -75,11 +80,39 @@
                             <option value="newest">En Yeni</option>
                             <option value="popular">En Popüler</option>
                             <option value="oldest">En Eski</option>
+=======
+                    <p class="notes-page-subtitle">Dönem ve bölüm seçerek ders programlarını görüntüleyin</p>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="schedule-filters">
+                    <div class="schedule-filter-group">
+                        <label for="term-filter">
+                            <i class="fas fa-calendar-alt"></i> Akademik Dönem
+                        </label>
+                        <select id="term-filter" class="schedule-select">
+                            <option value="">Dönem Seçin</option>
+                            <option value="2025-2026-fall">2025-2026 Güz</option>
+                            <option value="2024-2025-spring">2024-2025 Bahar</option>
+                            <option value="2024-2025-fall">2024-2025 Güz</option>
+                            <option value="2023-2024-spring">2023-2024 Bahar</option>
+                            <option value="2023-2024-fall">2023-2024 Güz</option>
+                        </select>
+                    </div>
+
+                    <div class="schedule-filter-group">
+                        <label for="subject-filter">
+                            <i class="fas fa-building-columns"></i> Branş Kodu
+                        </label>
+                        <select id="subject-filter" class="schedule-select" disabled>
+                            <option value="">Önce dönem seçin</option>
+>>>>>>> Stashed changes
                         </select>
                     </div>
                 </div>
 
                 <!-- Results Status -->
+<<<<<<< Updated upstream
                 <div class="filter-status" id="filter-status">
                     <span id="result-count">0</span> program bulundu
                 </div>
@@ -94,12 +127,46 @@
                     <button class="load-more-btn" id="load-more-btn">
                         <i class="fas fa-chevron-down"></i> Daha Fazla Göster
                     </button>
+=======
+                <div class="filter-status" id="filter-status" style="display: none;">
+                    <i class="fas fa-list"></i> <span id="result-count">0</span> ders bulundu
+                </div>
+
+                <!-- Schedule Table -->
+                <div class="schedule-table-wrapper" id="schedule-table-wrapper" style="display: none;">
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Ders Kodu</th>
+                                <th>Ders Adı</th>
+                                <th>Öğretim Görevlisi</th>
+                                <th>Gün</th>
+                                <th>Saat</th>
+                                <th>Bina</th>
+                                <th>Kontenjan</th>
+                                <th>Yazılı</th>
+                                <th>CRN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-table-body">
+                            <!-- Rows will be rendered by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div class="schedule-empty-state" id="schedule-empty-state">
+                    <i class="fas fa-calendar-week"></i>
+                    <h3>Ders programını görüntülemek için dönem ve branş kodu seçin</h3>
+                    <p>Seçim yaptığınızda dersler burada listelenecek</p>
+>>>>>>> Stashed changes
                 </div>
 
             </div>
         </section>
     </main>
 
+<<<<<<< Updated upstream
     <!-- Floating Action Button -->
     <button class="fab" id="fab-upload" aria-label="Program Paylaş">
         <i class="fas fa-plus"></i>
@@ -139,6 +206,8 @@
         </div>
     </div>
 
+=======
+>>>>>>> Stashed changes
     <footer class="footer">
         <div class="container">
             <div class="footer-left">
