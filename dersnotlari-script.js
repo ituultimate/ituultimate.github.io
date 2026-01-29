@@ -137,21 +137,23 @@ const fetchNotes = async () => {
 
         // Build query based on filters
         if (currentFilters.courseCode) {
-            // Filter by specific course
+            // Scenario B: Filter by specific course - limit 50
             notesQuery = query(
                 notesCollection,
                 where('courseCode', '==', currentFilters.courseCode),
-                orderBy('netLikes', 'desc')
+                orderBy('netLikes', 'desc'),
+                limit(50)
             );
         } else if (currentFilters.subjectCode) {
-            // Filter by subject
+            // Scenario B: Filter by subject - limit 50
             notesQuery = query(
                 notesCollection,
                 where('subjectCode', '==', currentFilters.subjectCode),
-                orderBy('netLikes', 'desc')
+                orderBy('netLikes', 'desc'),
+                limit(50)
             );
         } else {
-            // Default: Top 9 by likes
+            // Scenario A: Default - Top 9 by likes globally
             notesQuery = query(
                 notesCollection,
                 orderBy('netLikes', 'desc'),
@@ -290,22 +292,27 @@ function formatDate(timestamp) {
     }
 }
 
-// --- Update filter status text ---
+// --- Update filter status / section heading ---
 function updateFilterStatus(count) {
     const statusElement = document.getElementById('filter-status');
     const clearBtn = document.getElementById('clear-filters');
     if (!statusElement) return;
 
     if (!currentFilters.subjectCode && !currentFilters.courseCode) {
-        statusElement.innerHTML = '<i class="fas fa-fire"></i> En popüler 9 not gösteriliyor';
+        // Scenario A: No filter - Top 9 globally
+        statusElement.innerHTML = '🔥 En Popüler 9 Not';
         statusElement.classList.remove('filtered');
         if (clearBtn) clearBtn.style.display = 'none';
     } else if (currentFilters.courseCode) {
-        statusElement.innerHTML = `<i class="fas fa-filter"></i> ${currentFilters.courseCode} için ${count} not bulundu`;
+        // Scenario B: Course selected - show course code in heading
+        // Remove spaces from courseCode for display (e.g., "MAT 103" -> "MAT103")
+        const displayCode = currentFilters.courseCode.replace(/\s+/g, '');
+        statusElement.innerHTML = `📚 ${displayCode} Notları`;
         statusElement.classList.add('filtered');
         if (clearBtn) clearBtn.style.display = 'flex';
     } else {
-        statusElement.innerHTML = `<i class="fas fa-filter"></i> ${currentFilters.subjectCode} branşında ${count} not bulundu`;
+        // Scenario B: Subject selected - show subject code in heading
+        statusElement.innerHTML = `📚 ${currentFilters.subjectCode} Notları`;
         statusElement.classList.add('filtered');
         if (clearBtn) clearBtn.style.display = 'flex';
     }
