@@ -1,52 +1,28 @@
-/* ===========================================
-   DERS NOTLARI PAGE SCRIPT
-   Upload Access Control, Note Rendering & Filtering
-   =========================================== */
+/**
+ * DERS NOTLARI PAGE SCRIPT
+ * Firebase Integration for Notes & Filtering
+ * Uses modern ES modules with shared Firebase config
+ */
 
-// --- Mock Authentication State ---
+import { auth, db } from './firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+import {
+    collection,
+    getDocs,
+    query,
+    where,
+    orderBy,
+    limit,
+    doc,
+    updateDoc,
+    increment
+} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+// --- State Variables ---
 let isUserLoggedIn = false;
-
-// --- Robust Mock Notes Data ---
-const allNotes = [
-    // MAT (Mathematics)
-    { id: 1, subjectCode: 'MAT', courseCode: 'MAT103', title: 'Kalkülüs I - Limit ve Süreklilik', description: 'Limit tanımı, limit teoremleri, sağdan ve soldan limit, süreklilik kavramı ve ara değer teoremi.', uploader: 'Ahmet Y.', date: '28 Ocak 2026', externalUrl: 'https://drive.google.com/drive/mat103-1', likes: 45, dislikes: 3 },
-    { id: 2, subjectCode: 'MAT', courseCode: 'MAT103', title: 'Kalkülüs I - Türev Uygulamaları', description: 'Türev kuralları, zincir kuralı, maksimum-minimum problemleri ve grafik çizimi.', uploader: 'Zeynep K.', date: '27 Ocak 2026', externalUrl: 'https://drive.google.com/drive/mat103-2', likes: 38, dislikes: 2 },
-    { id: 3, subjectCode: 'MAT', courseCode: 'MAT104', title: 'Kalkülüs II - İntegral Teknikleri', description: 'Belirsiz integral, belirli integral, kısmi kesirler ve trigonometrik integrasyon.', uploader: 'Can T.', date: '26 Ocak 2026', externalUrl: 'https://drive.google.com/drive/mat104-1', likes: 52, dislikes: 5 },
-    { id: 4, subjectCode: 'MAT', courseCode: 'MAT104', title: 'Kalkülüs II - Seri ve Diziler', description: 'Yakınsaklık testleri, Taylor ve Maclaurin serileri, kuvvet serileri.', uploader: 'Elif S.', date: '25 Ocak 2026', externalUrl: 'https://drive.google.com/drive/mat104-2', likes: 29, dislikes: 1 },
-    { id: 5, subjectCode: 'MAT', courseCode: 'MAT281', title: 'Diferansiyel Denklemler - Hafta 3', description: 'Birinci mertebeden lineer diferansiyel denklemler ve integrasyon faktörü yöntemi.', uploader: 'Mehmet A.', date: '24 Ocak 2026', externalUrl: 'https://drive.google.com/drive/mat281-1', likes: 35, dislikes: 4 },
-    { id: 6, subjectCode: 'MAT', courseCode: 'MAT281', title: 'Diferansiyel Denklemler - Laplace', description: 'Laplace dönüşümü ve ters Laplace dönüşümü ile diferansiyel denklem çözümleri.', uploader: 'Selin M.', date: '23 Ocak 2026', externalUrl: 'https://drive.google.com/drive/mat281-2', likes: 41, dislikes: 2 },
-
-    // FIZ (Physics)
-    { id: 7, subjectCode: 'FIZ', courseCode: 'FIZ101', title: 'Fizik I - Kinematik Özet', description: 'Hız, ivme, düzgün hareket, eğik atış ve dairesel hareket formülleri.', uploader: 'Ali R.', date: '28 Ocak 2026', externalUrl: 'https://drive.google.com/drive/fiz101-1', likes: 67, dislikes: 4 },
-    { id: 8, subjectCode: 'FIZ', courseCode: 'FIZ101', title: 'Fizik I - Newton Yasaları', description: 'Newton\'un hareket yasaları, sürtünme kuvveti ve uygulama problemleri.', uploader: 'Deniz K.', date: '27 Ocak 2026', externalUrl: 'https://drive.google.com/drive/fiz101-2', likes: 55, dislikes: 3 },
-    { id: 9, subjectCode: 'FIZ', courseCode: 'FIZ102', title: 'Fizik II - Elektrostatik', description: 'Coulomb yasası, elektrik alan, potansiyel ve kondansatörler.', uploader: 'Berk Ö.', date: '26 Ocak 2026', externalUrl: 'https://drive.google.com/drive/fiz102-1', likes: 48, dislikes: 2 },
-    { id: 10, subjectCode: 'FIZ', courseCode: 'FIZ102', title: 'Fizik II - Maxwell Denklemleri', description: 'Maxwell denklemleri, Faraday yasası ve manyetik indüksiyon konularının özeti.', uploader: 'Zeynep K.', date: '25 Ocak 2026', externalUrl: 'https://drive.google.com/drive/fiz102-2', likes: 33, dislikes: 1 },
-
-    // KIM (Chemistry)
-    { id: 11, subjectCode: 'KIM', courseCode: 'KIM101', title: 'Genel Kimya - Atom Yapısı', description: 'Atom modelleri, kuantum sayıları, orbital dolumu ve periyodik tablo.', uploader: 'Ayşe B.', date: '28 Ocak 2026', externalUrl: 'https://drive.google.com/drive/kim101-1', likes: 42, dislikes: 3 },
-    { id: 12, subjectCode: 'KIM', courseCode: 'KIM101', title: 'Genel Kimya - Kimyasal Bağlar', description: 'İyonik, kovalent ve metalik bağlar. Lewis yapıları ve VSEPR teorisi.', uploader: 'Ozan T.', date: '27 Ocak 2026', externalUrl: 'https://drive.google.com/drive/kim101-2', likes: 36, dislikes: 2 },
-    { id: 13, subjectCode: 'KIM', courseCode: 'KIM102', title: 'Organik Kimya - Fonksiyonel Gruplar', description: 'Alkanlar, alkenler, alkoller, eterler ve karboksilik asitler.', uploader: 'Elif S.', date: '26 Ocak 2026', externalUrl: 'https://drive.google.com/drive/kim102-1', likes: 28, dislikes: 4 },
-    { id: 14, subjectCode: 'KIM', courseCode: 'KIM102', title: 'Organik Kimya - Reaksiyon Mekanizmaları', description: 'SN1, SN2, E1, E2 reaksiyonları ve stereokimya kavramları.', uploader: 'Ceren A.', date: '25 Ocak 2026', externalUrl: 'https://drive.google.com/drive/kim102-2', likes: 31, dislikes: 2 },
-
-    // BIL (Computer Science)
-    { id: 15, subjectCode: 'BIL', courseCode: 'BIL101', title: 'Bilgisayara Giriş - Algoritma', description: 'Algoritma tasarımı, akış diyagramları ve temel programlama kavramları.', uploader: 'Emre Ş.', date: '28 Ocak 2026', externalUrl: 'https://drive.google.com/drive/bil101-1', likes: 58, dislikes: 2 },
-    { id: 16, subjectCode: 'BIL', courseCode: 'BIL101', title: 'Bilgisayara Giriş - C Programlama', description: 'C programlama dili temelleri, değişkenler, döngüler ve fonksiyonlar.', uploader: 'Kaan P.', date: '27 Ocak 2026', externalUrl: 'https://drive.google.com/drive/bil101-2', likes: 62, dislikes: 3 },
-    { id: 17, subjectCode: 'BIL', courseCode: 'BIL102', title: 'Python Veri Yapıları', description: 'Liste, tuple, dictionary ve set veri yapılarının karşılaştırmalı özeti.', uploader: 'Mehmet A.', date: '26 Ocak 2026', externalUrl: 'https://drive.google.com/drive/bil102-1', likes: 71, dislikes: 2 },
-    { id: 18, subjectCode: 'BIL', courseCode: 'BIL102', title: 'Python OOP Kavramları', description: 'Sınıflar, nesneler, kalıtım, polimorfizm ve kapsülleme.', uploader: 'Seda Y.', date: '25 Ocak 2026', externalUrl: 'https://drive.google.com/drive/bil102-2', likes: 49, dislikes: 1 },
-
-    // ELE (Electrical Engineering)
-    { id: 19, subjectCode: 'ELE', courseCode: 'ELE201', title: 'Devre Teorisi - Temel Kavramlar', description: 'Ohm yasası, Kirchhoff yasaları, seri ve paralel devreler.', uploader: 'Burak Ç.', date: '28 Ocak 2026', externalUrl: 'https://drive.google.com/drive/ele201-1', likes: 44, dislikes: 3 },
-    { id: 20, subjectCode: 'ELE', courseCode: 'ELE201', title: 'Devre Teorisi - Thevenin Norton', description: 'Thevenin ve Norton eşdeğer devreleri, süperpozisyon teoremi.', uploader: 'Selin M.', date: '27 Ocak 2026', externalUrl: 'https://drive.google.com/drive/ele201-2', likes: 39, dislikes: 2 },
-    { id: 21, subjectCode: 'ELE', courseCode: 'ELE202', title: 'Elektronik - Diyotlar', description: 'Diyot çeşitleri, LED, Zener diyot ve doğrultucu devreler.', uploader: 'Ege N.', date: '26 Ocak 2026', externalUrl: 'https://drive.google.com/drive/ele202-1', likes: 27, dislikes: 1 },
-    { id: 22, subjectCode: 'ELE', courseCode: 'ELE202', title: 'Elektronik - Transistörler', description: 'BJT ve MOSFET transistörler, yükselteç devreleri.', uploader: 'Arda K.', date: '25 Ocak 2026', externalUrl: 'https://drive.google.com/drive/ele202-2', likes: 34, dislikes: 4 },
-
-    // MUK (Mechanics of Materials)
-    { id: 23, subjectCode: 'MUK', courseCode: 'MUK201', title: 'Mukavemet - Gerilme Şekil Değiştirme', description: 'Normal gerilme, kayma gerilmesi, Hooke yasası ve elastik modül.', uploader: 'Tolga B.', date: '24 Ocak 2026', externalUrl: 'https://drive.google.com/drive/muk201-1', likes: 22, dislikes: 2 },
-    { id: 24, subjectCode: 'MUK', courseCode: 'MUK201', title: 'Mukavemet - Eğilme Momentleri', description: 'Kesit alanı momentleri, eğilme gerilmesi ve elastik eğri.', uploader: 'İrem D.', date: '23 Ocak 2026', externalUrl: 'https://drive.google.com/drive/muk201-2', likes: 19, dislikes: 1 }
-];
-
-// --- Track user votes ---
-const userVotes = {};
+let currentUser = null;
+let allCoursesNested = {};  // Grouped courses data
+let userVotes = {};         // Track user votes locally
 
 // --- Current filter state ---
 let currentFilters = {
@@ -54,53 +30,60 @@ let currentFilters = {
     courseCode: ''
 };
 
-// --- Get unique subject codes ---
-function getSubjectCodes() {
-    const subjects = [...new Set(allNotes.map(note => note.subjectCode))];
-    return subjects.sort();
-}
+// =============================================================
+// FETCH COURSES (Similar to Scheduler)
+// =============================================================
+const fetchAndGroupCourses = async () => {
+    const subjectSelect = document.getElementById('subject-filter');
+    if (!subjectSelect) return;
 
-// --- Get course codes for a subject ---
-function getCourseCodes(subjectCode) {
-    const courses = [...new Set(
-        allNotes
-            .filter(note => note.subjectCode === subjectCode)
-            .map(note => note.courseCode)
-    )];
-    return courses.sort();
-}
+    try {
+        // Fetch from the same collection as scheduler
+        const coursesCollection = collection(db, '2526-bahar');
+        const coursesSnapshot = await getDocs(coursesCollection);
 
-// --- Filter and sort notes ---
-function getFilteredNotes() {
-    let filtered = [...allNotes];
+        if (coursesSnapshot.empty) {
+            console.warn('No courses found in database');
+            return;
+        }
 
-    // Apply subject filter
-    if (currentFilters.subjectCode) {
-        filtered = filtered.filter(note => note.subjectCode === currentFilters.subjectCode);
+        const courses = coursesSnapshot.docs.map(docSnap => ({
+            id: docSnap.id,
+            ...docSnap.data()
+        }));
+
+        // Group courses by prefix (subject code)
+        allCoursesNested = courses.reduce((acc, course) => {
+            const codeString = String(course.code || '').trim();
+            if (!codeString) return acc;
+
+            const prefix = codeString.split(' ')[0];
+            if (!prefix) return acc;
+
+            const fullCode = codeString;
+
+            if (!acc[prefix]) acc[prefix] = {};
+            if (!acc[prefix][fullCode]) {
+                acc[prefix][fullCode] = course.name || 'N/A';
+            }
+
+            return acc;
+        }, {});
+
+        // Populate subject dropdown
+        populateSubjectDropdown();
+
+    } catch (error) {
+        console.error('Error fetching courses:', error);
     }
-
-    // Apply course filter
-    if (currentFilters.courseCode) {
-        filtered = filtered.filter(note => note.courseCode === currentFilters.courseCode);
-    }
-
-    // Sort by net likes (descending)
-    filtered.sort((a, b) => (b.likes - b.dislikes) - (a.likes - a.dislikes));
-
-    // If no filters, return top 9
-    if (!currentFilters.subjectCode && !currentFilters.courseCode) {
-        return filtered.slice(0, 9);
-    }
-
-    return filtered;
-}
+};
 
 // --- Populate subject dropdown ---
 function populateSubjectDropdown() {
     const subjectSelect = document.getElementById('subject-filter');
     if (!subjectSelect) return;
 
-    const subjects = getSubjectCodes();
+    const subjects = Object.keys(allCoursesNested).sort();
     let options = '<option value="">Tümü</option>';
 
     subjects.forEach(subject => {
@@ -115,54 +98,112 @@ function populateCourseDropdown(subjectCode) {
     const courseSelect = document.getElementById('course-filter');
     if (!courseSelect) return;
 
-    if (!subjectCode) {
+    if (!subjectCode || !allCoursesNested[subjectCode]) {
         courseSelect.innerHTML = '<option value="">Önce branş seçin</option>';
         courseSelect.disabled = true;
         return;
     }
 
-    const courses = getCourseCodes(subjectCode);
+    const courses = Object.keys(allCoursesNested[subjectCode]).sort();
     let options = '<option value="">Tüm Dersler</option>';
 
-    courses.forEach(course => {
-        options += `<option value="${course}">${course}</option>`;
+    courses.forEach(courseCode => {
+        const courseName = allCoursesNested[subjectCode][courseCode];
+        options += `<option value="${courseCode}">${courseCode}</option>`;
     });
 
     courseSelect.innerHTML = options;
     courseSelect.disabled = false;
 }
 
-// --- Update filter status text ---
-function updateFilterStatus() {
-    const statusElement = document.getElementById('filter-status');
-    const clearBtn = document.getElementById('clear-filters');
-    if (!statusElement) return;
-
-    const notes = getFilteredNotes();
-
-    if (!currentFilters.subjectCode && !currentFilters.courseCode) {
-        statusElement.innerHTML = '<i class="fas fa-fire"></i> En popüler 9 not gösteriliyor';
-        statusElement.classList.remove('filtered');
-        if (clearBtn) clearBtn.style.display = 'none';
-    } else if (currentFilters.courseCode) {
-        statusElement.innerHTML = `<i class="fas fa-filter"></i> ${currentFilters.courseCode} için ${notes.length} not bulundu`;
-        statusElement.classList.add('filtered');
-        if (clearBtn) clearBtn.style.display = 'flex';
-    } else {
-        statusElement.innerHTML = `<i class="fas fa-filter"></i> ${currentFilters.subjectCode} branşında ${notes.length} not bulundu`;
-        statusElement.classList.add('filtered');
-        if (clearBtn) clearBtn.style.display = 'flex';
-    }
-}
-
-// --- Render Notes Function ---
-function renderNotes() {
+// =============================================================
+// FETCH NOTES FROM FIRESTORE
+// =============================================================
+const fetchNotes = async () => {
     const notesGrid = document.getElementById('notes-grid');
     if (!notesGrid) return;
 
-    const notes = getFilteredNotes();
+    // Show loading state
+    notesGrid.innerHTML = `
+        <div class="notes-empty-state">
+            <div class="spinner" style="width:40px;height:40px;border-width:4px;margin:0 auto 20px;"></div>
+            <p>Notlar yükleniyor...</p>
+        </div>
+    `;
 
-    if (notes.length === 0) {
+    try {
+        const notesCollection = collection(db, 'notes');
+        let notesQuery;
+
+        // Build query based on filters
+        if (currentFilters.courseCode) {
+            // Filter by specific course
+            notesQuery = query(
+                notesCollection,
+                where('courseCode', '==', currentFilters.courseCode),
+                orderBy('netLikes', 'desc')
+            );
+        } else if (currentFilters.subjectCode) {
+            // Filter by subject
+            notesQuery = query(
+                notesCollection,
+                where('subjectCode', '==', currentFilters.subjectCode),
+                orderBy('netLikes', 'desc')
+            );
+        } else {
+            // Default: Top 9 by likes
+            notesQuery = query(
+                notesCollection,
+                orderBy('netLikes', 'desc'),
+                limit(9)
+            );
+        }
+
+        const notesSnapshot = await getDocs(notesQuery);
+
+        if (notesSnapshot.empty) {
+            renderEmptyState();
+            return;
+        }
+
+        const notes = notesSnapshot.docs.map(docSnap => ({
+            id: docSnap.id,
+            ...docSnap.data()
+        }));
+
+        renderNotes(notes);
+        updateFilterStatus(notes.length);
+
+    } catch (error) {
+        console.error('Error fetching notes:', error);
+
+        // Check if it's an index error
+        if (error.code === 'failed-precondition') {
+            notesGrid.innerHTML = `
+                <div class="notes-empty-state">
+                    <i class="fas fa-database"></i>
+                    <h3>Veritabanı indeksi gerekli</h3>
+                    <p>Lütfen Firestore konsolunda gerekli indeksi oluşturun.</p>
+                </div>
+            `;
+        } else {
+            notesGrid.innerHTML = `
+                <div class="notes-empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Hata oluştu</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
+        }
+    }
+};
+
+// --- Render empty state ---
+function renderEmptyState() {
+    const notesGrid = document.getElementById('notes-grid');
+    if (!notesGrid) return;
+
+    if (currentFilters.subjectCode || currentFilters.courseCode) {
         notesGrid.innerHTML = `
             <div class="notes-empty-state">
                 <i class="fas fa-search"></i>
@@ -170,41 +211,60 @@ function renderNotes() {
                 <p>Bu kriterlere uygun not henüz yok.</p>
             </div>
         `;
-        return;
+    } else {
+        notesGrid.innerHTML = `
+            <div class="notes-empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>Henüz not yok</h3>
+                <p>İlk notu yükleyen sen ol!</p>
+            </div>
+        `;
     }
+}
+
+// --- Render Notes ---
+function renderNotes(notes) {
+    const notesGrid = document.getElementById('notes-grid');
+    if (!notesGrid) return;
 
     let htmlContent = '';
 
     notes.forEach(note => {
-        const netLikes = note.likes - note.dislikes;
+        const netLikes = note.netLikes || (note.likes || 0) - (note.dislikes || 0);
         const ratingClass = netLikes > 0 ? 'positive' : (netLikes < 0 ? 'negative' : '');
         const userVote = userVotes[note.id] || null;
+        const courseCode = note.courseCode || note.subjectCode || 'DERS';
+        const title = note.title || 'Başlıksız Not';
+        const description = note.description || '';
+        const uploader = note.uploader || note.author || 'Anonim';
+        const date = note.date || formatDate(note.createdAt);
+        const externalUrl = note.externalUrl || note.url || '#';
 
         htmlContent += `
-            <article class="note-card" data-note-id="${note.id}" onclick="handleCardClick(event, ${note.id})">
+            <article class="note-card" data-note-id="${note.id}" onclick="window.handleCardClick(event, '${note.id}')">
                 <div class="note-card-header">
-                    <span class="note-subject">${note.courseCode}</span>
-                    <span class="note-date"><i class="far fa-clock"></i> ${note.date}</span>
+                    <span class="note-subject">${courseCode}</span>
+                    <span class="note-date"><i class="far fa-clock"></i> ${date}</span>
                 </div>
-                <h3 class="note-title">${note.title}</h3>
-                <p class="note-description">${note.description}</p>
+                <h3 class="note-title">${title}</h3>
+                <p class="note-description">${description}</p>
                 <div class="note-author">
                     <i class="fas fa-user-circle"></i>
-                    <span>${note.uploader}</span>
+                    <span>${uploader}</span>
                 </div>
                 <div class="note-card-footer">
-                    <a href="${note.externalUrl}" target="_blank" rel="noopener noreferrer" class="note-link-btn" onclick="event.stopPropagation()">
+                    <a href="${externalUrl}" target="_blank" rel="noopener noreferrer" class="note-link-btn" onclick="event.stopPropagation()">
                         <i class="fas fa-external-link-alt"></i> Linke Git
                     </a>
                     <div class="note-rating">
                         <button class="rating-btn like-btn ${userVote === 'like' ? 'active' : ''}" 
-                                onclick="handleVote(event, ${note.id}, 'like')" 
+                                onclick="window.handleVote(event, '${note.id}', 'like')" 
                                 aria-label="Beğen">
                             <i class="fas fa-thumbs-up"></i>
                         </button>
                         <span class="rating-count ${ratingClass}" id="rating-count-${note.id}">${netLikes}</span>
                         <button class="rating-btn dislike-btn ${userVote === 'dislike' ? 'active' : ''}" 
-                                onclick="handleVote(event, ${note.id}, 'dislike')" 
+                                onclick="window.handleVote(event, '${note.id}', 'dislike')" 
                                 aria-label="Beğenme">
                             <i class="fas fa-thumbs-down"></i>
                         </button>
@@ -217,57 +277,119 @@ function renderNotes() {
     notesGrid.innerHTML = htmlContent;
 }
 
+// --- Format Firestore timestamp ---
+function formatDate(timestamp) {
+    if (!timestamp) return '';
+
+    try {
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('tr-TR', options);
+    } catch (e) {
+        return '';
+    }
+}
+
+// --- Update filter status text ---
+function updateFilterStatus(count) {
+    const statusElement = document.getElementById('filter-status');
+    const clearBtn = document.getElementById('clear-filters');
+    if (!statusElement) return;
+
+    if (!currentFilters.subjectCode && !currentFilters.courseCode) {
+        statusElement.innerHTML = '<i class="fas fa-fire"></i> En popüler 9 not gösteriliyor';
+        statusElement.classList.remove('filtered');
+        if (clearBtn) clearBtn.style.display = 'none';
+    } else if (currentFilters.courseCode) {
+        statusElement.innerHTML = `<i class="fas fa-filter"></i> ${currentFilters.courseCode} için ${count} not bulundu`;
+        statusElement.classList.add('filtered');
+        if (clearBtn) clearBtn.style.display = 'flex';
+    } else {
+        statusElement.innerHTML = `<i class="fas fa-filter"></i> ${currentFilters.subjectCode} branşında ${count} not bulundu`;
+        statusElement.classList.add('filtered');
+        if (clearBtn) clearBtn.style.display = 'flex';
+    }
+}
+
+// =============================================================
+// EVENT HANDLERS
+// =============================================================
+
 // --- Handle Card Click ---
-function handleCardClick(event, noteId) {
+window.handleCardClick = function (event, noteId) {
     if (event.target.closest('.note-link-btn') || event.target.closest('.rating-btn')) {
         return;
     }
     window.location.href = `note-details.html?id=${noteId}`;
-}
+};
 
 // --- Handle Like/Dislike Vote ---
-function handleVote(event, noteId, voteType) {
+window.handleVote = async function (event, noteId, voteType) {
     event.stopPropagation();
 
-    const note = allNotes.find(n => n.id === noteId);
-    if (!note) return;
+    if (!isUserLoggedIn) {
+        alert('Oy vermek için lütfen giriş yapın!');
+        return;
+    }
 
     const card = document.querySelector(`[data-note-id="${noteId}"]`);
+    if (!card) return;
+
     const likeBtn = card.querySelector('.like-btn');
     const dislikeBtn = card.querySelector('.dislike-btn');
     const countElement = document.getElementById(`rating-count-${noteId}`);
 
     const previousVote = userVotes[noteId];
+    let likeDelta = 0;
+    let dislikeDelta = 0;
 
+    // Calculate deltas
     if (previousVote === 'like') {
-        note.likes--;
+        likeDelta = -1;
         likeBtn.classList.remove('active');
     } else if (previousVote === 'dislike') {
-        note.dislikes--;
+        dislikeDelta = -1;
         dislikeBtn.classList.remove('active');
     }
 
     if (previousVote === voteType) {
+        // Toggle off
         delete userVotes[noteId];
     } else {
+        // Set new vote
         userVotes[noteId] = voteType;
         if (voteType === 'like') {
-            note.likes++;
+            likeDelta += 1;
             likeBtn.classList.add('active');
             dislikeBtn.classList.remove('active');
         } else {
-            note.dislikes++;
+            dislikeDelta += 1;
             dislikeBtn.classList.add('active');
             likeBtn.classList.remove('active');
         }
     }
 
-    const netLikes = note.likes - note.dislikes;
-    countElement.textContent = netLikes;
+    // Update UI immediately
+    const currentCount = parseInt(countElement.textContent) || 0;
+    const newCount = currentCount + likeDelta - dislikeDelta;
+    countElement.textContent = newCount;
     countElement.className = 'rating-count';
-    if (netLikes > 0) countElement.classList.add('positive');
-    else if (netLikes < 0) countElement.classList.add('negative');
-}
+    if (newCount > 0) countElement.classList.add('positive');
+    else if (newCount < 0) countElement.classList.add('negative');
+
+    // Update Firestore (placeholder - update netLikes)
+    try {
+        const noteRef = doc(db, 'notes', noteId);
+        await updateDoc(noteRef, {
+            likes: increment(likeDelta),
+            dislikes: increment(dislikeDelta),
+            netLikes: increment(likeDelta - dislikeDelta)
+        });
+    } catch (error) {
+        console.error('Error updating vote:', error);
+        // Could revert UI here if needed
+    }
+};
 
 // --- Handle Subject Filter Change ---
 function handleSubjectChange(event) {
@@ -275,15 +397,13 @@ function handleSubjectChange(event) {
     currentFilters.courseCode = '';
 
     populateCourseDropdown(currentFilters.subjectCode);
-    updateFilterStatus();
-    renderNotes();
+    fetchNotes();
 }
 
 // --- Handle Course Filter Change ---
 function handleCourseChange(event) {
     currentFilters.courseCode = event.target.value;
-    updateFilterStatus();
-    renderNotes();
+    fetchNotes();
 }
 
 // --- Clear Filters ---
@@ -296,8 +416,7 @@ function clearFilters() {
     document.getElementById('course-filter').disabled = true;
     document.getElementById('course-filter').innerHTML = '<option value="">Önce branş seçin</option>';
 
-    updateFilterStatus();
-    renderNotes();
+    fetchNotes();
 }
 
 // --- Upload Button Handler ---
@@ -306,19 +425,14 @@ function handleUploadClick() {
         alert('Ders notu yüklemek için lütfen giriş yapın!');
     } else {
         console.log('Opening upload modal...');
+        // TODO: Implement upload modal
     }
 }
 
-// --- Initialize Page ---
-document.addEventListener('DOMContentLoaded', function () {
-    // Populate filters
-    populateSubjectDropdown();
-    populateCourseDropdown('');
-
-    // Render initial notes (Top 9)
-    updateFilterStatus();
-    renderNotes();
-
+// =============================================================
+// INITIALIZATION
+// =============================================================
+document.addEventListener('DOMContentLoaded', async function () {
     // Add event listeners
     const subjectSelect = document.getElementById('subject-filter');
     const courseSelect = document.getElementById('course-filter');
@@ -329,6 +443,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (courseSelect) courseSelect.addEventListener('change', handleCourseChange);
     if (clearBtn) clearBtn.addEventListener('click', clearFilters);
     if (fabButton) fabButton.addEventListener('click', handleUploadClick);
+
+    // Fetch courses for dropdown
+    await fetchAndGroupCourses();
+
+    // Fetch initial notes (Top 9)
+    await fetchNotes();
 
     // Hide loading overlay
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -341,8 +461,14 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // --- Auth State Listener ---
-window.addEventListener('authStateChanged', function (event) {
-    if (event.detail) {
-        isUserLoggedIn = event.detail.isLoggedIn || false;
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        isUserLoggedIn = true;
+        currentUser = user;
+        console.log('User logged in:', user.email);
+    } else {
+        isUserLoggedIn = false;
+        currentUser = null;
+        console.log('Guest user');
     }
 });
