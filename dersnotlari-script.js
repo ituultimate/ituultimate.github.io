@@ -19,7 +19,8 @@ import {
     increment,
     addDoc,
     serverTimestamp,
-    arrayUnion
+    arrayUnion,
+    arrayRemove
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 // --- State Variables ---
@@ -249,6 +250,18 @@ function renderNotes(notes) {
         const date = note.date || formatDate(note.createdAt);
         const externalUrl = note.externalUrl || note.url || '#';
 
+        // Store note data for modal access
+        allNotesData[note.id] = {
+            id: note.id,
+            title: title,
+            courseCode: courseCode,
+            subjectCode: note.subjectCode,
+            description: description,
+            uploader: uploader,
+            date: date,
+            externalUrl: externalUrl
+        };
+
         htmlContent += `
             <article class="note-card" data-note-id="${note.id}" onclick="window.handleCardClick(event, '${note.id}')">
                 <div class="note-card-header">
@@ -342,20 +355,53 @@ function updateFilterStatus(count) {
 // EVENT HANDLERS
 // =============================================================
 
-// --- Handle Card Click ---
+// --- Store note data for modal ---
+let allNotesData = {};
+
+// --- Handle Card Click - Open Details Modal ---
 window.handleCardClick = function (event, noteId) {
     if (event.target.closest('.note-link-btn') || event.target.closest('.rating-btn')) {
         return;
     }
-    window.location.href = `note-details.html?id=${noteId}`;
+    openNoteDetailsModal(noteId);
 };
 
-// --- Handle Like/Dislike Vote ---
+// --- Open Note Details Modal ---
+function openNoteDetailsModal(noteId) {
+    const note = allNotesData[noteId];
+    if (!note) return;
+
+    const modal = document.getElementById('note-details-modal');
+    if (!modal) return;
+
+    // Populate modal content
+    document.getElementById('detail-title').textContent = note.title || 'Başlıksız Not';
+    document.getElementById('detail-course').innerHTML = `<i class="fas fa-book"></i> ${note.courseCode || note.subjectCode || 'N/A'}`;
+    document.getElementById('detail-date').innerHTML = `<i class="far fa-clock"></i> ${note.date || ''}`;
+    document.getElementById('detail-uploader').innerHTML = `<i class="fas fa-user-circle"></i> <span>Yükleyen: ${note.uploader || 'Anonim'}</span>`;
+    document.getElementById('detail-description').textContent = note.description || 'Açıklama yok.';
+    document.getElementById('detail-link').href = note.externalUrl || note.url || '#';
+
+    // Show modal
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+// --- Close Note Details Modal ---
+function closeNoteDetailsModal() {
+    const modal = document.getElementById('note-details-modal');
+    if (!modal) return;
+
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// --- Handle Like/Dislike Vote (Toggle Logic) ---
 window.handleVote = async function (event, noteId, voteType) {
     event.stopPropagation();
 
     if (!isUserLoggedIn) {
-        alert('Oy vermek için lütfen giriş yapın!');
+        // Silent fail - could show a tooltip instead
         return;
     }
 
@@ -372,12 +418,11 @@ window.handleVote = async function (event, noteId, voteType) {
     dislikeBtn.disabled = true;
 
     try {
-        // Fetch current note data to check if user has already voted
+        // Fetch current note data to check user's vote status
         const noteRef = doc(db, 'notes', noteId);
         const noteSnapshot = await getDoc(noteRef);
 
         if (!noteSnapshot.exists()) {
-            alert('Bu not bulunamadı.');
             return;
         }
 
@@ -388,33 +433,81 @@ window.handleVote = async function (event, noteId, voteType) {
         const hasLiked = likedByUsers.includes(userId);
         const hasDisliked = dislikedByUsers.includes(userId);
 
-        // Check if user has already voted (either like or dislike)
-        if (hasLiked || hasDisliked) {
-            alert('Bu notu zaten oyladınız!');
-            return;
-        }
-
-        // User hasn't voted yet - proceed with the vote
         let updateData = {};
+        let countDelta = 0;
 
+        // === TOGGLE LOGIC ===
         if (voteType === 'like') {
-            updateData = {
-                likes: increment(1),
-                netLikes: increment(1),
-                likedByUsers: arrayUnion(userId)
-            };
-            // Update UI
-            likeBtn.classList.add('active');
-            userVotes[noteId] = 'like';
+            if (hasLiked) {
+                // Already liked -> REMOVE like (toggle off)
+                updateData = {
+                    likes: increment(-1),
+                    netLikes: increment(-1),
+                    likedByUsers: arrayRemove(userId)
+                };
+                countDelta = -1;
+                likeBtn.classList.remove('active');
+                delete userVotes[noteId];
+            } else if (hasDisliked) {
+                // Has dislike -> SWITCH to like
+                updateData = {
+                    likes: increment(1),
+                    dislikes: increment(-1),
+                    netLikes: increment(2), // +1 for like, +1 for removing dislike
+                    likedByUsers: arrayUnion(userId),
+                    dislikedByUsers: arrayRemove(userId)
+                };
+                countDelta = 2;
+                likeBtn.classList.add('active');
+                dislikeBtn.classList.remove('active');
+                userVotes[noteId] = 'like';
+            } else {
+                // No vote -> ADD like
+                updateData = {
+                    likes: increment(1),
+                    netLikes: increment(1),
+                    likedByUsers: arrayUnion(userId)
+                };
+                countDelta = 1;
+                likeBtn.classList.add('active');
+                userVotes[noteId] = 'like';
+            }
         } else {
-            updateData = {
-                dislikes: increment(1),
-                netLikes: increment(-1),
-                dislikedByUsers: arrayUnion(userId)
-            };
-            // Update UI
-            dislikeBtn.classList.add('active');
-            userVotes[noteId] = 'dislike';
+            // voteType === 'dislike'
+            if (hasDisliked) {
+                // Already disliked -> REMOVE dislike (toggle off)
+                updateData = {
+                    dislikes: increment(-1),
+                    netLikes: increment(1),
+                    dislikedByUsers: arrayRemove(userId)
+                };
+                countDelta = 1;
+                dislikeBtn.classList.remove('active');
+                delete userVotes[noteId];
+            } else if (hasLiked) {
+                // Has like -> SWITCH to dislike
+                updateData = {
+                    likes: increment(-1),
+                    dislikes: increment(1),
+                    netLikes: increment(-2), // -1 for removing like, -1 for dislike
+                    likedByUsers: arrayRemove(userId),
+                    dislikedByUsers: arrayUnion(userId)
+                };
+                countDelta = -2;
+                dislikeBtn.classList.add('active');
+                likeBtn.classList.remove('active');
+                userVotes[noteId] = 'dislike';
+            } else {
+                // No vote -> ADD dislike
+                updateData = {
+                    dislikes: increment(1),
+                    netLikes: increment(-1),
+                    dislikedByUsers: arrayUnion(userId)
+                };
+                countDelta = -1;
+                dislikeBtn.classList.add('active');
+                userVotes[noteId] = 'dislike';
+            }
         }
 
         // Update Firestore
@@ -422,7 +515,7 @@ window.handleVote = async function (event, noteId, voteType) {
 
         // Update UI count
         const currentCount = parseInt(countElement.textContent) || 0;
-        const newCount = voteType === 'like' ? currentCount + 1 : currentCount - 1;
+        const newCount = currentCount + countDelta;
         countElement.textContent = newCount;
         countElement.className = 'rating-count';
         if (newCount > 0) countElement.classList.add('positive');
@@ -430,7 +523,6 @@ window.handleVote = async function (event, noteId, voteType) {
 
     } catch (error) {
         console.error('Error updating vote:', error);
-        alert('Oy verirken bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
         // Re-enable buttons
         likeBtn.disabled = false;
@@ -646,9 +738,23 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-    // Close modal on Escape key
+    // Note Details modal event listeners
+    const noteDetailsModal = document.getElementById('note-details-modal');
+    const noteDetailsClose = document.getElementById('note-details-close');
+
+    if (noteDetailsClose) noteDetailsClose.addEventListener('click', closeNoteDetailsModal);
+    if (noteDetailsModal) {
+        noteDetailsModal.addEventListener('click', (e) => {
+            if (e.target === noteDetailsModal) closeNoteDetailsModal();
+        });
+    }
+
+    // Close modals on Escape key
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeUploadModal();
+        if (e.key === 'Escape') {
+            closeUploadModal();
+            closeNoteDetailsModal();
+        }
     });
 
     // Fetch courses for dropdown

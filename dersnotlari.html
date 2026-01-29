@@ -201,6 +201,47 @@
             </div>
         </div>
 
+        <!-- Note Details Modal (View Mode) -->
+        <div class="upload-modal-overlay" id="note-details-modal" style="display: none;">
+            <div class="upload-modal-card note-details-card">
+                <!-- Close Button -->
+                <button class="upload-modal-close" id="note-details-close" aria-label="Kapat">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <!-- Note Details Content -->
+                <div class="note-details-content">
+                    <h2 class="note-details-title" id="detail-title">Not Başlığı</h2>
+
+                    <div class="note-details-meta">
+                        <span class="detail-badge" id="detail-course">
+                            <i class="fas fa-book"></i> MAT 281
+                        </span>
+                        <span class="detail-date" id="detail-date">
+                            <i class="far fa-clock"></i> 15 Ocak 2026
+                        </span>
+                    </div>
+
+                    <div class="note-details-uploader" id="detail-uploader">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Yükleyen: Kullanıcı Adı</span>
+                    </div>
+
+                    <div class="note-details-description-wrapper">
+                        <h4 class="description-label"><i class="fas fa-align-left"></i> Açıklama</h4>
+                        <p class="note-details-description" id="detail-description">
+                            Bu notun açıklaması burada görüntülenecek...
+                        </p>
+                    </div>
+
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="note-details-link-btn"
+                        id="detail-link">
+                        <i class="fas fa-external-link-alt"></i> Linke Git
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Floating Action Button -->
         <button class="fab-upload" id="fab-upload" aria-label="Not Yükle">
             <i class="fas fa-plus"></i>
