@@ -9,6 +9,7 @@ import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/fi
 import {
     collection,
     getDocs,
+    getDoc,
     query,
     where,
     orderBy,
@@ -17,7 +18,8 @@ import {
     updateDoc,
     increment,
     addDoc,
-    serverTimestamp
+    serverTimestamp,
+    arrayUnion
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 // --- State Variables ---
@@ -207,23 +209,14 @@ function renderEmptyState() {
     const notesGrid = document.getElementById('notes-grid');
     if (!notesGrid) return;
 
-    if (currentFilters.subjectCode || currentFilters.courseCode) {
-        notesGrid.innerHTML = `
-            <div class="notes-empty-state">
-                <i class="fas fa-search"></i>
-                <h3>Not bulunamadı</h3>
-                <p>Bu kriterlere uygun not henüz yok.</p>
-            </div>
-        `;
-    } else {
-        notesGrid.innerHTML = `
-            <div class="notes-empty-state">
-                <i class="fas fa-folder-open"></i>
-                <h3>Henüz not yok</h3>
-                <p>İlk notu yükleyen sen ol!</p>
-            </div>
-        `;
-    }
+    // Filtre kontrolü yapmadan doğrudan istenen mesajı basıyoruz
+    notesGrid.innerHTML = `
+        <div class="notes-empty-state">
+            <i class="fas fa-folder-open"></i>
+            <h3>Henüz not yok</h3>
+            <p>İlk notu yükleyen sen ol!</p>
+        </div>
+    `;
 }
 
 // --- Render Notes ---
@@ -232,10 +225,22 @@ function renderNotes(notes) {
     if (!notesGrid) return;
 
     let htmlContent = '';
+    const userId = currentUser?.uid;
 
     notes.forEach(note => {
         const netLikes = note.netLikes || (note.likes || 0) - (note.dislikes || 0);
         const ratingClass = netLikes > 0 ? 'positive' : (netLikes < 0 ? 'negative' : '');
+
+        // Check if current user has already voted on this note
+        const likedByUsers = note.likedByUsers || [];
+        const dislikedByUsers = note.dislikedByUsers || [];
+        const hasLiked = userId && likedByUsers.includes(userId);
+        const hasDisliked = userId && dislikedByUsers.includes(userId);
+
+        // Update local state to match Firestore
+        if (hasLiked) userVotes[note.id] = 'like';
+        else if (hasDisliked) userVotes[note.id] = 'dislike';
+
         const userVote = userVotes[note.id] || null;
         const courseCode = note.courseCode || note.subjectCode || 'DERS';
         const title = note.title || 'Başlıksız Not';
@@ -301,25 +306,33 @@ function updateFilterStatus(count) {
     const pageTitle = document.getElementById('page-title');
     if (!statusElement) return;
 
+    // Eğer branş ve ders kodu seçili değilse (yani "Tümü" durumundaysa)
     if (!currentFilters.subjectCode && !currentFilters.courseCode) {
         // Scenario A: No filter - Top 9 globally
-        // Show sub-header, keep main title
-        statusElement.style.display = 'flex';
-        statusElement.innerHTML = '🔥 En popüler 9 not gösteriliyor';
+
+        statusElement.style.display = 'flex'; // Görünür yap
+
+        // DEĞİŞİKLİK BURADA: Emoji yerine turuncu renkli FontAwesome ikonu
+        statusElement.innerHTML = '<i class="fas fa-fire" style="color: #ff4500;"></i> En popüler 9 not gösteriliyor';
+
         statusElement.classList.remove('filtered');
         if (pageTitle) pageTitle.textContent = '📓 Ders Notları';
         if (clearBtn) clearBtn.style.display = 'none';
+
     } else if (currentFilters.courseCode) {
         // Scenario B: Course selected
-        // HIDE sub-header, update main title to course
+        // Ders seçiliyse bu yazıyı GİZLE
         statusElement.style.display = 'none';
+
         const displayCode = currentFilters.courseCode.replace(/\s+/g, '');
         if (pageTitle) pageTitle.textContent = `📚 ${displayCode} Notları`;
         if (clearBtn) clearBtn.style.display = 'flex';
+
     } else {
-        // Scenario B: Subject selected
-        // HIDE sub-header, update main title to subject
+        // Scenario C: Subject selected
+        // Branş seçiliyse bu yazıyı GİZLE
         statusElement.style.display = 'none';
+
         if (pageTitle) pageTitle.textContent = `📚 ${currentFilters.subjectCode} Notları`;
         if (clearBtn) clearBtn.style.display = 'flex';
     }
@@ -346,6 +359,7 @@ window.handleVote = async function (event, noteId, voteType) {
         return;
     }
 
+    const userId = currentUser.uid;
     const card = document.querySelector(`[data-note-id="${noteId}"]`);
     if (!card) return;
 
@@ -353,55 +367,74 @@ window.handleVote = async function (event, noteId, voteType) {
     const dislikeBtn = card.querySelector('.dislike-btn');
     const countElement = document.getElementById(`rating-count-${noteId}`);
 
-    const previousVote = userVotes[noteId];
-    let likeDelta = 0;
-    let dislikeDelta = 0;
+    // Disable buttons during operation
+    likeBtn.disabled = true;
+    dislikeBtn.disabled = true;
 
-    // Calculate deltas
-    if (previousVote === 'like') {
-        likeDelta = -1;
-        likeBtn.classList.remove('active');
-    } else if (previousVote === 'dislike') {
-        dislikeDelta = -1;
-        dislikeBtn.classList.remove('active');
-    }
-
-    if (previousVote === voteType) {
-        // Toggle off
-        delete userVotes[noteId];
-    } else {
-        // Set new vote
-        userVotes[noteId] = voteType;
-        if (voteType === 'like') {
-            likeDelta += 1;
-            likeBtn.classList.add('active');
-            dislikeBtn.classList.remove('active');
-        } else {
-            dislikeDelta += 1;
-            dislikeBtn.classList.add('active');
-            likeBtn.classList.remove('active');
-        }
-    }
-
-    // Update UI immediately
-    const currentCount = parseInt(countElement.textContent) || 0;
-    const newCount = currentCount + likeDelta - dislikeDelta;
-    countElement.textContent = newCount;
-    countElement.className = 'rating-count';
-    if (newCount > 0) countElement.classList.add('positive');
-    else if (newCount < 0) countElement.classList.add('negative');
-
-    // Update Firestore (placeholder - update netLikes)
     try {
+        // Fetch current note data to check if user has already voted
         const noteRef = doc(db, 'notes', noteId);
-        await updateDoc(noteRef, {
-            likes: increment(likeDelta),
-            dislikes: increment(dislikeDelta),
-            netLikes: increment(likeDelta - dislikeDelta)
-        });
+        const noteSnapshot = await getDoc(noteRef);
+
+        if (!noteSnapshot.exists()) {
+            alert('Bu not bulunamadı.');
+            return;
+        }
+
+        const noteData = noteSnapshot.data();
+        const likedByUsers = noteData.likedByUsers || [];
+        const dislikedByUsers = noteData.dislikedByUsers || [];
+
+        const hasLiked = likedByUsers.includes(userId);
+        const hasDisliked = dislikedByUsers.includes(userId);
+
+        // Check if user has already voted (either like or dislike)
+        if (hasLiked || hasDisliked) {
+            alert('Bu notu zaten oyladınız!');
+            return;
+        }
+
+        // User hasn't voted yet - proceed with the vote
+        let updateData = {};
+
+        if (voteType === 'like') {
+            updateData = {
+                likes: increment(1),
+                netLikes: increment(1),
+                likedByUsers: arrayUnion(userId)
+            };
+            // Update UI
+            likeBtn.classList.add('active');
+            userVotes[noteId] = 'like';
+        } else {
+            updateData = {
+                dislikes: increment(1),
+                netLikes: increment(-1),
+                dislikedByUsers: arrayUnion(userId)
+            };
+            // Update UI
+            dislikeBtn.classList.add('active');
+            userVotes[noteId] = 'dislike';
+        }
+
+        // Update Firestore
+        await updateDoc(noteRef, updateData);
+
+        // Update UI count
+        const currentCount = parseInt(countElement.textContent) || 0;
+        const newCount = voteType === 'like' ? currentCount + 1 : currentCount - 1;
+        countElement.textContent = newCount;
+        countElement.className = 'rating-count';
+        if (newCount > 0) countElement.classList.add('positive');
+        else if (newCount < 0) countElement.classList.add('negative');
+
     } catch (error) {
         console.error('Error updating vote:', error);
-        // Could revert UI here if needed
+        alert('Oy verirken bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+        // Re-enable buttons
+        likeBtn.disabled = false;
+        dislikeBtn.disabled = false;
     }
 };
 
@@ -513,10 +546,12 @@ async function handleUploadSubmit(event) {
     const courseCode = document.getElementById('upload-course').value;
     const instructor = document.getElementById('upload-instructor').value.trim();
     const link = document.getElementById('upload-link').value.trim();
+    const title = document.getElementById('upload-title').value.trim();
     const description = document.getElementById('upload-description').value.trim();
+    const isAnonymous = document.getElementById('upload-anonymous').checked;
 
     // Validation
-    if (!subjectCode || !courseCode || !link || !description) {
+    if (!subjectCode || !courseCode || !link || !title || !description) {
         alert('Lütfen tüm zorunlu alanları doldurun!');
         return;
     }
@@ -526,20 +561,25 @@ async function handleUploadSubmit(event) {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yükleniyor...';
 
     try {
+        // Determine uploader name based on anonymous checkbox
+        const uploaderName = isAnonymous ? 'Anonim' : (currentUser.displayName || currentUser.email.split('@')[0]);
+
         // Create note document
         const noteData = {
             subjectCode: subjectCode,
             courseCode: courseCode,
-            title: `${courseCode} Notu`,
+            title: title,
             description: description,
             instructor: instructor || null,
             externalUrl: link,
-            uploader: currentUser.displayName || currentUser.email.split('@')[0],
+            uploader: uploaderName,
             uploaderID: currentUser.uid,
             uploaderEmail: currentUser.email,
             likes: 0,
             dislikes: 0,
             netLikes: 0,
+            likedByUsers: [],      // Array to track users who liked
+            dislikedByUsers: [],   // Array to track users who disliked
             createdAt: serverTimestamp(),
             date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
         };

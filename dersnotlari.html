@@ -110,9 +110,9 @@
                     </button>
                 </div>
 
-                <!-- Filter Status / Sub-header (only shown for default view) -->
+                <!-- Filter Status / Sub-header (shown for default view, hidden by JS when filtered) -->
                 <div class="filter-status" id="filter-status">
-                    🔥 En popüler 9 not gösteriliyor
+                    <i class="fas fa-fire" style="color: #ff4500;"></i> En popüler 9 not gösteriliyor
                 </div>
 
                 <!-- Notes Grid -->
@@ -171,11 +171,27 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="upload-title" class="form-label">
+                            <i class="fas fa-heading"></i> Not Başlığı *
+                        </label>
+                        <input type="text" id="upload-title" class="form-input" placeholder="Örn: Final Özet Notları"
+                            required>
+                    </div>
+
+                    <div class="form-group">
                         <label for="upload-description" class="form-label">
                             <i class="fas fa-align-left"></i> Açıklama *
                         </label>
                         <textarea id="upload-description" class="form-textarea" rows="3"
                             placeholder="Bu not ne hakkında? Hangi konuları kapsıyor?" required></textarea>
+                    </div>
+
+                    <div class="form-group form-checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="upload-anonymous">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text"><i class="fas fa-user-secret"></i> Anonim olarak yükle</span>
+                        </label>
                     </div>
 
                     <button type="submit" class="upload-submit-btn" id="upload-submit-btn">
