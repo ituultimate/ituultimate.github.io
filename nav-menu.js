@@ -1,8 +1,43 @@
 /**
  * Shared Navigation Menu Script
- * Handles hamburger menu toggle for mobile navigation with smooth animations
+ * Handles navbar injection and hamburger menu toggle for mobile navigation
  */
+
+const navbarHTML = `
+    <header class="header">
+        <nav class="navbar container">
+            <a href="/" class="nav-logo">ITU UltiMate</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
+                <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
+                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
+                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
+                <li class="nav-item nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        Not Defteri <i class="fas fa-chevron-down"></i>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/dersnotlari"><i class="fas fa-book"></i> Ders Notları</a>
+                        <a href="/dersrehberi"><i class="fas fa-compass"></i> Ders Rehberleri</a>
+                        <a href="/dersprogramarsiv"><i class="fas fa-archive"></i> Ders Programı Arşivi</a>
+                    </div>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </nav>
+    </header>
+`;
+
 document.addEventListener('DOMContentLoaded', () => {
+    const navbarPlaceholder = document.getElementById('navbar-placeholder');
+    if (navbarPlaceholder) {
+        navbarPlaceholder.innerHTML = navbarHTML;
+    }
+
     const hamburger = document.querySelector(".hamburger");
     const navMenu = document.querySelector(".nav-menu");
     let isAnimating = false;
@@ -31,11 +66,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeBtn.style.display = 'none';
                 document.body.style.overflow = '';
 
-                // Close dropdown if open
+                // Close user dropdown if open
                 const userDropdown = document.querySelector(".user-dropdown");
                 if (userDropdown) {
                     userDropdown.classList.remove("active");
                 }
+
+                // Close nav dropdowns if open
+                document.querySelectorAll(".nav-dropdown.active").forEach(d => {
+                    d.classList.remove("active");
+                });
             }
 
             // Reset animation lock after transition completes
@@ -98,6 +138,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // Handle nav dropdown on mobile (Not Defteri, etc.)
+        document.querySelectorAll(".nav-dropdown").forEach(dropdown => {
+            const trigger = dropdown.querySelector(".nav-dropdown-trigger");
+            if (trigger) {
+                trigger.addEventListener("click", (e) => {
+                    if (isMobileMode()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Close other dropdowns first
+                        document.querySelectorAll(".nav-dropdown.active").forEach(d => {
+                            if (d !== dropdown) d.classList.remove("active");
+                        });
+                        dropdown.classList.toggle("active");
+                    }
+                });
+            }
+        });
+
+        // Close nav dropdowns when clicking dropdown links on mobile
+        document.querySelectorAll(".nav-dropdown-content a").forEach(link => {
+            link.addEventListener("click", () => {
+                if (isMobileMode()) {
+                    toggleMenu(false);
+                }
+            });
+        });
 
         // Handle orientation changes
         window.addEventListener("orientationchange", () => {

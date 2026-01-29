@@ -190,22 +190,7 @@
             style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
-    <header class="header">
-        <nav class="navbar container">
-            <a href="/" class="nav-logo">ITU UltiMate</a>
-            <ul class="nav-menu">
-                <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
-                <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
-                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
-                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
-            </ul>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </nav>
-    </header>
+    <div id="navbar-placeholder"></div>
 
     <main>
         <div id="loading-overlay" class="loading-overlay">
@@ -255,7 +240,7 @@
                 badgeText: 'GÜNCELLEME',
                 date: '26 Ocak 2026',
                 title: 'Google ile Giriş ve Email Doğrulama',
-                content: 'Hesap güvenliğinizi artırmak için email doğrulama sistemi devreye alındı. Ayrıca Google ile tek tıkla giriş özelliği aktifleştirildi.'
+                content: 'Hesap güvenliğinizi artırmak için email doğrulama sistemi devreye alındı. Ayrıca Google ile tek tıklada giriş özelliği aktifleştirildi.'
             },
             {
                 type: 'bakim',
@@ -273,7 +258,7 @@
             }
         ];
 
-        // --- DUYURULARI EKRAÑA YAZDIRAN FONKSİYON ---
+        // --- DUYURULARI EKRANA YAZDIRAN FONKSİYON ---
         function renderAnnouncements() {
             const listContainer = document.getElementById('announcement-list');
             let htmlContent = '';
