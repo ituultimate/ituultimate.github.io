@@ -16,6 +16,8 @@ import {
     limit,
     doc,
     updateDoc,
+    deleteDoc,
+    setDoc,
     increment,
     addDoc,
     serverTimestamp,
@@ -28,6 +30,7 @@ let isUserLoggedIn = false;
 let currentUser = null;
 let allCoursesNested = {};  // Grouped courses data
 let userVotes = {};         // Track user votes locally
+let userFavorites = [];     // Track user's favorited note IDs
 
 // --- Current filter state ---
 let currentFilters = {
@@ -250,6 +253,12 @@ function renderNotes(notes) {
         const date = note.date || formatDate(note.createdAt);
         const externalUrl = note.externalUrl || note.url || '#';
 
+        // Check if current user owns this note
+        const isOwner = userId && note.uploaderID === userId;
+
+        // Check if note is favorited
+        const isFavorited = userFavorites.includes(note.id);
+
         // Store note data for modal access
         allNotesData[note.id] = {
             id: note.id,
@@ -259,11 +268,26 @@ function renderNotes(notes) {
             description: description,
             uploader: uploader,
             date: date,
-            externalUrl: externalUrl
+            externalUrl: externalUrl,
+            uploaderID: note.uploaderID
         };
 
         htmlContent += `
             <article class="note-card" data-note-id="${note.id}" onclick="window.handleCardClick(event, '${note.id}')">
+                <div class="note-card-actions">
+                    <button class="action-btn favorite-btn ${isFavorited ? 'active' : ''}" 
+                            onclick="window.handleToggleFavorite(event, '${note.id}')"
+                            aria-label="Favorilere Ekle">
+                        <i class="${isFavorited ? 'fas' : 'far'} fa-bookmark"></i>
+                    </button>
+                    ${isOwner ? `
+                    <button class="action-btn delete-btn" 
+                            onclick="window.handleDeleteNote(event, '${note.id}')"
+                            aria-label="Notu Sil">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    ` : ''}
+                </div>
                 <div class="note-card-header">
                     <span class="note-subject">${courseCode}</span>
                     <span class="note-date"><i class="far fa-clock"></i> ${date}</span>
@@ -530,6 +554,105 @@ window.handleVote = async function (event, noteId, voteType) {
     }
 };
 
+// --- Fetch User's Favorites List ---
+async function fetchUserFavorites() {
+    if (!currentUser) {
+        userFavorites = [];
+        return;
+    }
+
+    try {
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            userFavorites = userDoc.data().favorites || [];
+        } else {
+            // Create user document if it doesn't exist
+            await setDoc(userDocRef, {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                displayName: currentUser.displayName || currentUser.email.split('@')[0],
+                favorites: [],
+                createdAt: serverTimestamp()
+            });
+            userFavorites = [];
+        }
+    } catch (error) {
+        console.error('Error fetching user favorites:', error);
+        userFavorites = [];
+    }
+}
+
+// --- Handle Delete Note ---
+window.handleDeleteNote = async function (event, noteId) {
+    event.stopPropagation();
+
+    if (!isUserLoggedIn) return;
+
+    // Confirm deletion
+    if (!confirm('Bu notu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) {
+        return;
+    }
+
+    try {
+        const noteRef = doc(db, 'notes', noteId);
+        await deleteDoc(noteRef);
+
+        // Remove from UI
+        const card = document.querySelector(`[data-note-id="${noteId}"]`);
+        if (card) {
+            card.remove();
+        }
+
+        // Remove from local data
+        delete allNotesData[noteId];
+
+    } catch (error) {
+        console.error('Error deleting note:', error);
+        alert('Not silinirken bir hata oluştu.');
+    }
+};
+
+// --- Handle Toggle Favorite ---
+window.handleToggleFavorite = async function (event, noteId) {
+    event.stopPropagation();
+
+    if (!isUserLoggedIn) {
+        return;
+    }
+
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('i');
+    const isFavorited = userFavorites.includes(noteId);
+
+    try {
+        const userDocRef = doc(db, 'users', currentUser.uid);
+
+        if (isFavorited) {
+            // Remove from favorites
+            await updateDoc(userDocRef, {
+                favorites: arrayRemove(noteId)
+            });
+            userFavorites = userFavorites.filter(id => id !== noteId);
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+            btn.classList.remove('active');
+        } else {
+            // Add to favorites
+            await updateDoc(userDocRef, {
+                favorites: arrayUnion(noteId)
+            });
+            userFavorites.push(noteId);
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            btn.classList.add('active');
+        }
+    } catch (error) {
+        console.error('Error toggling favorite:', error);
+    }
+};
+
 // --- Handle Subject Filter Change ---
 function handleSubjectChange(event) {
     currentFilters.subjectCode = event.target.value;
@@ -774,14 +897,19 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 // --- Auth State Listener ---
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (user) {
         isUserLoggedIn = true;
         currentUser = user;
         console.log('User logged in:', user.email);
+
+        // Fetch user's favorites and refresh notes
+        await fetchUserFavorites();
+        fetchNotes(); // Re-render to show favorite states
     } else {
         isUserLoggedIn = false;
         currentUser = null;
+        userFavorites = [];
         console.log('Guest user');
     }
 });

@@ -31,19 +31,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="base.css">
     <link rel="stylesheet" href="attendance-style.css">
+    <link rel="stylesheet" href="dersnotlari-style.css">
 
     <style>
         /* --- PROFİL SAYFASINA ÖZEL STİLLER --- */
 
         .profile-wrapper {
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            /* Yukarıya yasla */
+            flex-direction: column;
+            align-items: center;
             min-height: 85vh;
             padding: 40px 20px;
             background-color: #f8f9fa;
-            /* Hafif gri arka plan */
+            gap: 30px;
         }
 
         .profile-card {
@@ -52,7 +52,6 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             width: 100%;
             max-width: 500px;
-            /* Kart genişliği */
             overflow: hidden;
             border: 1px solid #e9ecef;
             position: relative;
@@ -69,7 +68,6 @@
             padding: 0 30px 40px 30px;
             text-align: center;
             margin-top: -60px;
-            /* Profil fotosunu yukarı çekmek için */
         }
 
         /* Profil Fotoğrafı */
@@ -168,6 +166,160 @@
             background: #dc3545;
             color: white;
         }
+
+        /* --- TAB NAVİGASYON --- */
+        .profile-tabs-container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .profile-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .profile-tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #6c757d;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s;
+        }
+
+        .profile-tab-btn:hover {
+            color: #062a54;
+            background: rgba(6, 42, 84, 0.05);
+        }
+
+        .profile-tab-btn.active {
+            color: #062a54;
+            background: white;
+            border-bottom: 3px solid #00a8cc;
+        }
+
+        .profile-tab-btn i {
+            margin-right: 8px;
+        }
+
+        /* --- NOTES GRID --- */
+        #profile-notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        #profile-notes-grid .note-card {
+            position: relative;
+        }
+
+        /* Empty & Loading States */
+        .empty-state,
+        .loading-text,
+        .error-text {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .loading-text i {
+            font-size: 1.5rem;
+            color: #00a8cc;
+        }
+
+        /* --- EDIT PROFILE FORM --- */
+        .edit-profile-form {
+            display: none;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .edit-profile-form input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .edit-profile-form .form-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-profile-form .form-buttons button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            background: #e9ecef;
+            border: none;
+            color: #333;
+        }
+
+        .btn-save {
+            background: #00a8cc;
+            border: none;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #0096b3;
+        }
+
+        .btn-edit {
+            background: transparent;
+            border: 2px solid #00a8cc;
+            color: #00a8cc;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-edit:hover {
+            background: #00a8cc;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .profile-tabs {
+                flex-direction: column;
+            }
+
+            #profile-notes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -220,10 +372,37 @@
                             </div>
                         </div>
 
+                        <!-- Edit Profile Form (Hidden by default) -->
+                        <div class="edit-profile-form" id="edit-profile-form">
+                            <input type="text" id="edit-display-name" placeholder="Görünen İsim">
+                            <div class="form-buttons">
+                                <button class="btn-cancel" id="cancel-edit-btn">İptal</button>
+                                <button class="btn-save" id="save-profile-btn">Kaydet</button>
+                            </div>
+                        </div>
+
                         <div class="action-buttons">
+                            <button id="edit-profile-btn" class="btn-edit"><i class="fas fa-edit"></i> Profili
+                                Düzenle</button>
                             <a href="/programlayici" class="btn btn-primary btn-full">Ders Programıma Git</a>
                             <button id="logout-btn-profile" class="btn-outline btn-full">Çıkış Yap</button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Tabs and Notes Section -->
+                <div class="profile-tabs-container">
+                    <div class="profile-tabs">
+                        <button class="profile-tab-btn active" data-tab="uploads">
+                            <i class="fas fa-upload"></i> Yüklemelerim
+                        </button>
+                        <button class="profile-tab-btn" data-tab="favorites">
+                            <i class="far fa-bookmark"></i> Favorilerim
+                        </button>
+                    </div>
+
+                    <div id="profile-notes-grid">
+                        <div class="loading-text"><i class="fas fa-spinner fa-spin"></i> Yükleniyor...</div>
                     </div>
                 </div>
 
@@ -232,6 +411,7 @@
     </main>
 
     <script type="module" src="auth-manager.js"></script>
+    <script type="module" src="profil-script.js"></script>
 
     <script type="module">
         import { auth } from "./firebase-config.js";
