@@ -42,7 +42,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- DUYURU SAYFASI STİLLERİ --- */
+        /* --- DUYURU SAYFASI STÃ„Â°LLERÃ„Â° --- */
 
         .page-wrapper {
             background-color: #f8f9fa;
@@ -52,11 +52,11 @@
 
         .content-container {
             max-width: 800px;
-            /* Okuma kolaylığı için çok geniş yapmıyoruz */
+            /* Okuma kolaylÃ„Â±Ã„Å¸Ã„Â± iÃƒÂ§in ÃƒÂ§ok geniÃ…Å¸ yapmÃ„Â±yoruz */
             margin: 0 auto;
         }
 
-        /* Başlık Alanı */
+        /* BaÃ…Å¸lÃ„Â±k AlanÃ„Â± */
         .page-header {
             text-align: center;
             margin-bottom: 40px;
@@ -74,7 +74,7 @@
             font-size: 1rem;
         }
 
-        /* Duyuru Kartları */
+        /* Duyuru KartlarÃ„Â± */
         .announcement-list {
             display: flex;
             flex-direction: column;
@@ -97,7 +97,7 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
 
-        /* Sol Taraftaki Renkli Çizgi (Kategoriye göre değişir) */
+        /* Sol Taraftaki Renkli Ãƒâ€¡izgi (Kategoriye gÃƒÂ¶re deÃ„Å¸iÃ…Å¸ir) */
         .announcement-card::before {
             content: '';
             position: absolute;
@@ -106,10 +106,10 @@
             bottom: 0;
             width: 5px;
             background-color: #00a8cc;
-            /* Varsayılan renk */
+            /* VarsayÃ„Â±lan renk */
         }
 
-        /* Kart İçeriği */
+        /* Kart Ã„Â°ÃƒÂ§eriÃ„Å¸i */
         .card-meta {
             display: flex;
             justify-content: space-between;
@@ -190,22 +190,7 @@
             style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
-    <header class="header">
-        <nav class="navbar container">
-            <a href="/" class="nav-logo">ITU UltiMate</a>
-            <ul class="nav-menu">
-                <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
-                <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
-                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
-                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
-            </ul>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </nav>
-    </header>
+    <div id="navbar-placeholder"></div>
 
     <main>
         <div id="loading-overlay" class="loading-overlay">
@@ -241,7 +226,7 @@
                 badgeText: 'YENİLİK',
                 date: '27 Ocak 2026',
                 title: 'Gelecek Özellikler',
-                content: 'Yakın zamanda kullanıcıların dersler hakkında yorumlar/puanlamalar yapabileceği ve ders notlarının paylaşılabileceği yepyeni modülümüzü yayınlayacağız. Ayrıca daha kişiselleştirilebilir kullanıcı profilleri ve kullanıcı puanları da çok yakında sizlerle olacak.'
+                content: 'YakÃ„Â±n zamanda kullanÃ„Â±cÃ„Â±larÃ„Â±n dersler hakkÃ„Â±nda yorumlar/puanlamalar yapabileceÃ„Å¸i ve ders notlarÃ„Â±nÃ„Â±n paylaÃ…Å¸Ã„Â±labileceÃ„Å¸i yepyeni modÃƒÂ¼lÃƒÂ¼mÃƒÂ¼zÃƒÂ¼ yayÃ„Â±nlayacaÃ„Å¸Ã„Â±z. AyrÃ„Â±ca daha kiÃ…Å¸iselleÃ…Å¸tirilebilir kullanÃ„Â±cÃ„Â± profilleri ve kullanÃ„Â±cÃ„Â± puanlarÃ„Â± da ÃƒÂ§ok yakÃ„Â±nda sizlerle olacak.'
             },
             {
                 type: 'yeni', // Seçenekler: 'yeni', 'sistem', 'bakim', 'genel'
@@ -255,7 +240,7 @@
                 badgeText: 'GÜNCELLEME',
                 date: '26 Ocak 2026',
                 title: 'Google ile Giriş ve Email Doğrulama',
-                content: 'Hesap güvenliğinizi artırmak için email doğrulama sistemi devreye alındı. Ayrıca Google ile tek tıkla giriş özelliği aktifleştirildi.'
+                content: 'Hesap güvenliğinizi artırmak için email doğrulama sistemi devreye alındı. Ayrıca Google ile tek tıklada giriş özelliği aktifleştirildi.'
             },
             {
                 type: 'bakim',
@@ -273,13 +258,13 @@
             }
         ];
 
-        // --- DUYURULARI EKRAÑA YAZDIRAN FONKSİYON ---
+        // --- DUYURULARI EKRAÃƒâ€˜A YAZDIRAN FONKSÃ„Â°YON ---
         function renderAnnouncements() {
             const listContainer = document.getElementById('announcement-list');
             let htmlContent = '';
 
             announcements.forEach(item => {
-                // Her bir duyuru için HTML oluştur
+                // Her bir duyuru iÃƒÂ§in HTML oluÃ…Å¸tur
                 htmlContent += `
                     <div class="announcement-card type-${item.type}">
                         <div class="card-meta">
@@ -295,14 +280,14 @@
             listContainer.innerHTML = htmlContent;
         }
 
-        // Sayfa yüklenince çalıştır
+        // Sayfa yÃƒÂ¼klenince ÃƒÂ§alÃ„Â±Ã…Å¸tÃ„Â±r
         document.addEventListener('DOMContentLoaded', renderAnnouncements);
     </script>
 
     <footer class="footer">
         <div class="container">
             <div class="footer-left">
-                <a href="/about" class="footer-link">Hakkında & Gizlilik</a>
+                <a href="/about" class="footer-link">HakkÃ„Â±nda & Gizlilik</a>
                 <div class="social-icons">
                     <a href="https://www.instagram.com/ituultimate" target="_blank" rel="noopener" class="social-icon">
                         <i class="fab fa-instagram"></i>

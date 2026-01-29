@@ -34,7 +34,7 @@
     <link rel="stylesheet" href="dersnotlari-style.css">
 
     <style>
-        /* --- PROFİL SAYFASINA ÖZEL STİLLER --- */
+        /* --- PROFÃ„Â°L SAYFASINA Ãƒâ€“ZEL STÃ„Â°LLER --- */
 
         .profile-wrapper {
             display: flex;
@@ -303,7 +303,7 @@
             color: white;
         }
 
-        /* --- TAB NAVİGASYON --- */
+        /* --- TAB NAVÃ„Â°GASYON --- */
         .profile-tabs-container {
             width: 100%;
             max-width: 900px;
@@ -461,22 +461,7 @@
 
 <body>
 
-    <header class="header">
-        <nav class="navbar container">
-            <a href="/" class="nav-logo">ITU UltiMate</a>
-            <ul class="nav-menu">
-                <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
-                <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
-                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
-                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
-            </ul>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </nav>
-    </header>
+    <div id="navbar-placeholder"></div>
 
     <main>
         <div id="loading-overlay" class="loading-overlay">
@@ -499,7 +484,7 @@
 
                         <!-- Right: User Info -->
                         <div class="profile-info-section">
-                            <h2 class="user-name" id="display-name">Yükleniyor...</h2>
+                            <h2 class="user-name" id="display-name">YÃƒÂ¼kleniyor...</h2>
                             <p class="user-email" id="display-email">...</p>
 
                             <div class="info-badges">
@@ -509,27 +494,27 @@
                                 </span>
                                 <span class="info-badge">
                                     <i class="fas fa-user-check"></i>
-                                    Standart Üye
+                                    Standart ÃƒÅ“ye
                                 </span>
                             </div>
 
                             <div class="profile-actions">
                                 <button id="edit-profile-btn" class="btn-edit">
-                                    <i class="fas fa-edit"></i> Düzenle
+                                    <i class="fas fa-edit"></i> DÃƒÂ¼zenle
                                 </button>
                                 <a href="/programlayici" class="btn-secondary">
-                                    <i class="fas fa-calendar"></i> Ders Programı
+                                    <i class="fas fa-calendar"></i> Ders ProgramÃ„Â±
                                 </a>
                                 <button id="logout-btn-profile" class="btn-logout">
-                                    <i class="fas fa-sign-out-alt"></i> Çıkış
+                                    <i class="fas fa-sign-out-alt"></i> Ãƒâ€¡Ã„Â±kÃ„Â±Ã…Å¸
                                 </button>
                             </div>
 
                             <!-- Edit Profile Form (Hidden by default) -->
                             <div class="edit-profile-form" id="edit-profile-form">
-                                <input type="text" id="edit-display-name" placeholder="Görünen İsim">
+                                <input type="text" id="edit-display-name" placeholder="GÃƒÂ¶rÃƒÂ¼nen Ã„Â°sim">
                                 <div class="form-buttons">
-                                    <button class="btn-cancel" id="cancel-edit-btn">İptal</button>
+                                    <button class="btn-cancel" id="cancel-edit-btn">Ã„Â°ptal</button>
                                     <button class="btn-save" id="save-profile-btn">Kaydet</button>
                                 </div>
                             </div>
@@ -542,7 +527,7 @@
                 <div class="profile-tabs-container">
                     <div class="profile-tabs">
                         <button class="profile-tab-btn active" data-tab="uploads">
-                            <i class="fas fa-upload"></i> Yüklemelerim
+                            <i class="fas fa-upload"></i> YÃƒÂ¼klemelerim
                         </button>
                         <button class="profile-tab-btn" data-tab="favorites">
                             <i class="far fa-bookmark"></i> Favorilerim
@@ -550,7 +535,7 @@
                     </div>
 
                     <div id="profile-notes-grid">
-                        <div class="loading-text"><i class="fas fa-spinner fa-spin"></i> Yükleniyor...</div>
+                        <div class="loading-text"><i class="fas fa-spinner fa-spin"></i> YÃƒÂ¼kleniyor...</div>
                     </div>
                 </div>
 
@@ -565,44 +550,44 @@
         import { auth } from "./firebase-config.js";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Auth Manager zaten giriş kontrolü yapıyor, biz burada sadece veriyi gösteriyoruz
+        // Auth Manager zaten giriÃ…Å¸ kontrolÃƒÂ¼ yapÃ„Â±yor, biz burada sadece veriyi gÃƒÂ¶steriyoruz
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // 1. İsim Göster
+                // 1. Ã„Â°sim GÃƒÂ¶ster
                 const nameEl = document.getElementById('display-name');
                 const name = user.displayName || user.email.split('@')[0];
-                // İsmin ilk harflerini büyüt
+                // Ã„Â°smin ilk harflerini bÃƒÂ¼yÃƒÂ¼t
                 nameEl.textContent = name.charAt(0).toUpperCase() + name.slice(1);
 
-                // 2. Email Göster
+                // 2. Email GÃƒÂ¶ster
                 document.getElementById('display-email').textContent = user.email;
 
-                // 3. Tarih Göster (Firebase creationTime)
+                // 3. Tarih GÃƒÂ¶ster (Firebase creationTime)
                 const dateEl = document.getElementById('join-date');
                 if (user.metadata.creationTime) {
                     const dateObj = new Date(user.metadata.creationTime);
-                    // Türkçe formatta tarih (Örn: 26 Ocak 2026)
+                    // TÃƒÂ¼rkÃƒÂ§e formatta tarih (Ãƒâ€“rn: 26 Ocak 2026)
                     dateEl.textContent = dateObj.toLocaleDateString('tr-TR', {
                         day: 'numeric', month: 'long', year: 'numeric'
                     });
                 }
 
-                // 4. Profil Fotosu Göster
+                // 4. Profil Fotosu GÃƒÂ¶ster
                 const avatarContainer = document.getElementById('avatar-container');
                 if (user.photoURL) {
                     // Google fotosu varsa
                     avatarContainer.innerHTML = `<img src="${user.photoURL}" alt="Profil" class="avatar-img">`;
                 } else {
-                    // Foto yoksa ismin baş harfini göster
+                    // Foto yoksa ismin baÃ…Å¸ harfini gÃƒÂ¶ster
                     const initial = name.charAt(0).toUpperCase();
                     avatarContainer.innerHTML = `<span class="avatar-placeholder">${initial}</span>`;
                 }
             }
         });
 
-        // Çıkış Butonu İşlevi
+        // Ãƒâ€¡Ã„Â±kÃ„Â±Ã…Å¸ Butonu Ã„Â°Ã…Å¸levi
         document.getElementById('logout-btn-profile').addEventListener('click', () => {
-            if (confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+            if (confirm("Ãƒâ€¡Ã„Â±kÃ„Â±Ã…Å¸ yapmak istediÃ„Å¸inize emin misiniz?")) {
                 signOut(auth).then(() => {
                     window.location.href = "/";
                 });
@@ -613,7 +598,7 @@
     <footer class="footer">
         <div class="container">
             <div class="footer-left">
-                <a href="/about" class="footer-link">Hakkında & Gizlilik</a>
+                <a href="/about" class="footer-link">HakkÃ„Â±nda & Gizlilik</a>
                 <div class="social-icons">
                     <a href="https://www.instagram.com/ituultimate" target="_blank" rel="noopener" class="social-icon">
                         <i class="fab fa-instagram"></i>
