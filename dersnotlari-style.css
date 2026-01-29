@@ -211,9 +211,9 @@
 
 .note-subject {
     font-family: 'Patrick Hand', cursive;
-    font-size: 0.9rem;
+    font-size: 1.15rem;
     color: #00a8cc;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -977,4 +977,59 @@
     .note-details-description {
         max-height: 150px;
     }
+}
+
+/* ===========================================
+   NOTE CARD ACTION BUTTONS (Delete/Favorite)
+   =========================================== */
+
+.note-card-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+    z-index: 5;
+}
+
+.action-btn {
+    width: auto;
+    height: auto;
+    padding: 6px;
+    border: none;
+    outline: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.action-btn i {
+    font-size: 1.2rem;
+    color: #adb5bd;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    transform: scale(1.15);
+}
+
+.action-btn:focus {
+    outline: none;
+}
+
+/* Favorite Button */
+.favorite-btn:hover i {
+    color: #f5a623;
+}
+
+.favorite-btn.active i {
+    color: #f5a623;
+}
+
+/* Delete Button */
+.delete-btn:hover i {
+    color: #dc3545;
 }
