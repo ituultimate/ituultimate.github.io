@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YYGVJKPCM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-3YYGVJKPCM');
+    </script>
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="ITU UltiMate" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilim | ITU UltiMate</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome & Stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="attendance-style.css">
+    <link rel="stylesheet" href="dersnotlari-style.css">
+
+    <style>
+        /* --- PROFÃ„Â°L SAYFASINA Ãƒâ€“ZEL STÃ„Â°LLER --- */
+
+        .profile-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 85vh;
+            padding: 40px 20px;
+            background-color: #f8f9fa;
+            gap: 30px;
+        }
+
+        /* ========================================
+           HORIZONTAL PROFILE CARD (New Design)
+           ======================================== */
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+        }
+
+        .profile-card-inner {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 30px;
+            gap: 30px;
+        }
+
+        /* Left Side - Avatar */
+        .profile-avatar-section {
+            flex-shrink: 0;
+        }
+
+        .avatar-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #00a8cc;
+            box-shadow: 0 4px 15px rgba(0, 168, 204, 0.25);
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-placeholder {
+            font-size: 2.5rem;
+            color: #062a54;
+            font-weight: bold;
+        }
+
+        /* Right Side - User Info */
+        .profile-info-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            color: #062a54;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .user-email {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        /* Info Badges */
+        .info-badges {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f8f9fa;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #495057;
+        }
+
+        .info-badge i {
+            color: #00a8cc;
+            font-size: 0.9rem;
+        }
+
+        /* Profile Actions */
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #00a8cc 0%, #0096b3 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 168, 204, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            color: #495057;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 2px solid #dc3545;
+            color: #dc3545;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Edit Profile Form */
+        .edit-profile-form {
+            display: none;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .edit-profile-form input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+
+        .edit-profile-form .form-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            background: #e9ecef;
+            border: none;
+            color: #333;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            flex: 1;
+            background: #00a8cc;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-save:hover {
+            background: #0096b3;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .profile-card-inner {
+                flex-direction: column;
+                text-align: center;
+                padding: 25px 20px;
+            }
+
+            .user-name {
+                font-size: 1.4rem;
+            }
+
+            .info-badges {
+                justify-content: center;
+            }
+
+            .profile-actions {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .profile-actions button,
+            .profile-actions a {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* ========================================
+           LEGACY STYLES (kept for compatibility)
+           ======================================== */
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #dc3545;
+            color: #dc3545;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-outline:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* --- TAB NAVÃ„Â°GASYON --- */
+        .profile-tabs-container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .profile-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .profile-tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #6c757d;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s;
+        }
+
+        .profile-tab-btn:hover {
+            color: #062a54;
+            background: rgba(6, 42, 84, 0.05);
+        }
+
+        .profile-tab-btn.active {
+            color: #062a54;
+            background: white;
+            border-bottom: 3px solid #00a8cc;
+        }
+
+        .profile-tab-btn i {
+            margin-right: 8px;
+        }
+
+        /* --- NOTES GRID --- */
+        #profile-notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        #profile-notes-grid .note-card {
+            position: relative;
+        }
+
+        /* Empty & Loading States */
+        .empty-state,
+        .loading-text,
+        .error-text {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .loading-text i {
+            font-size: 1.5rem;
+            color: #00a8cc;
+        }
+
+        /* --- EDIT PROFILE FORM --- */
+        .edit-profile-form {
+            display: none;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .edit-profile-form input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .edit-profile-form .form-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-profile-form .form-buttons button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            background: #e9ecef;
+            border: none;
+            color: #333;
+        }
+
+        .btn-save {
+            background: #00a8cc;
+            border: none;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #0096b3;
+        }
+
+        .btn-edit {
+            background: transparent;
+            border: 2px solid #00a8cc;
+            color: #00a8cc;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-edit:hover {
+            background: #00a8cc;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .profile-tabs {
+                flex-direction: column;
+            }
+
+            #profile-notes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="navbar-placeholder"></div>
+
+    <main>
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+        </div>
+
+        <section id="main-content" style="display: none;">
+            <div class="profile-wrapper">
+
+                <!-- HORIZONTAL PROFILE CARD -->
+                <div class="profile-card">
+                    <div class="profile-card-inner">
+
+                        <!-- Left: Avatar -->
+                        <div class="profile-avatar-section">
+                            <div class="avatar-container" id="avatar-container">
+                                <span class="avatar-placeholder">?</span>
+                            </div>
+                        </div>
+
+                        <!-- Right: User Info -->
+                        <div class="profile-info-section">
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+                            <h2 class="user-name" id="display-name">YÃƒÂ¼kleniyor...</h2>
+=======
+                            <h2 class="user-name" id="display-name">Yükleniyor...</h2>
+>>>>>>> Stashed changes
+=======
+                            <h2 class="user-name" id="display-name">Yükleniyor...</h2>
+>>>>>>> Stashed changes
+                            <p class="user-email" id="display-email">...</p>
+
+                            <div class="info-badges">
+                                <span class="info-badge">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <span id="join-date">-</span>
+                                </span>
+                                <span class="info-badge">
+                                    <i class="fas fa-user-check"></i>
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+                                    Standart ÃƒÅ“ye
+=======
+                                    Standart Üye
+>>>>>>> Stashed changes
+=======
+                                    Standart Üye
+>>>>>>> Stashed changes
+                                </span>
+                            </div>
+
+                            <div class="profile-actions">
+                                <button id="edit-profile-btn" class="btn-edit">
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+                                    <i class="fas fa-edit"></i> DÃƒÂ¼zenle
+                                </button>
+                                <a href="/programlayici" class="btn-secondary">
+                                    <i class="fas fa-calendar"></i> Ders ProgramÃ„Â±
+                                </a>
+                                <button id="logout-btn-profile" class="btn-logout">
+                                    <i class="fas fa-sign-out-alt"></i> Ãƒâ€¡Ã„Â±kÃ„Â±Ã…Å¸
+=======
+=======
+>>>>>>> Stashed changes
+                                    <i class="fas fa-edit"></i> Düzenle
+                                </button>
+                                <a href="/programlayici" class="btn-secondary">
+                                    <i class="fas fa-calendar"></i> Ders Programı
+                                </a>
+                                <button id="logout-btn-profile" class="btn-logout">
+                                    <i class="fas fa-sign-out-alt"></i> Çıkış
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+                                </button>
+                            </div>
+
+                            <!-- Edit Profile Form (Hidden by default) -->
+                            <div class="edit-profile-form" id="edit-profile-form">
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+                                <input type="text" id="edit-display-name" placeholder="GÃƒÂ¶rÃƒÂ¼nen Ã„Â°sim">
+                                <div class="form-buttons">
+                                    <button class="btn-cancel" id="cancel-edit-btn">Ã„Â°ptal</button>
+=======
+                                <input type="text" id="edit-display-name" placeholder="Görünen İsim">
+                                <div class="form-buttons">
+                                    <button class="btn-cancel" id="cancel-edit-btn">İptal</button>
+>>>>>>> Stashed changes
+=======
+                                <input type="text" id="edit-display-name" placeholder="Görünen İsim">
+                                <div class="form-buttons">
+                                    <button class="btn-cancel" id="cancel-edit-btn">İptal</button>
+>>>>>>> Stashed changes
+                                    <button class="btn-save" id="save-profile-btn">Kaydet</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Tabs and Notes Section -->
+                <div class="profile-tabs-container">
+                    <div class="profile-tabs">
+                        <button class="profile-tab-btn active" data-tab="uploads">
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+                            <i class="fas fa-upload"></i> YÃƒÂ¼klemelerim
+=======
+                            <i class="fas fa-upload"></i> Yüklemelerim
+>>>>>>> Stashed changes
+=======
+                            <i class="fas fa-upload"></i> Yüklemelerim
+>>>>>>> Stashed changes
+                        </button>
+                        <button class="profile-tab-btn" data-tab="favorites">
+                            <i class="far fa-bookmark"></i> Favorilerim
+                        </button>
+                    </div>
+
+                    <div id="profile-notes-grid">
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+                        <div class="loading-text"><i class="fas fa-spinner fa-spin"></i> YÃƒÂ¼kleniyor...</div>
+=======
+                        <div class="loading-text"><i class="fas fa-spinner fa-spin"></i> Yükleniyor...</div>
+>>>>>>> Stashed changes
+=======
+                        <div class="loading-text"><i class="fas fa-spinner fa-spin"></i> Yükleniyor...</div>
+>>>>>>> Stashed changes
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="auth-manager.js"></script>
+    <script type="module" src="profil-script.js"></script>
+
+    <script type="module">
+        import { auth } from "./firebase-config.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Auth Manager zaten giriÃ…Å¸ kontrolÃƒÂ¼ yapÃ„Â±yor, biz burada sadece veriyi gÃƒÂ¶steriyoruz
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // 1. Ã„Â°sim GÃƒÂ¶ster
+                const nameEl = document.getElementById('display-name');
+                const name = user.displayName || user.email.split('@')[0];
+                // Ã„Â°smin ilk harflerini bÃƒÂ¼yÃƒÂ¼t
+                nameEl.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+
+                // 2. Email GÃƒÂ¶ster
+                document.getElementById('display-email').textContent = user.email;
+
+                // 3. Tarih GÃƒÂ¶ster (Firebase creationTime)
+                const dateEl = document.getElementById('join-date');
+                if (user.metadata.creationTime) {
+                    const dateObj = new Date(user.metadata.creationTime);
+                    // TÃƒÂ¼rkÃƒÂ§e formatta tarih (Ãƒâ€“rn: 26 Ocak 2026)
+                    dateEl.textContent = dateObj.toLocaleDateString('tr-TR', {
+                        day: 'numeric', month: 'long', year: 'numeric'
+                    });
+                }
+
+                // 4. Profil Fotosu GÃƒÂ¶ster
+                const avatarContainer = document.getElementById('avatar-container');
+                if (user.photoURL) {
+                    // Google fotosu varsa
+                    avatarContainer.innerHTML = `<img src="${user.photoURL}" alt="Profil" class="avatar-img">`;
+                } else {
+                    // Foto yoksa ismin baÃ…Å¸ harfini gÃƒÂ¶ster
+                    const initial = name.charAt(0).toUpperCase();
+                    avatarContainer.innerHTML = `<span class="avatar-placeholder">${initial}</span>`;
+                }
+            }
+        });
+
+        // Ãƒâ€¡Ã„Â±kÃ„Â±Ã…Å¸ Butonu Ã„Â°Ã…Å¸levi
+        document.getElementById('logout-btn-profile').addEventListener('click', () => {
+            if (confirm("Ãƒâ€¡Ã„Â±kÃ„Â±Ã…Å¸ yapmak istediÃ„Å¸inize emin misiniz?")) {
+                signOut(auth).then(() => {
+                    window.location.href = "/";
+                });
+            }
+        });
+    </script>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-left">
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+                <a href="/about" class="footer-link">HakkÃ„Â±nda & Gizlilik</a>
+=======
+                <a href="/about" class="footer-link">Hakkında &amp; Gizlilik</a>
+>>>>>>> Stashed changes
+=======
+                <a href="/about" class="footer-link">Hakkında &amp; Gizlilik</a>
+>>>>>>> Stashed changes
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/ituultimate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/company/itu-ultimate" target="_blank" rel="noopener"
+                        class="social-icon">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@ITUUltiMate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-right">
+                <p>&copy; 2025 ITU UltiMate. Made with ❤️ for ITU Students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="nav-menu.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    }, (err) => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+
+</body>
+
+</html>

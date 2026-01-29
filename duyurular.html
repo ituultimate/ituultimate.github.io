@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YYGVJKPCM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-3YYGVJKPCM');
+    </script>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-MKCJ22QK');</script>
+    <!-- End Google Tag Manager -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="ITU UltiMate" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duyurular | ITU UltiMate</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="attendance-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- DUYURU SAYFASI STÃ„Â°LLERÃ„Â° --- */
+
+        .page-wrapper {
+            background-color: #f8f9fa;
+            min-height: 90vh;
+            padding: 40px 20px;
+        }
+
+        .content-container {
+            max-width: 800px;
+            /* Okuma kolaylÃ„Â±Ã„Å¸Ã„Â± iÃƒÂ§in ÃƒÂ§ok geniÃ…Å¸ yapmÃ„Â±yoruz */
+            margin: 0 auto;
+        }
+
+        /* BaÃ…Å¸lÃ„Â±k AlanÃ„Â± */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            color: #062a54;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+
+        /* Duyuru KartlarÃ„Â± */
+        .announcement-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .announcement-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .announcement-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Sol Taraftaki Renkli Ãƒâ€¡izgi (Kategoriye gÃƒÂ¶re deÃ„Å¸iÃ…Å¸ir) */
+        .announcement-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background-color: #00a8cc;
+            /* VarsayÃ„Â±lan renk */
+        }
+
+        /* Kart Ã„Â°ÃƒÂ§eriÃ„Å¸i */
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .date {
+            color: #adb5bd;
+            font-weight: 500;
+        }
+
+        .card-title {
+            color: #062a54;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            color: #555;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Kategori Renkleri */
+        .type-yeni {
+            border-left-color: #28a745 !important;
+        }
+
+        .type-yeni .badge {
+            background-color: #e6f9e9;
+            color: #28a745;
+        }
+
+        .type-sistem {
+            border-left-color: #00a8cc !important;
+        }
+
+        .type-sistem .badge {
+            background-color: #e0f7fa;
+            color: #00a8cc;
+        }
+
+        .type-bakim {
+            border-left-color: #dc3545 !important;
+        }
+
+        .type-bakim .badge {
+            background-color: #fce8e6;
+            color: #dc3545;
+        }
+
+        .type-genel {
+            border-left-color: #6c757d !important;
+        }
+
+        .type-genel .badge {
+            background-color: #f1f3f5;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKCJ22QK" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div id="navbar-placeholder"></div>
+
+    <main>
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+        </div>
+
+        <section id="main-content" style="display: none;">
+            <div class="page-wrapper">
+                <div class="content-container">
+
+                    <div class="page-header">
+                        <h1 class="page-title">Duyurular & Güncellemeler</h1>
+                        <p class="page-subtitle">Sistemle ilgili yenilikleri ve bakım çalışmalarını buradan takip
+                            edebilirsiniz.</p>
+                    </div>
+
+                    <div class="announcement-list" id="announcement-list">
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="auth-manager.js"></script>
+
+    <script>
+        // --- DUYURU VERİLERİ ---
+        // Yeni bir duyuru eklemek için bu listeye bir {object} daha eklemen yeterli.
+        const announcements = [
+            {
+                type: 'sistem',
+                badgeText: 'YENİLİK',
+                date: '27 Ocak 2026',
+                title: 'Gelecek Özellikler',
+                content: 'YakÃ„Â±n zamanda kullanÃ„Â±cÃ„Â±larÃ„Â±n dersler hakkÃ„Â±nda yorumlar/puanlamalar yapabileceÃ„Å¸i ve ders notlarÃ„Â±nÃ„Â±n paylaÃ…Å¸Ã„Â±labileceÃ„Å¸i yepyeni modÃƒÂ¼lÃƒÂ¼mÃƒÂ¼zÃƒÂ¼ yayÃ„Â±nlayacaÃ„Å¸Ã„Â±z. AyrÃ„Â±ca daha kiÃ…Å¸iselleÃ…Å¸tirilebilir kullanÃ„Â±cÃ„Â± profilleri ve kullanÃ„Â±cÃ„Â± puanlarÃ„Â± da ÃƒÂ§ok yakÃ„Â±nda sizlerle olacak.'
+            },
+            {
+                type: 'yeni', // Seçenekler: 'yeni', 'sistem', 'bakim', 'genel'
+                badgeText: 'YENİ ÖZELLİK',
+                date: '27 Ocak 2026',
+                title: 'Profil Sayfası Yayında!',
+                content: 'Artık kullanıcılar kendi profil sayfalarını görüntüleyebilir, üyelik tarihlerini ve hesap türlerini kontrol edebilirler. Google fotoğraf entegrasyonu tamamlandı.'
+            },
+            {
+                type: 'sistem',
+                badgeText: 'GÜNCELLEME',
+                date: '26 Ocak 2026',
+                title: 'Google ile Giriş ve Email Doğrulama',
+                content: 'Hesap güvenliğinizi artırmak için email doğrulama sistemi devreye alındı. Ayrıca Google ile tek tıklada giriş özelliği aktifleştirildi.'
+            },
+            {
+                type: 'bakim',
+                badgeText: 'BAKIM ÇALIŞMASI',
+                date: '24 Ocak 2026',
+                title: 'Veritabanı Bakım Çalışması',
+                content: 'Pazar gecesi 03:00 - 05:00 saatleri arasında veritabanı iyileştirmesi yapılacaktır. Bu süre zarfında sisteme erişim kesintiye uğrayabilir.'
+            },
+            {
+                type: 'genel',
+                badgeText: 'DUYURU',
+                date: '20 Ocak 2026',
+                title: 'ITU UltiMate Projesi Başladı',
+                content: 'İTÜ öğrencileri için geliştirdiğimiz açık kaynak projemiz yayında! Ortalama hesaplama ve programlayıcı modülleri kullanıma açıldı.'
+            }
+        ];
+
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+        // --- DUYURULARI EKRAÃƒâ€˜A YAZDIRAN FONKSÃ„Â°YON ---
+=======
+        // --- DUYURULARI EKRANA YAZDIRAN FONKSİYON ---
+>>>>>>> Stashed changes
+=======
+        // --- DUYURULARI EKRANA YAZDIRAN FONKSİYON ---
+>>>>>>> Stashed changes
+        function renderAnnouncements() {
+            const listContainer = document.getElementById('announcement-list');
+            let htmlContent = '';
+
+            announcements.forEach(item => {
+                // Her bir duyuru iÃƒÂ§in HTML oluÃ…Å¸tur
+                htmlContent += `
+                    <div class="announcement-card type-${item.type}">
+                        <div class="card-meta">
+                            <span class="badge">${item.badgeText}</span>
+                            <span class="date"><i class="far fa-clock"></i> ${item.date}</span>
+                        </div>
+                        <h3 class="card-title">${item.title}</h3>
+                        <p class="card-text">${item.content}</p>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = htmlContent;
+        }
+
+        // Sayfa yÃƒÂ¼klenince ÃƒÂ§alÃ„Â±Ã…Å¸tÃ„Â±r
+        document.addEventListener('DOMContentLoaded', renderAnnouncements);
+    </script>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-left">
+                <a href="/about" class="footer-link">HakkÃ„Â±nda & Gizlilik</a>
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/ituultimate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/company/itu-ultimate" target="_blank" rel="noopener"
+                        class="social-icon">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@ITUUltiMate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-right">
+                <p>&copy; 2025 ITU UltiMate. Made with ❤️ for ITU Students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="nav-menu.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    }, (err) => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+
+</body>
+
+</html>
