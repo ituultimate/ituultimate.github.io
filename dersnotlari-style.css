@@ -109,24 +109,59 @@
     cursor: not-allowed;
 }
 
+/* Filtre Butonu Tasarımı - Küçük Yuvarlak */
 .filter-clear-btn {
-    font-family: 'Patrick Hand', cursive;
-    font-size: 1rem;
-    padding: 10px 20px;
+    width: 45px;
+    /* Dropdown yüksekliğine yakın */
+    height: 45px;
+    border-radius: 50%;
+    /* Tam yuvarlak */
+    padding: 0;
+
     background: #dc3545;
     color: white;
     border: none;
-    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
+
+    font-size: 1.2rem;
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+
+    /* Animasyon ve Görünürlük Ayarları */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    /* Varsayılan olarak görünmez ama YER KAPLAR (Kaymayı engeller) */
+    opacity: 0;
+    pointer-events: none;
+    /* Görünmezken tıklanamaz */
+    transform: scale(0.5) rotate(-45deg);
+    /* Hafif küçültülmüş başlar */
+    margin-left: 10px;
+    /* Dropdownlardan biraz uzaklaşsın */
+}
+
+/* Aktif olduğunda alacağı hal */
+.filter-clear-btn.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1) rotate(0);
 }
 
 .filter-clear-btn:hover {
     background: #c82333;
-    transform: translateY(-2px);
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+}
+
+/* Mobil uyumluluk */
+@media (max-width: 768px) {
+    .filter-clear-btn {
+        width: 40px;
+        height: 40px;
+        align-self: flex-end;
+        /* Mobilde sağ alt köşeye hizala */
+    }
 }
 
 /* --- Filter Status --- */

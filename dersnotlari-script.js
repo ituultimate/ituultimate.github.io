@@ -145,7 +145,7 @@ const fetchNotes = async () => {
 
         // Build query based on filters
         if (currentFilters.courseCode) {
-            // Scenario B: Filter by specific course - limit 50
+            // Scenario B: Filter by specific course
             notesQuery = query(
                 notesCollection,
                 where('courseCode', '==', currentFilters.courseCode),
@@ -153,7 +153,7 @@ const fetchNotes = async () => {
                 limit(50)
             );
         } else if (currentFilters.subjectCode) {
-            // Scenario B: Filter by subject - limit 50
+            // Scenario B: Filter by subject
             notesQuery = query(
                 notesCollection,
                 where('subjectCode', '==', currentFilters.subjectCode),
@@ -171,6 +171,11 @@ const fetchNotes = async () => {
 
         const notesSnapshot = await getDocs(notesQuery);
 
+        // --- KRİTİK DÜZELTME BURADA ---
+        // Filtre durumunu ve başlıkları, notların boş olup olmadığına bakmaksızın GÜNCELLİYORUZ.
+        // Böylece not olmasa bile "MAT Notları" yazar ve "En popüler..." yazısı kaybolur.
+        updateFilterStatus(notesSnapshot.size);
+
         if (notesSnapshot.empty) {
             renderEmptyState();
             return;
@@ -182,7 +187,6 @@ const fetchNotes = async () => {
         }));
 
         renderNotes(notes);
-        updateFilterStatus(notes.length);
 
     } catch (error) {
         console.error('Error fetching notes:', error);
@@ -341,40 +345,42 @@ function updateFilterStatus(count) {
     const statusElement = document.getElementById('filter-status');
     const clearBtn = document.getElementById('clear-filters');
     const pageTitle = document.getElementById('page-title');
+
     if (!statusElement) return;
 
-    // Eğer branş ve ders kodu seçili değilse (yani "Tümü" durumundaysa)
-    if (!currentFilters.subjectCode && !currentFilters.courseCode) {
-        // Scenario A: No filter - Top 9 globally
+    // Filtre aktif mi kontrolü
+    const isFilterActive = (currentFilters.subjectCode !== '') || (currentFilters.courseCode !== '');
 
-        statusElement.style.display = 'flex'; // Görünür yap
+    if (isFilterActive) {
+        // --- FİLTRE AKTİF ---
 
-        // DEĞİŞİKLİK BURADA: Emoji yerine turuncu renkli FontAwesome ikonu
-        statusElement.innerHTML = '<i class="fas fa-fire" style="color: #ff4500;"></i> En popüler 9 not gösteriliyor';
-
-        statusElement.classList.remove('filtered');
-        if (pageTitle) pageTitle.textContent = '📓 Ders Notları';
-        if (clearBtn) clearBtn.style.display = 'none';
-
-    } else if (currentFilters.courseCode) {
-        // Scenario B: Course selected
-        // Ders seçiliyse bu yazıyı GİZLE
         statusElement.style.display = 'none';
 
-        const displayCode = currentFilters.courseCode.replace(/\s+/g, '');
-        if (pageTitle) pageTitle.textContent = `📚 ${displayCode} Notları`;
-        if (clearBtn) clearBtn.style.display = 'flex';
+        // DEĞİŞİKLİK: Display yerine Class ekliyoruz
+        if (clearBtn) clearBtn.classList.add('active');
+
+        // Başlık güncelleme
+        if (pageTitle) {
+            if (currentFilters.courseCode) {
+                const displayCode = currentFilters.courseCode.replace(/\s+/g, '');
+                pageTitle.textContent = `📚 ${currentFilters.courseCode} Notları`;
+            } else {
+                pageTitle.textContent = `📚 ${currentFilters.subjectCode} Notları`;
+            }
+        }
 
     } else {
-        // Scenario C: Subject selected
-        // Branş seçiliyse bu yazıyı GİZLE
-        statusElement.style.display = 'none';
+        // --- FİLTRE KAPALI ---
 
-        if (pageTitle) pageTitle.textContent = `📚 ${currentFilters.subjectCode} Notları`;
-        if (clearBtn) clearBtn.style.display = 'flex';
+        statusElement.style.display = 'flex';
+        statusElement.innerHTML = '<i class="fas fa-fire" style="color: #ff4500;"></i> En popüler 9 not gösteriliyor';
+
+        // DEĞİŞİKLİK: Display yerine Class siliyoruz
+        if (clearBtn) clearBtn.classList.remove('active');
+
+        if (pageTitle) pageTitle.textContent = '📓 Ders Notları';
     }
 }
-
 // =============================================================
 // EVENT HANDLERS
 // =============================================================
