@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YYGVJKPCM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-3YYGVJKPCM');
+    </script>
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="ITU UltiMate" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol | ITU UltiMate</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="base.css?v=2.0">
+    <link rel="stylesheet" href="attendance-style.css?v=2.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* === THREE-COLUMN LAYOUT WITH DECORATIVE SIDE BACKGROUNDS === */
+
+        /* Main layout wrapper: uses CSS Grid for the three-column structure */
+        .login-layout {
+            display: grid;
+            grid-template-columns: 1fr minmax(auto, 440px) 1fr;
+            min-height: 85vh;
+            width: 100%;
+            align-items: stretch;
+            /* Ensure all columns fill the full grid height */
+        }
+
+        /* Decorative side panels with sketch backgrounds */
+        .side-decoration {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .side-decoration::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.9;
+            /* Visible sketches, retaining line detail */
+        }
+
+        /* Left side: very subtle fade near center edge only */
+        .side-left::before {
+            background-image:
+                linear-gradient(to right, transparent 0%, transparent 85%, rgba(255, 255, 255, 0.4) 100%),
+                url('sketch-left.png');
+        }
+
+        /* Right side: very subtle fade near center edge only */
+        .side-right::before {
+            background-image:
+                linear-gradient(to left, transparent 0%, transparent 85%, rgba(255, 255, 255, 0.4) 100%),
+                url('sketch-right.png');
+        }
+
+        /* Center column containing the form card */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+            /* Ensures card stays above decorations */
+        }
+
+        /* Form card: visually separated with white bg and shadow */
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow:
+                0 4px 24px rgba(6, 42, 84, 0.08),
+                0 1px 3px rgba(0, 0, 0, 0.04);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(233, 236, 239, 0.8);
+            backdrop-filter: blur(8px);
+            /* Subtle blur for depth */
+            min-height: 540px;
+        }
+
+        /* === RESPONSIVE: Hide side images on smaller screens === */
+        @media (max-width: 991px) {
+            .login-layout {
+                grid-template-columns: 1fr;
+                /* Single column */
+            }
+
+            .side-decoration {
+                display: none;
+                /* Hide decorative side panels */
+            }
+
+            .login-wrapper {
+                min-height: 85vh;
+            }
+        }
+
+        /* === FORM STYLES === */
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .error-msg {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="navbar container">
+            <a href="/" class="nav-logo">ITU UltiMate</a>
+        </nav>
+    </header>
+
+    <!-- Three-column layout: left sketch | register card | right sketch -->
+    <main class="login-layout">
+        <!-- Left decorative panel with architectural sketch -->
+        <div class="side-decoration side-left" aria-hidden="true"></div>
+
+        <!-- Center: Register form (unchanged) -->
+        <div class="login-wrapper">
+            <div class="login-card">
+                <h2 style="text-align: center; color: #062a54; margin-bottom: 1.5rem;">Hesap Oluştur</h2>
+
+                <form id="register-form">
+                    <label style="font-weight: 600; display:block; margin-bottom:5px;">Email</label>
+                    <input type="email" id="email" class="form-input" placeholder="mail@itu.edu.tr" required>
+
+                    <label style="font-weight: 600; display:block; margin-bottom:5px;">Şifre</label>
+                    <input type="password" id="password" class="form-input" placeholder="En az 6 karakter" required
+                        minlength="6">
+
+                    <button type="submit" class="btn btn-primary btn-full">Kayıt Ol</button>
+                </form>
+
+                <div id="error-message" class="error-msg"></div>
+
+                <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+                    Zaten hesabın var mı? <a id="login-link" href="login"
+                        style="color: #00a8cc; font-weight: bold;">Giriş
+                        Yap</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right decorative panel with architectural sketch -->
+        <div class="side-decoration side-right" aria-hidden="true"></div>
+    </main>
+
+    <script type="module" src="auth-manager.js?v=2.0"></script>
+    <script>
+        // Clear old service workers and caches to fix caching issues
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                registrations.forEach(registration => registration.unregister());
+            });
+            caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
+            });
+        }
+    </script>
+</body>
+
+</html>
