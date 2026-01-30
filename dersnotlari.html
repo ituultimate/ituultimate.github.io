@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3YYGVJKPCM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-3YYGVJKPCM');
+    </script>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-MKCJ22QK');</script>
+    <!-- End Google Tag Manager -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="ITU UltiMate" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Notları | ITU UltiMate</title>
+    <meta name="description"
+        content="İTÜ öğrencileri için ders notları paylaşım platformu. Arkadaşlarınla notlarını paylaş, başkalarının notlarından faydalan.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Patrick+Hand&display=swap"
+        rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="base.css?v=2.0">
+    <link rel="stylesheet" href="dersnotlari-style.css?v=2.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MKCJ22QK" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div id="navbar-placeholder"></div>
+
+    <main>
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+        </div>
+
+        <section id="main-content" style="display: none;">
+            <div class="notes-page-wrapper">
+
+                <!-- Page Header -->
+                <div class="notes-page-header">
+                    <h1 class="notes-page-title" id="page-title">📓 Ders Notları</h1>
+                    <p class="notes-page-subtitle">
+                        Arkadaşlarınla ders notlarını paylaş, başkalarının notlarından faydalan.
+                        Birlikte öğrenmek daha kolay!
+                    </p>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="notes-filter-section">
+                    <div class="filter-group">
+                        <label for="subject-filter" class="filter-label">
+                            <i class="fas fa-book"></i> Branş Kodu
+                        </label>
+                        <select id="subject-filter" class="filter-select">
+                            <option value="">Tümü</option>
+                            <!-- Options populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="course-filter" class="filter-label">
+                            <i class="fas fa-graduation-cap"></i> Ders Kodu
+                        </label>
+                        <select id="course-filter" class="filter-select" disabled>
+                            <option value="">Önce branş seçin</option>
+                            <!-- Options populated by JavaScript -->
+                        </select>
+                    </div>
+                    <button id="clear-filters" class="filter-clear-btn" style="display: none;">
+                        <i class="fas fa-times"></i> Filtreleri Temizle
+                    </button>
+                </div>
+
+                <!-- Filter Status / Sub-header (shown for default view, hidden by JS when filtered) -->
+                <div class="filter-status" id="filter-status">
+                    <i class="fas fa-fire" style="color: #ff4500;"></i> En popüler 9 not gösteriliyor
+                </div>
+
+                <!-- Notes Grid -->
+                <div class="notes-grid" id="notes-grid">
+                    <!-- Notes will be rendered here by JavaScript -->
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Upload Modal Overlay -->
+        <div class="upload-modal-overlay" id="upload-modal" style="display: none;">
+            <div class="upload-modal-card">
+                <!-- Close Button -->
+                <button class="upload-modal-close" id="upload-modal-close" aria-label="Kapat">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <!-- Modal Header -->
+                <h2 class="upload-modal-title">📝 Yeni Not Ekle</h2>
+
+                <!-- Upload Form -->
+                <form id="upload-form" class="upload-form">
+                    <div class="form-group">
+                        <label for="upload-subject" class="form-label">
+                            <i class="fas fa-book"></i> Branş *
+                        </label>
+                        <select id="upload-subject" class="form-select" required>
+                            <option value="">Branş seçin...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="upload-course" class="form-label">
+                            <i class="fas fa-graduation-cap"></i> Ders *
+                        </label>
+                        <select id="upload-course" class="form-select" required disabled>
+                            <option value="">Önce branş seçin...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="upload-instructor" class="form-label">
+                            <i class="fas fa-chalkboard-teacher"></i> Öğretim Görevlisi
+                        </label>
+                        <input type="text" id="upload-instructor" class="form-input"
+                            placeholder="Örn: Prof. Dr. Ahmet Yılmaz">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="upload-link" class="form-label">
+                            <i class="fas fa-link"></i> Not Linki *
+                        </label>
+                        <input type="url" id="upload-link" class="form-input" placeholder="https://drive.google.com/..."
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="upload-title" class="form-label">
+                            <i class="fas fa-heading"></i> Not Başlığı *
+                        </label>
+                        <input type="text" id="upload-title" class="form-input" placeholder="Örn: Final Özet Notları"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="upload-description" class="form-label">
+                            <i class="fas fa-align-left"></i> Açıklama *
+                        </label>
+                        <textarea id="upload-description" class="form-textarea" rows="3"
+                            placeholder="Bu not ne hakkında? Hangi konuları kapsıyor?" required></textarea>
+                    </div>
+
+                    <div class="form-group form-checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="upload-anonymous">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text"><i class="fas fa-user-secret"></i> Anonim olarak yükle</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="upload-submit-btn" id="upload-submit-btn">
+                        <i class="fas fa-upload"></i> Yükle
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Note Details Modal (View Mode) -->
+        <div class="upload-modal-overlay" id="note-details-modal" style="display: none;">
+            <div class="upload-modal-card note-details-card">
+                <!-- Close Button -->
+                <button class="upload-modal-close" id="note-details-close" aria-label="Kapat">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <!-- Note Details Content -->
+                <div class="note-details-content">
+                    <h2 class="note-details-title" id="detail-title">Not Başlığı</h2>
+
+                    <div class="note-details-meta">
+                        <span class="detail-badge" id="detail-course">
+                            <i class="fas fa-book"></i> MAT 281
+                        </span>
+                        <span class="detail-date" id="detail-date">
+                            <i class="far fa-clock"></i> 15 Ocak 2026
+                        </span>
+                    </div>
+
+                    <div class="note-details-uploader" id="detail-uploader">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Yükleyen: Kullanıcı Adı</span>
+                    </div>
+
+                    <div class="note-details-description-wrapper">
+                        <h4 class="description-label"><i class="fas fa-align-left"></i> Açıklama</h4>
+                        <p class="note-details-description" id="detail-description">
+                            Bu notun açıklaması burada görüntülenecek...
+                        </p>
+                    </div>
+
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="note-details-link-btn"
+                        id="detail-link">
+                        <i class="fas fa-external-link-alt"></i> Linke Git
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <button class="fab-upload" id="fab-upload" aria-label="Not Yükle">
+            <i class="fas fa-plus"></i>
+        </button>
+        <span class="fab-tooltip">Not Yükle</span>
+
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-left">
+                <a href="/about" class="footer-link">Hakkında & Gizlilik</a>
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/ituultimate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/company/itu-ultimate" target="_blank" rel="noopener"
+                        class="social-icon">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@ITUUltiMate" target="_blank" rel="noopener" class="social-icon">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-right">
+                <p>&copy; 2025 ITU UltiMate. Made with ❤️ for ITU Students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="nav-menu.js?v=2.0"></script>
+    <script type="module" src="auth-manager.js?v=2.0"></script>
+    <script type="module" src="dersnotlari-script.js?v=2.0"></script>
+    <script>
+        // Clear old service workers and caches to fix caching issues
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                registrations.forEach(registration => registration.unregister());
+            });
+            caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
+            });
+        }
+    </script>
+</body>
+
+</html>
