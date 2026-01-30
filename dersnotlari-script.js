@@ -47,7 +47,7 @@ const fetchAndGroupCourses = async () => {
 
     try {
         // Fetch from the same collection as scheduler
-        const coursesCollection = collection(db, '2526-bahar');
+        const coursesCollection = collection(db, '2025-2026-bahar');
         const coursesSnapshot = await getDocs(coursesCollection);
 
         if (coursesSnapshot.empty) {
