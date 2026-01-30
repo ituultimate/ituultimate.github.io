@@ -29,7 +29,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ortalama Hesaplayıcı | ITU UltimMte</title>
+    <title>Ortalama Hesaplayıcı | ITU UltiMate</title>
 
     <!-- Google Fonts: Inter for body, Poppins for headings -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,8 +39,8 @@
         rel="stylesheet">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="base.css">
-    <link rel="stylesheet" href="gpa-calculator-style.css">
+    <link rel="stylesheet" href="base.css?v=2.0">
+    <link rel="stylesheet" href="gpa-calculator-style.css?v=2.0">
 </head>
 
 <body>
@@ -49,22 +49,7 @@
             style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
-    <header class="header">
-        <nav class="navbar container">
-            <a href="/" class="nav-logo">ITU UltiMate</a>
-            <ul class="nav-menu">
-                <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
-                <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
-                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
-                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
-            </ul>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </nav>
-    </header>
+    <div id="navbar-placeholder"></div>
 
     <main>
         <section class="gpa-calculator-section">
@@ -145,18 +130,17 @@
         </div>
     </footer>
 
-    <script src="nav-menu.js"></script>
-    <script src="gpa-calculator-script.js"></script>
-    <script type="module" src="auth-manager.js"></script>
+    <script src="nav-menu.js?v=2.0"></script>
+    <script src="gpa-calculator-script.js?v=2.0"></script>
+    <script type="module" src="auth-manager.js?v=2.0"></script>
     <script>
+        // Clear old service workers and caches to fix caching issues
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    }, (err) => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                registrations.forEach(registration => registration.unregister());
+            });
+            caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
             });
         }
     </script>
