@@ -86,6 +86,7 @@ function updateUI(user) {
                     </span>
                     <div class="dropdown-content">
                         <a href="/profil" class="dropdown-item"><i class="fas fa-user"></i> Profilim</a>
+                        <a href="/ituconnect" class="dropdown-item"><i class="fas fa-comments"></i> ITU Connect</a>
                         <a href="#" id="global-logout-btn" class="dropdown-item logout"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a>
                     </div>
                 </div>
