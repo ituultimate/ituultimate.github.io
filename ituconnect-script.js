@@ -251,37 +251,33 @@ function subscribeToMessages(channelId) {
 }
 
 function renderMessages(messages) {
-    if (!messages.length) {
-        messageList.innerHTML = `
-            <div class="empty-messages">
-                <p>Bu kanalda henüz mesaj yok. İlk mesajı sen yaz! 🐝</p>
-            </div>
-        `;
-        return;
-    }
-
+    // ...
     messageList.innerHTML = messages.map(msg => {
-        const badge = getBadgeForMessageCount(msg.userMessageCount || 0);
-        const time = formatTime(msg.createdAt);
-        const avatarUrl = msg.userPhoto || DEFAULT_AVATAR;
+        // ... (badge tanımları vs)
 
+        // --- DEĞİŞİKLİK BURADA ---
+        // Veritabanındaki isim yerine, eğer kullanıcı bizsek güncel ismi kullan
+        let displayName = msg.userName || 'Anonim';
+
+        // Eğer mesajın sahibi şu anki kullanıcı ise, güncel auth bilgisini kullan
+        if (currentUser && msg.userId === currentUser.uid) {
+            displayName = currentUser.displayName || displayName;
+        }
+        // -------------------------
+
+        // Aşağıdaki ${sanitizeMessage(msg.userName)} kısmını ${sanitizeMessage(displayName)} yap
         return `
-            <div class="message-item" data-message-id="${msg.id}">
-                <img class="message-avatar" src="${avatarUrl}" alt="Avatar" onerror="this.src='${DEFAULT_AVATAR}'">
-                <div class="message-content">
+            <div class="message-item" ...>
+                ...
                     <div class="message-header">
-                        <span class="message-author">${sanitizeMessage(msg.userName || 'Anonim')}</span>
-                        ${renderBadge(badge)}
-                        <span class="message-time">${time}</span>
+                        <span class="message-author">${sanitizeMessage(displayName)}</span>
+                        ...
                     </div>
-                    <div class="message-text">${sanitizeMessage(msg.text)}</div>
-                </div>
+                ...
             </div>
         `;
     }).join('');
-
-    // Scroll to bottom
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // ...
 }
 
 function formatTime(timestamp) {
