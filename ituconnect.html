@@ -32,6 +32,8 @@
     <title>ITU Connect | ITU UltiMate</title>
     <meta name="description"
         content="İTÜ öğrencileri için kampüs sosyal platformu. Fakülte ve kampüs kanallarında gerçek zamanlı sohbet.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#062a54">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,9 +56,12 @@
     <div id="navbar-placeholder"></div>
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="loading-overlay">
+    <div id="loading-overlay" class="loading-overlay" aria-live="polite" role="status" aria-label="Yükleniyor">
         <div class="spinner"></div>
     </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container" role="alert" aria-live="polite"></div>
 
     <!-- Main Connect Container -->
     <main id="main-content" class="connect-main" style="display: none;">
@@ -98,8 +103,8 @@
             </aside>
 
             <!-- Mobile: Floating button to open channels -->
-            <button class="mobile-channels-btn" id="mobile-channels-btn" title="Kanallar">
-                <i class="fas fa-bars"></i>
+            <button class="mobile-channels-btn" id="mobile-channels-btn" aria-label="Kanalları aç" title="Kanallar">
+                <i class="fas fa-bars" aria-hidden="true"></i>
             </button>
 
             <!-- Center: Chat Area -->
@@ -115,8 +120,8 @@
                             <i class="fas fa-circle"></i>
                             <span id="online-count">0</span> çevrimiçi
                         </span>
-                        <button class="toggle-users-btn" id="toggle-users-btn" title="Kullanıcıları Göster">
-                            <i class="fas fa-users"></i>
+                        <button class="toggle-users-btn" id="toggle-users-btn" aria-label="Kullanıcıları göster" title="Kullanıcıları Göster">
+                            <i class="fas fa-users" aria-hidden="true"></i>
                         </button>
                     </div>
                 </header>
@@ -148,15 +153,26 @@
                     <div class="message-list" id="message-list" style="display: none;">
                         <!-- Messages populated by JavaScript -->
                     </div>
+
+                    <!-- Loading More Messages Indicator -->
+                    <div id="loading-more-messages">Daha fazla mesaj yükleniyor...</div>
+
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator" id="typing-indicator" style="display: none;" aria-live="polite">
+                        <span class="typing-dots">
+                            <span></span><span></span><span></span>
+                        </span>
+                        <span class="typing-text">Birisi yazıyor...</span>
+                    </div>
                 </div>
 
                 <!-- Message Input -->
-                <form class="message-form" id="message-form">
+                <form class="message-form" id="message-form" aria-label="Mesaj gönder">
                     <div class="message-input-wrapper">
                         <input type="text" id="message-input" placeholder="Mesaj yazmak için önce kanal seçin..."
-                            autocomplete="off" disabled>
-                        <button type="submit" class="send-btn" id="send-btn" disabled>
-                            <i class="fas fa-paper-plane"></i>
+                            autocomplete="off" disabled aria-label="Mesajınızı buraya yazın">
+                        <button type="submit" class="send-btn" id="send-btn" disabled aria-label="Mesaj gönder">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
                         </button>
                     </div>
                     <div class="input-hint" id="input-hint">
@@ -178,7 +194,7 @@
                         <img class="status-avatar" id="my-avatar" src="" alt="Avatar">
                         <div class="status-info">
                             <span class="status-name" id="my-name">Giriş Yapın</span>
-                            <select class="status-select" id="status-select" disabled>
+                            <select class="status-select" id="status-select" disabled aria-label="Durumunuzu seçin">
                                 <option value="online">🟢 Çevrimiçi</option>
                                 <option value="library">📚 Kütüphanede</option>
                                 <option value="cafeteria">🍽️ Yemekhanede</option>
@@ -230,6 +246,7 @@
 
     <!-- Scripts -->
     <script src="nav-menu.js?v=2.0"></script>
+    <script type="module" src="toast-notifications.js?v=2.0"></script>
     <script type="module" src="ituconnect-script.js?v=2.0"></script>
     <script type="module" src="auth-manager.js?v=2.0"></script>
     <script>

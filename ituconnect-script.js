@@ -3,6 +3,7 @@
  * Real-time chat with Firebase Firestore
  */
 import { auth, db } from './firebase-config.js';
+import toast from './toast-notifications.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 import {
     collection,
@@ -12,13 +13,17 @@ import {
     setDoc,
     addDoc,
     updateDoc,
+    deleteDoc,
     query,
     orderBy,
     limit,
     where,
     onSnapshot,
     serverTimestamp,
-    Timestamp
+    Timestamp,
+    onDisconnect,
+    runTransaction,
+    startAfter
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 // =============================================================
@@ -73,6 +78,12 @@ let currentUser = null;
 let currentChannel = null;
 let unsubscribeMessages = null;
 let unsubscribeOnlineUsers = null;
+let unsubscribePresence = null;
+let typingTimeout = null;
+let typingIndicatorTimeout = null;
+let messages = [];
+let lastVisibleMessage = null;
+let isLoadingMore = false;
 
 // DOM Elements
 const loadingOverlay = document.getElementById('loading-overlay');
@@ -107,11 +118,63 @@ function containsBadWords(text) {
 // Default avatar as data URI (simple user icon)
 const DEFAULT_AVATAR = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#062a54"/><circle cx="20" cy="16" r="7" fill="white"/><ellipse cx="20" cy="35" rx="12" ry="10" fill="white"/></svg>');
 
+// Rate limiting configuration
+const RATE_LIMIT = {
+    maxMessages: 10,
+    windowMs: 60000,
+    userHistory: new Map()
+};
+
+// Debounce helper
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Rate limiter
+function checkRateLimit(userId) {
+    const now = Date.now();
+    const history = RATE_LIMIT.userHistory.get(userId) || [];
+
+    const recentMessages = history.filter(time => now - time < RATE_LIMIT.windowMs);
+
+    if (recentMessages.length >= RATE_LIMIT.maxMessages) {
+        return false;
+    }
+
+    recentMessages.push(now);
+    RATE_LIMIT.userHistory.set(userId, recentMessages);
+    return true;
+}
+
 function sanitizeMessage(text) {
-    // Basic XSS prevention
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function validateMessage(text) {
+    if (!text || !text.trim()) {
+        return { valid: false, error: 'Mesaj boş olamaz' };
+    }
+
+    if (text.trim().length > 500) {
+        return { valid: false, error: 'Mesaj çok uzun (maksimum 500 karakter)' };
+    }
+
+    if (containsBadWords(text)) {
+        return { valid: false, error: 'Mesajınız uygunsuz içerik barındırıyor' };
+    }
+
+    return { valid: true };
 }
 
 // =============================================================
@@ -130,6 +193,75 @@ function renderBadge(badgeType) {
     if (!badgeType) return '';
     const badge = BADGE_THRESHOLDS[badgeType];
     return `<span class="bee-badge ${badgeType}">${badge.icon}</span>`;
+}
+
+// =============================================================
+// TYPING INDICATOR
+// =============================================================
+
+function showTypingIndicator(users) {
+    const indicator = document.getElementById('typing-indicator');
+    if (!indicator) return;
+
+    if (!users || users.length === 0) {
+        indicator.style.display = 'none';
+        return;
+    }
+
+    const typingText = indicator.querySelector('.typing-text');
+    if (users.length === 1) {
+        typingText.textContent = `${users[0]} yazıyor...`;
+    } else if (users.length === 2) {
+        typingText.textContent = `${users[0]} ve ${users[1]} yazıyor...`;
+    } else {
+        typingText.textContent = `${users.length} kişi yazıyor...`;
+    }
+
+    indicator.style.display = 'flex';
+
+    clearTimeout(typingIndicatorTimeout);
+    typingIndicatorTimeout = setTimeout(() => {
+        indicator.style.display = 'none';
+    }, 3000);
+}
+
+function sendTypingIndicator() {
+    if (!currentChannel || !currentUser) return;
+
+    const typingRef = doc(db, 'channels', currentChannel, 'typing', currentUser.uid);
+    setDoc(typingRef, {
+        userId: currentUser.uid,
+        userName: currentUser.displayName || 'Kullanıcı',
+        timestamp: serverTimestamp()
+    }).catch(error => {
+        console.error('Error sending typing indicator:', error);
+    });
+}
+
+function subscribeToTypingUsers() {
+    if (unsubscribeMessages) {
+        unsubscribeMessages();
+    }
+
+    const typingRef = collection(db, 'channels', currentChannel, 'typing');
+
+    unsubscribeMessages = onSnapshot(typingRef, (snapshot) => {
+        const now = Date.now();
+        const typingUsers = snapshot.docs
+            .map(doc => doc.data())
+            .filter(user => {
+                const time = user.timestamp?.toDate?.() || user.timestamp;
+                if (!time) return false;
+                const diff = now - new Date(time).getTime();
+                return diff < 3000;
+            })
+            .filter(user => user.userId !== currentUser?.uid)
+            .map(user => user.userName);
+
+        showTypingIndicator(typingUsers);
+    }, (error) => {
+        console.error('Error listening to typing users:', error);
+    });
 }
 
 // =============================================================
@@ -211,6 +343,9 @@ function selectChannel(channelId) {
     // Subscribe to messages
     subscribeToMessages(channelId);
 
+    // Subscribe to typing users
+    subscribeToTypingUsers();
+
     // Close mobile sidebar
     channelSidebar.classList.remove('open');
     document.querySelector('.sidebar-overlay')?.classList.remove('active');
@@ -226,31 +361,89 @@ function subscribeToMessages(channelId) {
         unsubscribeMessages();
     }
 
+    // Reset pagination
+    messages = [];
+    lastVisibleMessage = null;
+    isLoadingMore = false;
+
     const messagesRef = collection(db, 'channels', channelId, 'messages');
-    // --- YENİ KOD BAŞLANGIÇ ---
-    // Şu andan 10 dakika öncesini hesapla
-    const onDakikaOnce = new Date(Date.now() - 10 * 60 * 1000);
+    // Only get messages from last 10 minutes (database limit)
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
     const q = query(
         messagesRef,
-        where('createdAt', '>', onDakikaOnce), // Sadece son 10 dakikayı getir
+        where('createdAt', '>', tenMinutesAgo),
         orderBy('createdAt', 'desc'),
         limit(50)
     );
-    // --- YENİ KOD BİTİŞ ---
+
     unsubscribeMessages = onSnapshot(q, (snapshot) => {
-        const messages = snapshot.docs.map(doc => ({
+        messages = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         })).reverse(); // Oldest first
 
+        if (snapshot.docs.length > 0) {
+            lastVisibleMessage = snapshot.docs[snapshot.docs.length - 1];
+        }
+
         renderMessages(messages);
     }, (error) => {
         console.error('Error listening to messages:', error);
+        toast.error('Mesajlar yüklenirken hata oluştu');
     });
 }
 
+async function loadMoreMessages() {
+    if (isLoadingMore || !lastVisibleMessage || !currentChannel) return;
+
+    isLoadingMore = true;
+    const loadingIndicator = document.getElementById('loading-more-messages');
+
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
+    }
+
+    try {
+        const messagesRef = collection(db, 'channels', currentChannel, 'messages');
+        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+
+        const q = query(
+            messagesRef,
+            where('createdAt', '>', tenMinutesAgo),
+            orderBy('createdAt', 'desc'),
+            startAfter(lastVisibleMessage),
+            limit(30)
+        );
+
+        const snapshot = await getDocs(q);
+
+        const newMessages = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        })).reverse();
+
+        if (newMessages.length > 0) {
+            messages = [...newMessages, ...messages];
+            lastVisibleMessage = snapshot.docs[snapshot.docs.length - 1];
+            renderMessages(messages);
+        }
+
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error loading more messages:', error);
+        toast.error('Daha fazla mesaj yüklenirken hata oluştu');
+    } finally {
+        isLoadingMore = false;
+    }
+}
+
 function renderMessages(messages) {
+    const previousScrollHeight = messagesContainer.scrollHeight;
+    const wasScrolledToBottom = messagesContainer.scrollTop + messagesContainer.clientHeight >= messagesContainer.scrollHeight - 50;
+
     if (!messages.length) {
         messageList.innerHTML = `
             <div class="empty-messages">
@@ -280,8 +473,16 @@ function renderMessages(messages) {
         `;
     }).join('');
 
-    // Scroll to bottom
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // Maintain scroll position when loading more messages
+    if (previousScrollHeight !== messagesContainer.scrollHeight) {
+        if (wasScrolledToBottom) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } else {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight - previousScrollHeight;
+        }
+    } else {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 }
 
 function formatTime(timestamp) {
@@ -320,18 +521,28 @@ function formatTime(timestamp) {
 // =============================================================
 
 async function sendMessage(text) {
-    if (!currentChannel || !currentUser || !text.trim()) return;
-
-    // Check for bad words
-    if (containsBadWords(text)) {
-        alert('Mesajınız uygunsuz içerik barındırıyor. Lütfen düzenleyin.');
+    if (!currentChannel || !currentUser || !text.trim()) {
+        toast.error('Kanal seçin ve giriş yapın');
         return;
     }
 
     // Check if user has @itu.edu.tr email
     const email = currentUser.email || '';
     if (!email.endsWith('@itu.edu.tr')) {
-        alert('Sadece @itu.edu.tr hesapları mesaj gönderebilir.');
+        toast.error('Sadece @itu.edu.tr hesapları mesaj gönderebilir.');
+        return;
+    }
+
+    // Validate message
+    const validation = validateMessage(text);
+    if (!validation.valid) {
+        toast.error(validation.error);
+        return;
+    }
+
+    // Check rate limit
+    if (!checkRateLimit(currentUser.uid)) {
+        toast.warning('Çok fazla mesaj gönderiyorsunuz. Lütfen bekleyin.');
         return;
     }
 
@@ -342,21 +553,19 @@ async function sendMessage(text) {
         const userData = userDoc.exists() ? userDoc.data() : {};
         const messageCount = (userData.messageCount || 0) + 1;
 
-        // --- DÜZELTME BURADA BAŞLIYOR ---
-        // 1. ÖNCE TARİHİ HESAPLIYORUZ (Bu satır eksikti)
-        const imhaTarihi = new Date();
-        imhaTarihi.setMinutes(imhaTarihi.getMinutes() + 10); // 10 dakika ekle
-        // --------------------------------
+        // Calculate expiration date (10 minutes from now)
+        const expireDate = new Date();
+        expireDate.setMinutes(expireDate.getMinutes() + 10);
 
-        // Add message
+        // Add message with 10-minute expiration
         await addDoc(collection(db, 'channels', currentChannel, 'messages'), {
-            text: text.trim(),
+            text: sanitizeMessage(text.trim()),
             userId: currentUser.uid,
             userName: currentUser.displayName || 'Anonim',
             userPhoto: currentUser.photoURL || null,
             userMessageCount: messageCount,
             createdAt: serverTimestamp(),
-            expireAt: imhaTarihi // 2. SONRA BURADA KULLANIYORUZ
+            expireAt: expireDate
         });
 
         // Update user's message count
@@ -367,10 +576,49 @@ async function sendMessage(text) {
 
         // Clear input
         messageInput.value = '';
+
+        // Remove typing indicator
+        const typingRef = doc(db, 'channels', currentChannel, 'typing', currentUser.uid);
+        await deleteDoc(typingRef).catch(() => {});
     } catch (error) {
         console.error('Error sending message:', error);
-        alert('Mesaj gönderilemedi. Lütfen tekrar deneyin.');
+        toast.error('Mesaj gönderilemedi. Lütfen tekrar deneyin.');
     }
+}
+
+// =============================================================
+// FIREBASE PRESENCE (Reliable Online/Offline Detection)
+// =============================================================
+
+function setupFirebasePresence() {
+    if (!currentUser || unsubscribePresence) return;
+
+    const presenceRef = doc(db, 'userStatus', currentUser.uid);
+    const onlineRef = doc(db, '.info/connected');
+
+    const unsubscribeConnected = onSnapshot(onlineRef, (snapshot) => {
+        if (snapshot.data()?.connected === true) {
+            const presenceData = {
+                status: 'online',
+                displayName: currentUser.displayName || 'Kullanıcı',
+                photoURL: currentUser.photoURL || null,
+                messageCount: 0,
+                lastChanged: serverTimestamp()
+            };
+
+            onDisconnect(presenceRef).set({
+                status: 'offline',
+                displayName: currentUser.displayName || 'Kullanıcı',
+                photoURL: currentUser.photoURL || null,
+                messageCount: 0,
+                lastChanged: serverTimestamp()
+            });
+
+            setDoc(presenceRef, presenceData, { merge: true });
+        }
+    });
+
+    unsubscribePresence = () => unsubscribeConnected();
 }
 
 // =============================================================
@@ -427,7 +675,7 @@ function renderOnlineUsers(users) {
 // USER STATUS
 // =============================================================
 
-async function updateUserStatus(status) {
+const debouncedUpdateStatus = debounce(async (status) => {
     if (!currentUser) return;
 
     try {
@@ -440,6 +688,10 @@ async function updateUserStatus(status) {
     } catch (error) {
         console.error('Error updating status:', error);
     }
+}, 500);
+
+async function updateUserStatus(status) {
+    await debouncedUpdateStatus(status);
 }
 
 function updateMyStatusUI(user) {
@@ -530,9 +782,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Typing indicator on input
+    messageInput?.addEventListener('input', () => {
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            sendTypingIndicator();
+        }, 300);
+    });
+
     // Status change
     document.getElementById('status-select')?.addEventListener('change', (e) => {
         updateUserStatus(e.target.value);
+    });
+
+    // Infinite scroll for messages
+    messagesContainer?.addEventListener('scroll', () => {
+        if (messagesContainer.scrollTop < 50) {
+            loadMoreMessages();
+        }
     });
 
     // Show content
@@ -548,6 +815,9 @@ onAuthStateChanged(auth, async (user) => {
 
     if (user) {
         console.log('User logged in:', user.email);
+
+        // Setup Firebase Presence
+        setupFirebasePresence();
 
         // Update UI
         updateMyStatusUI(user);
@@ -572,6 +842,12 @@ onAuthStateChanged(auth, async (user) => {
     } else {
         console.log('User logged out');
 
+        // Unsubscribe from presence
+        if (unsubscribePresence) {
+            unsubscribePresence();
+            unsubscribePresence = null;
+        }
+
         // Update UI
         updateMyStatusUI(null);
 
@@ -582,11 +858,3 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Set offline status when leaving
-window.addEventListener('beforeunload', () => {
-    if (currentUser) {
-        // Note: This may not always fire due to browser restrictions
-        // Consider using Firebase Presence for more reliable offline detection
-        updateUserStatus('offline');
-    }
-});

@@ -3,6 +3,19 @@
    Discord/Teams-style layout
    =========================================== */
 
+/* --- CSS Variables for Consistent Theming --- */
+:root {
+    --connect-sidebar-width: 260px;
+    --connect-users-width: 240px;
+    --connect-sidebar-width-tablet: 220px;
+    --connect-users-width-tablet: 200px;
+    --connect-sidebar-width-mobile: 280px;
+    --connect-users-width-mobile: 260px;
+    --connect-border-radius: 12px;
+    --connect-transition-speed: 0.3s;
+    --connect-transition-fast: 0.2s;
+}
+
 /* --- Layout Container --- */
 .connect-main {
     background-color: var(--bg-color-grey);
@@ -11,7 +24,7 @@
 
 .connect-container {
     display: grid;
-    grid-template-columns: 260px 1fr 240px;
+    grid-template-columns: var(--connect-sidebar-width) 1fr var(--connect-users-width);
     height: calc(100vh - 80px);
     max-width: 100%;
     overflow: hidden;
@@ -105,6 +118,11 @@
 .channel-item:hover {
     background: rgba(255, 255, 255, 0.1);
     color: white;
+}
+
+.channel-item:focus {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: 2px;
 }
 
 .channel-item.active {
@@ -338,6 +356,30 @@
     word-wrap: break-word;
 }
 
+/* Loading More Messages */
+#loading-more-messages {
+    display: none;
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+#loading-more-messages::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--secondary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 /* Message Form */
 .message-form {
     padding: 1rem 1.5rem;
@@ -374,6 +416,10 @@
     color: var(--text-muted);
 }
 
+#message-input:focus {
+    outline: none;
+}
+
 #message-input:disabled {
     cursor: not-allowed;
 }
@@ -395,6 +441,11 @@
 .send-btn:hover:not(:disabled) {
     background: #0096b3;
     transform: scale(1.05);
+}
+
+.send-btn:focus:not(:disabled) {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .send-btn:disabled {
@@ -641,7 +692,7 @@
 /* --- Responsive Design --- */
 @media (max-width: 1024px) {
     .connect-container {
-        grid-template-columns: 220px 1fr 200px;
+        grid-template-columns: var(--connect-sidebar-width-tablet) 1fr var(--connect-users-width-tablet);
     }
 }
 
@@ -656,7 +707,7 @@
         left: 0;
         top: 80px;
         bottom: 0;
-        width: 280px;
+        width: var(--connect-sidebar-width-mobile);
         z-index: 200;
         transform: translateX(-100%);
     }
@@ -671,7 +722,7 @@
         right: 0;
         top: 80px;
         bottom: 0;
-        width: 260px;
+        width: var(--connect-users-width-mobile);
         z-index: 200;
         transform: translateX(100%);
         border-left: 1px solid var(--border-color);
@@ -799,4 +850,238 @@
     background: linear-gradient(135deg, #e5e4e2, #a0a0a0);
     color: #333;
     border: 1px solid #888;
+}
+
+/* ===========================================
+   Toast Notifications
+   =========================================== */
+
+.toast-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.toast {
+    pointer-events: all;
+    min-width: 300px;
+    max-width: 400px;
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast.dismiss {
+    transform: translateX(400px);
+    opacity: 0;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.toast-content i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--text-color-dark);
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    background: var(--bg-color-grey);
+    color: var(--text-color-dark);
+}
+
+/* Toast Types */
+.toast-success {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    border-left: 4px solid #28a745;
+}
+
+.toast-success .toast-content i {
+    color: #28a745;
+}
+
+.toast-error {
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    border-left: 4px solid #dc3545;
+}
+
+.toast-error .toast-content i {
+    color: #dc3545;
+}
+
+.toast-warning {
+    background: linear-gradient(135deg, #fff3cd, #ffeeba);
+    border-left: 4px solid #ffc107;
+}
+
+.toast-warning .toast-content i {
+    color: #ffc107;
+}
+
+.toast-info {
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    border-left: 4px solid #17a2b8;
+}
+
+.toast-info .toast-content i {
+    color: #17a2b8;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: var(--bg-color-grey);
+    border-radius: 12px;
+    margin-top: 0.5rem;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.typing-dots {
+    display: flex;
+    gap: 3px;
+}
+
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    background: var(--secondary-color);
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes typingBounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+/* Responsive Toast */
+@media (max-width: 480px) {
+    .toast-container {
+        left: 10px;
+        right: 10px;
+    }
+
+    .toast {
+        min-width: unset;
+        max-width: none;
+    }
+}
+
+/* ===========================================
+   Reduced Motion Support
+   =========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .welcome-state .welcome-icon {
+        animation: none;
+    }
+
+    .typing-dots span {
+        animation: none;
+        opacity: 1;
+    }
+
+    .toast {
+        transition: none;
+        transform: none;
+    }
+
+    .toast.show {
+        opacity: 1;
+    }
+
+    .sidebar-overlay {
+        transition: none;
+    }
+}
+
+/* ===========================================
+   Focus-visible for Keyboard Navigation
+   =========================================== */
+
+.channel-item:focus-visible,
+.send-btn:focus-visible,
+.status-select:focus-visible,
+.message-input-wrapper:focus-within,
+.mobile-channels-btn:focus-visible,
+.toggle-users-btn:focus-visible,
+.sidebar-toggle-btn:focus-visible {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: 2px;
 }
