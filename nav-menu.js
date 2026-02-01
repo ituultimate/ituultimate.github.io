@@ -28,7 +28,7 @@ const navbarHTML = `
                     </span>
                     <div class="nav-dropdown-content">
                         <a href="/ituconnect"><i class="fas fa-comments"></i> ITU Connect</a>
-                        <a href="/kampus"><i class="fas fa-map-marker-alt"></i> Kampüste Gez</a>
+                        <a href="/campus.html"><i class="fas fa-map-marker-alt"></i> Kampüste Gez</a>
                     </div>
                 </li>
             </ul>
