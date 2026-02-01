@@ -10,19 +10,28 @@ import {
     setPersistence,
     browserLocalPersistence,
     browserSessionPersistence,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    updateProfile
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 // ==========================================
 // 1. AYARLAR VE TANIMLAMALAR
 // ==========================================
 
-const protectedPages = [
+// Pages that show a friendly modal instead of hard redirect
+const softProtectedPages = [
     "programlayici", "programlayici.html",
     "programlayıcı", "programlayıcı.html",
-    "yts", "yts.html",
+    "yts", "yts.html"
+];
+
+// Pages that require hard redirect (must be logged in)
+const hardProtectedPages = [
     "profil", "profil.html"
 ];
+
+// Combined for backwards compatibility
+const protectedPages = [...softProtectedPages, ...hardProtectedPages];
 
 const path = window.location.pathname;
 const rawPageName = path.split("/").filter(Boolean).pop();
@@ -46,6 +55,104 @@ const redirectTarget = ALLOWED_REDIRECTS.includes(rawRedirect) ? rawRedirect : '
 
 // Guard flag to prevent redundant redirects during auth state changes
 let isRedirecting = false;
+
+// Flag to track if modal has been shown (prevent duplicates)
+let authModalShown = false;
+
+// ==========================================
+// AUTH MODAL FUNCTION
+// ==========================================
+
+/**
+ * Show a friendly authentication modal for soft-protected pages
+ * Instead of hard-redirecting, this shows a dismissible modal
+ */
+function showAuthModal() {
+    // Prevent duplicate modals
+    if (authModalShown || document.querySelector('.auth-modal-overlay')) {
+        return;
+    }
+    authModalShown = true;
+
+    // Create modal HTML
+    const modalHTML = `
+        <div class="auth-modal-overlay" id="auth-modal-overlay">
+            <div class="auth-modal">
+                <button class="auth-modal-close" id="auth-modal-close" aria-label="Kapat">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="auth-modal-icon">
+                    ☁️
+                </div>
+                <h2 class="auth-modal-title">Bulut Kayıt Sistemi</h2>
+                <p class="auth-modal-message">
+                    Merhaba! Eğer üye girişi yapıp programlayıcıyı kullanırsanız, programınız bulut sistemimize kaydedilir ve istediğiniz zaman giriş yaparak programınızı görebilir, hatta kaydettiğiniz programdaki derslerin yoklama takibini tüm dönem yapabilirsiniz.
+                </p>
+                <a href="/login?redirect=${encodeURIComponent(currentPage)}" class="auth-modal-cta">
+                    <i class="fas fa-sign-in-alt"></i>&nbsp; Giriş Yap
+                </a>
+                <span class="auth-modal-dismiss" id="auth-modal-dismiss">Şimdilik geç</span>
+            </div>
+        </div>
+    `;
+
+    // Inject modal into the page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Add event listeners
+    const overlay = document.getElementById('auth-modal-overlay');
+    const closeBtn = document.getElementById('auth-modal-close');
+    const dismissBtn = document.getElementById('auth-modal-dismiss');
+
+    const closeModal = () => {
+        overlay.style.animation = 'authModalFadeIn 0.2s ease reverse forwards';
+        setTimeout(() => {
+            overlay.remove();
+        }, 200);
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    dismissBtn.addEventListener('click', closeModal);
+
+    // Close on overlay click (outside modal)
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeModal();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', escHandler);
+        }
+    });
+}
+
+// ==========================================
+// AVATAR HELPER FUNCTION
+// ==========================================
+
+/**
+ * Generate a Data URI for an avatar from an emoji
+ * Creates an SVG with the emoji centered on a branded background
+ * @param {string} emoji - The emoji to use as avatar
+ * @returns {string} - Data URI string for the avatar
+ */
+function generateAvatarDataURI(emoji) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <defs>
+            <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#062a54"/>
+                <stop offset="100%" style="stop-color:#0a3d6f"/>
+            </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="50" fill="url(#bg)"/>
+        <text x="50" y="50" font-size="50" text-anchor="middle" dominant-baseline="central">${emoji}</text>
+    </svg>`;
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
 
 // ==========================================
 // 2. ARAYÜZ (NAVBAR & LOADING) YÖNETİMİ
@@ -110,16 +217,28 @@ function updateUI(user) {
     }
 
     // --- B. YÜKLEME EKRANI VE İÇERİK ---
-    const isProtected = protectedPages.includes(currentPage);
+    const isSoftProtected = softProtectedPages.includes(currentPage);
+    const isHardProtected = hardProtectedPages.includes(currentPage);
+    const isProtected = isSoftProtected || isHardProtected;
 
     // YENİ KURAL: Korumalı sayfaya girmek için hem user olmalı hem maili onaylı olmalı
     const isAuthorized = user && user.emailVerified;
 
     if (isAuthorized || !isProtected) {
+        // User is authorized OR page is not protected - show content normally
         if (loadingOverlay) loadingOverlay.style.display = 'none';
         if (mainContent) mainContent.style.display = 'block';
+    } else if (isSoftProtected) {
+        // Soft-protected page (programlayici, yts) - show modal but allow access
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
+        if (mainContent) mainContent.style.display = 'block';
+
+        // Show the auth modal after a short delay for better UX
+        setTimeout(() => {
+            showAuthModal();
+        }, 500);
     } else {
-        // Yetkisiz erişim varsa yönlendir
+        // Hard-protected page (profil) - redirect to login
         // Skip if already on login/register page to prevent loops
         if (currentPage.includes("login") || currentPage.includes("register")) {
             if (loadingOverlay) loadingOverlay.style.display = 'none';
@@ -206,17 +325,34 @@ function setupAuthForms() {
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
+                const username = document.getElementById('username')?.value?.trim() || '';
+                const selectedAvatar = document.getElementById('selected-avatar')?.value || '🐝';
                 const btn = registerForm.querySelector('button');
+
+                // Validate username
+                if (username.length < 2 || username.length > 20) {
+                    showError({ code: 'auth/invalid-username' }, errorDiv);
+                    return;
+                }
 
                 btn.innerText = "Kaydediliyor...";
                 btn.disabled = true;
 
                 createUserWithEmailAndPassword(auth, email, password)
                     .then(async (userCredential) => {
-                        // YENİ: Doğrulama maili gönder
+                        // Generate avatar photoURL from emoji
+                        const avatarPhotoURL = generateAvatarDataURI(selectedAvatar);
+
+                        // Update user profile with username and avatar
+                        await updateProfile(userCredential.user, {
+                            displayName: username,
+                            photoURL: avatarPhotoURL
+                        });
+
+                        // Send verification email
                         await sendEmailVerification(userCredential.user);
 
-                        // Kullanıcıyı bilgilendir ve çıkış yap (Login sayfasına at)
+                        // Inform user and sign out
                         alert("Kayıt başarılı! Lütfen email adresinize gönderilen doğrulama linkine tıklayın. (Spam klasörünüzü kontrol etmeyi unutmayın.)");
                         await signOut(auth);
                         window.location.replace("/login");
@@ -247,9 +383,9 @@ function showError(error, element) {
     if (!element) return;
     let msg = "Hata: " + error.code;
 
-    // YENİ: Mail doğrulanmamış hatası
+    // Custom error messages
     if (error.code === 'auth/email-not-verified') msg = "Lütfen önce email adresinizi doğrulayın (Spam kutusuna bakın).";
-
+    if (error.code === 'auth/invalid-username') msg = "Kullanıcı adı 2-20 karakter arasında olmalıdır.";
     if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') msg = "Bilgiler hatalı.";
     if (error.code === 'auth/wrong-password') msg = "Şifre yanlış.";
     if (error.code === 'auth/email-already-in-use') msg = "Bu email zaten kayıtlı.";

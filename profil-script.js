@@ -18,13 +18,39 @@ import {
     documentId,
     arrayRemove,
     arrayUnion,
-    writeBatch
+    writeBatch,
+    setDoc
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 // --- State Variables ---
 let currentUser = null;
 let userFavorites = [];
 let currentTab = 'uploads';
+let selectedAvatarEmoji = null;
+
+// --- ITU Themed Avatars ---
+const ITU_AVATARS = [
+    { emoji: '🐝', label: 'Arı (ITU Mascot)' },
+    { emoji: '⚙️', label: 'Dişli (Mühendislik)' },
+    { emoji: '⚓', label: 'Çapa (Denizcilik)' },
+    { emoji: '🏛️', label: 'Sütun (Mimarlık)' },
+    { emoji: '🚀', label: 'Roket (Uzay)' },
+    { emoji: '🧬', label: 'DNA (Biyoloji)' },
+    { emoji: '💻', label: 'Bilgisayar' },
+    { emoji: '⛑️', label: 'Kask (İnşaat)' },
+    { emoji: '⚡', label: 'Şimşek (Elektrik)' },
+    { emoji: '🔬', label: 'Mikroskop (Araştırma)' },
+    { emoji: '🎨', label: 'Palet (Tasarım)' },
+    { emoji: '📐', label: 'Gönye (Mimar)' },
+    { emoji: '🔧', label: 'Anahtar (Makine)' },
+    { emoji: '⛏️', label: 'Kazma (Maden)' },
+    { emoji: '🌊', label: 'Dalga (Deniz)' },
+    { emoji: '✈️', label: 'Uçak (Havacılık)' },
+    { emoji: '🎓', label: 'Kep (Mezun)' },
+    { emoji: '📚', label: 'Kitaplar (Kütüphane)' },
+    { emoji: '🏗️', label: 'Vinç (İnşaat)' },
+    { emoji: '🌳', label: 'Ağaç (Kampüs)' }
+];
 
 // =============================================================
 // TAB SWITCHING
@@ -308,21 +334,22 @@ async function updateUserProfile(displayName) {
     if (!currentUser) return;
 
     const saveBtn = document.getElementById('save-profile-btn');
-    const originalText = saveBtn ? saveBtn.textContent : 'Kaydet';
+    const saveIcon = saveBtn?.querySelector('i');
+    const originalIconClass = saveIcon?.className || '';
 
     try {
-        // Show loading state
-        if (saveBtn) {
-            saveBtn.textContent = 'Kaydediliyor...';
+        // Show loading state with spinner icon (no text change)
+        if (saveBtn && saveIcon) {
+            saveIcon.className = 'fas fa-spinner fa-spin';
             saveBtn.disabled = true;
         }
 
         // 1. Update Firebase Auth
         await updateProfile(currentUser, { displayName });
 
-        // 2. Update Firestore user document
+        // 2. Update Firestore user document (use setDoc with merge to create if missing)
         const userDocRef = doc(db, 'users', currentUser.uid);
-        await updateDoc(userDocRef, { displayName });
+        await setDoc(userDocRef, { displayName }, { merge: true });
 
         // 3. Batch update all user's notes with new uploader name
         const notesRef = collection(db, 'notes');
@@ -344,14 +371,14 @@ async function updateUserProfile(displayName) {
         // 4. Update UI
         document.getElementById('display-name').textContent = displayName;
 
-        alert('Profil ve tüm notlarınız güncellendi!');
+        showToast('İsim başarıyla güncellendi!', 'success');
     } catch (error) {
         console.error('Error updating profile:', error);
-        alert('Profil güncellenirken hata oluştu.');
+        showToast('Profil güncellenirken hata oluştu.', 'error');
     } finally {
-        // Reset button state
-        if (saveBtn) {
-            saveBtn.textContent = originalText;
+        // Reset button state (restore icon)
+        if (saveBtn && saveIcon) {
+            saveIcon.className = originalIconClass;
             saveBtn.disabled = false;
         }
     }
@@ -371,6 +398,192 @@ function formatDate(timestamp) {
     }
 }
 
+/**
+ * Generate a Data URI for an avatar from an emoji
+ * Creates an SVG with the emoji centered on a branded background
+ */
+function generateAvatarDataURI(emoji) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <defs>
+            <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#062a54"/>
+                <stop offset="100%" style="stop-color:#0a3d6f"/>
+            </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="50" fill="url(#bg)"/>
+        <text x="50" y="50" font-size="50" text-anchor="middle" dominant-baseline="central">${emoji}</text>
+    </svg>`;
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
+
+/**
+ * Show a simple toast notification
+ */
+function showToast(message, type = 'success') {
+    // Check if toast-notifications.js is available
+    if (window.toast) {
+        window.toast[type](message);
+        return;
+    }
+
+    // Fallback simple toast
+    const existing = document.querySelector('.profile-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = `profile-toast profile-toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${type === 'success' ? '#28a745' : '#dc3545'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        animation: slideUp 0.3s ease;
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// =============================================================
+// AVATAR MODAL FUNCTIONS
+// =============================================================
+
+function initAvatarModal() {
+    const modal = document.getElementById('avatar-modal');
+    const closeBtn = document.getElementById('avatar-modal-close');
+    const overlay = document.getElementById('avatar-modal-overlay');
+    const cancelBtn = document.getElementById('avatar-cancel-btn');
+    const saveBtn = document.getElementById('avatar-save-btn');
+    const grid = document.getElementById('avatar-grid');
+
+    if (!modal || !grid) return;
+
+    // Render avatar grid
+    renderAvatarGrid(grid);
+
+    // Use event delegation for avatar edit button (it gets replaced by onAuthStateChanged)
+    document.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('#avatar-edit-btn');
+        if (editBtn) {
+            e.preventDefault();
+            openAvatarModal(modal);
+        }
+    });
+
+    // Close modal
+    closeBtn?.addEventListener('click', () => closeAvatarModal(modal));
+    overlay?.addEventListener('click', () => closeAvatarModal(modal));
+    cancelBtn?.addEventListener('click', () => closeAvatarModal(modal));
+
+    // Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeAvatarModal(modal);
+        }
+    });
+
+    // Save avatar
+    saveBtn?.addEventListener('click', () => saveAvatar(modal, saveBtn));
+}
+
+function renderAvatarGrid(grid) {
+    grid.innerHTML = ITU_AVATARS.map((avatar, index) => `
+        <button type="button" 
+                class="avatar-option" 
+                data-emoji="${avatar.emoji}"
+                title="${avatar.label}"
+                aria-label="${avatar.label}">
+            <span class="avatar-emoji">${avatar.emoji}</span>
+        </button>
+    `).join('');
+
+    // Add click listeners
+    grid.querySelectorAll('.avatar-option').forEach(btn => {
+        btn.addEventListener('click', () => selectAvatar(btn, grid));
+    });
+}
+
+function selectAvatar(btn, grid) {
+    // Remove previous selection
+    grid.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('selected'));
+
+    // Add selection to clicked
+    btn.classList.add('selected');
+    selectedAvatarEmoji = btn.dataset.emoji;
+}
+
+function openAvatarModal(modal) {
+    // Reset selection
+    selectedAvatarEmoji = null;
+    modal.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('selected'));
+
+    // Open modal
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    // Focus first avatar
+    setTimeout(() => {
+        const firstAvatar = modal.querySelector('.avatar-option');
+        if (firstAvatar) firstAvatar.focus();
+    }, 100);
+}
+
+function closeAvatarModal(modal) {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    selectedAvatarEmoji = null;
+}
+
+async function saveAvatar(modal, saveBtn) {
+    if (!selectedAvatarEmoji || !currentUser) {
+        showToast('Lütfen bir avatar seçin', 'error');
+        return;
+    }
+
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = 'Kaydediliyor...';
+    saveBtn.disabled = true;
+
+    try {
+        // Generate photo URL from emoji
+        const newPhotoURL = generateAvatarDataURI(selectedAvatarEmoji);
+
+        // 1. Update Firebase Auth profile
+        await updateProfile(currentUser, { photoURL: newPhotoURL });
+
+        // 2. Update Firestore users collection
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        await setDoc(userDocRef, { photoURL: newPhotoURL }, { merge: true });
+
+        // 3. Update UI immediately (edit button is outside container, so just update inner content)
+        const avatarContainer = document.getElementById('avatar-container');
+        if (avatarContainer) {
+            avatarContainer.innerHTML = `<img src="${newPhotoURL}" alt="Profil" class="avatar-img">`;
+        }
+
+        // 4. Close modal and show success
+        closeAvatarModal(modal);
+        showToast('Avatar başarıyla güncellendi!', 'success');
+
+    } catch (error) {
+        console.error('Error saving avatar:', error);
+        showToast('Avatar güncellenirken hata oluştu', 'error');
+    } finally {
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+    }
+}
+
 // =============================================================
 // INITIALIZATION
 // =============================================================
@@ -383,36 +596,102 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Edit profile button
-    const editBtn = document.getElementById('edit-profile-btn');
-    const editForm = document.getElementById('edit-profile-form');
-    const cancelBtn = document.getElementById('cancel-edit-btn');
-    const saveBtn = document.getElementById('save-profile-btn');
+    // ===========================================
+    // INLINE USERNAME EDITING
+    // ===========================================
 
-    if (editBtn && editForm) {
-        editBtn.addEventListener('click', () => {
-            editForm.style.display = 'block';
-            editBtn.style.display = 'none';
-        });
+    const viewMode = document.getElementById('name-view-mode');
+    const editMode = document.getElementById('name-edit-mode');
+    const displayName = document.getElementById('display-name');
+    const editInput = document.getElementById('edit-display-name');
+    const editBtn = document.getElementById('edit-profile-btn');
+    const saveBtn = document.getElementById('save-profile-btn');
+    const cancelBtn = document.getElementById('cancel-edit-btn');
+
+    /**
+     * Enter Edit Mode: Hide view, show input with current name
+     */
+    function enterEditMode() {
+        if (!viewMode || !editMode || !displayName || !editInput) return;
+
+        // Populate input with current name
+        editInput.value = displayName.textContent;
+
+        // Toggle visibility
+        viewMode.classList.add('hidden');
+        editMode.classList.add('active');
+
+        // Focus and select the input
+        editInput.focus();
+        editInput.select();
+    }
+
+    /**
+     * Exit Edit Mode: Hide input, show view (discard changes)
+     */
+    function exitEditMode() {
+        if (!viewMode || !editMode) return;
+
+        viewMode.classList.remove('hidden');
+        editMode.classList.remove('active');
+    }
+
+    /**
+     * Save and Exit: Update Firebase, update UI, then exit
+     */
+    async function saveAndExit() {
+        const newName = editInput.value.trim();
+
+        if (!newName || newName.length < 2) {
+            showToast('İsim en az 2 karakter olmalı', 'error');
+            editInput.focus();
+            return;
+        }
+
+        if (newName.length > 30) {
+            showToast('İsim en fazla 30 karakter olabilir', 'error');
+            editInput.focus();
+            return;
+        }
+
+        // Update Firebase and UI
+        await updateUserProfile(newName);
+
+        // Update the display name text
+        displayName.textContent = newName;
+
+        // Exit edit mode
+        exitEditMode();
+    }
+
+    // Event Listeners
+    if (editBtn) {
+        editBtn.addEventListener('click', enterEditMode);
     }
 
     if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            editForm.style.display = 'none';
-            editBtn.style.display = 'inline-block';
-        });
+        cancelBtn.addEventListener('click', exitEditMode);
     }
 
     if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
-            const newName = document.getElementById('edit-display-name').value.trim();
-            if (newName) {
-                updateUserProfile(newName);
-                editForm.style.display = 'none';
-                editBtn.style.display = 'inline-block';
+        saveBtn.addEventListener('click', saveAndExit);
+    }
+
+    // Keyboard shortcuts for input
+    if (editInput) {
+        editInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveAndExit();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                exitEditMode();
             }
         });
     }
+
+    // Initialize avatar modal
+    initAvatarModal();
 });
 
 // --- Auth State Listener ---

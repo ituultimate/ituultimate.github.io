@@ -198,7 +198,7 @@ const handleCellClick = async (e) => {
 };
 
 // =============================================================
-// INITIALIZATION
+// INITIALIZATION (Cloud-Only - No LocalStorage)
 // =============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -211,18 +211,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const attendanceContainer = document.getElementById(CONTAINER_ID);
         if (!attendanceContainer) return;
 
-        if (user) {
+        if (user && user.emailVerified) {
             console.log("YTS: Kullanıcı giriş yaptı, veriler çekiliyor...", user.email);
             currentUser = user;
             fetchUserData(user);
         } else {
-            console.log("YTS: Kullanıcı giriş yapmamış.");
+            console.log("YTS: Kullanıcı giriş yapmamış veya email doğrulanmamış.");
+            currentUser = null;
+            currentAttendanceData = {};
+            // Clean message without localStorage reference
             attendanceContainer.innerHTML = `
                 <p class="no-courses-message">
                     Derslerini görmek için lütfen giriş yap.
-                    <br><br>
-                    (Misafir girişi için LocalStorage kullanılabilir ancak şu an Bulut modu aktif.)
                 </p>`;
         }
     });
 });
+

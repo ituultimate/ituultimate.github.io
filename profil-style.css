@@ -1,0 +1,397 @@
+/* ===========================================
+   Profile Avatar Modal & Edit Overlay Styles
+   =========================================== */
+
+/* === Avatar Edit Overlay === */
+/* Positioned on .profile-avatar-section which has position:relative */
+.avatar-edit-overlay {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 32px;
+    height: 32px;
+    background: #062a54;
+    border: 2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+}
+
+.avatar-edit-overlay:hover {
+    transform: scale(1.1);
+    background: #0a3d6f;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.avatar-edit-overlay:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.4);
+}
+
+.avatar-edit-overlay i {
+    font-size: 0.8rem;
+}
+
+/* ===========================================
+   Inline Username Editing
+   =========================================== */
+
+/* Container for both states */
+.user-name-container {
+    position: relative;
+    min-height: 40px;
+}
+
+/* View Mode (State A) */
+.user-name-view {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-name-view .user-name {
+    margin: 0;
+}
+
+/* Edit Mode (State B) - Hidden by default */
+.user-name-edit {
+    display: none;
+    align-items: center;
+    gap: 6px;
+}
+
+.user-name-edit.active {
+    display: flex;
+}
+
+.user-name-view.hidden {
+    display: none;
+}
+
+/* Seamless Input - Matches h2 typography */
+.inline-name-input {
+    font-family: inherit;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #062a54;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #00a8cc;
+    padding: 2px 4px;
+    outline: none;
+    min-width: 120px;
+    max-width: 250px;
+    transition: border-color 0.2s ease;
+}
+
+.inline-name-input:focus {
+    border-bottom-color: #0096b3;
+}
+
+.inline-name-input::placeholder {
+    color: #adb5bd;
+    font-weight: 400;
+}
+
+/* Edit Button (Pencil) */
+.btn-edit-inline {
+    background: transparent;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.btn-edit-inline:hover {
+    background: rgba(0, 168, 204, 0.1);
+    color: #00a8cc;
+}
+
+.btn-edit-inline:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 168, 204, 0.3);
+}
+
+/* Inline Action Buttons (Save & Cancel) */
+.btn-inline-action {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+}
+
+/* Save Button (Checkmark) */
+.btn-save-inline {
+    background: #28a745;
+    color: white;
+}
+
+.btn-save-inline:hover {
+    background: #218838;
+    transform: scale(1.1);
+}
+
+/* Cancel Button (X) */
+.btn-cancel-inline {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-cancel-inline:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.btn-inline-action:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+/* === Avatar Selection Modal === */
+.avatar-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.avatar-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.avatar-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 42, 84, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.avatar-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 420px;
+    max-height: 80vh;
+    overflow: hidden;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.avatar-modal.active .avatar-modal-content {
+    transform: scale(1) translateY(0);
+}
+
+.avatar-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #062a54 0%, #0a3d6f 100%);
+    color: white;
+}
+
+.avatar-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.modal-close-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    line-height: 1;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.avatar-modal-body {
+    padding: 1.5rem;
+}
+
+.avatar-modal-subtitle {
+    text-align: center;
+    color: #6c757d;
+    margin: 0 0 1.25rem 0;
+    font-size: 0.9rem;
+}
+
+/* === Avatar Grid === */
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+
+.avatar-option {
+    aspect-ratio: 1;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.avatar-option:hover {
+    border-color: #00a8cc;
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(0, 168, 204, 0.2);
+}
+
+.avatar-option:focus {
+    outline: none;
+    border-color: #00a8cc;
+    box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.2);
+}
+
+.avatar-option.selected {
+    border-color: #00a8cc;
+    background: linear-gradient(135deg, #e6f9fc 0%, #d0f0f5 100%);
+    box-shadow: 0 4px 12px rgba(0, 168, 204, 0.3);
+}
+
+.avatar-option.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    background: #00a8cc;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.avatar-emoji {
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+/* === Modal Footer === */
+.avatar-modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 1rem 1.5rem 1.5rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-modal-cancel,
+.btn-modal-save {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-modal-cancel {
+    background: white;
+    border: 1px solid #ddd;
+    color: #495057;
+}
+
+.btn-modal-cancel:hover {
+    background: #e9ecef;
+    border-color: #ccc;
+}
+
+.btn-modal-save {
+    background: linear-gradient(135deg, #00a8cc 0%, #0096b3 100%);
+    border: none;
+    color: white;
+}
+
+.btn-modal-save:hover {
+    box-shadow: 0 4px 12px rgba(0, 168, 204, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-modal-save:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* === Responsive Grid === */
+@media (max-width: 480px) {
+    .avatar-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    .avatar-emoji {
+        font-size: 1.5rem;
+    }
+
+    .avatar-modal-content {
+        width: 95%;
+        max-height: 85vh;
+    }
+
+    .avatar-modal-footer {
+        flex-direction: column;
+    }
+}
+
+/* === Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+
+    .avatar-modal,
+    .avatar-modal-content,
+    .avatar-edit-overlay,
+    .avatar-option {
+        transition: none;
+    }
+}

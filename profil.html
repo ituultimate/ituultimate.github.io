@@ -32,6 +32,7 @@
     <link rel="stylesheet" href="base.css?v=2.0">
     <link rel="stylesheet" href="attendance-style.css?v=2.0">
     <link rel="stylesheet" href="dersnotlari-style.css?v=2.0">
+    <link rel="stylesheet" href="profil-style.css?v=2.0">
 
     <style>
         /* --- PROFÃ„Â°L SAYFASINA Ãƒâ€“ZEL STÃ„Â°LLER --- */
@@ -70,6 +71,7 @@
         /* Left Side - Avatar */
         .profile-avatar-section {
             flex-shrink: 0;
+            position: relative;
         }
 
         .avatar-container {
@@ -83,6 +85,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            position: relative;
         }
 
         .avatar-img {
@@ -480,11 +483,38 @@
                             <div class="avatar-container" id="avatar-container">
                                 <span class="avatar-placeholder">?</span>
                             </div>
+                            <!-- Avatar Edit Overlay - OUTSIDE container to avoid overflow:hidden clipping -->
+                            <button type="button" class="avatar-edit-overlay" id="avatar-edit-btn"
+                                aria-label="Avatar Düzenle">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
                         </div>
 
                         <!-- Right: User Info -->
                         <div class="profile-info-section">
-                            <h2 class="user-name" id="display-name">Yükleniyor...</h2>
+                            <!-- Username with Inline Editing -->
+                            <div class="user-name-container">
+                                <!-- State A: View Mode -->
+                                <div class="user-name-view" id="name-view-mode">
+                                    <h2 class="user-name" id="display-name">Yükleniyor...</h2>
+                                    <button id="edit-profile-btn" class="btn-edit-inline" title="İsmi Düzenle">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                </div>
+                                <!-- State B: Edit Mode (hidden by default) -->
+                                <div class="user-name-edit" id="name-edit-mode">
+                                    <input type="text" id="edit-display-name" class="inline-name-input"
+                                        placeholder="Görünen isminiz" maxlength="30">
+                                    <button id="save-profile-btn" class="btn-inline-action btn-save-inline"
+                                        title="Kaydet">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button id="cancel-edit-btn" class="btn-inline-action btn-cancel-inline"
+                                        title="İptal">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
                             <p class="user-email" id="display-email">...</p>
 
                             <div class="info-badges">
@@ -499,24 +529,12 @@
                             </div>
 
                             <div class="profile-actions">
-                                <button id="edit-profile-btn" class="btn-edit">
-                                    <i class="fas fa-edit"></i> Düzenle
-                                </button>
                                 <a href="/programlayici" class="btn-secondary">
                                     <i class="fas fa-calendar"></i> Ders Programı
                                 </a>
                                 <button id="logout-btn-profile" class="btn-logout">
                                     <i class="fas fa-sign-out-alt"></i> Çıkış
                                 </button>
-                            </div>
-
-                            <!-- Edit Profile Form (Hidden by default) -->
-                            <div class="edit-profile-form" id="edit-profile-form">
-                                <input type="text" id="edit-display-name" placeholder="Görünen İsim">
-                                <div class="form-buttons">
-                                    <button class="btn-cancel" id="cancel-edit-btn">İptal</button>
-                                    <button class="btn-save" id="save-profile-btn">Kaydet</button>
-                                </div>
                             </div>
                         </div>
 
@@ -572,13 +590,15 @@
                     });
                 }
 
-                // 4. Profil Fotosu GÃƒÂ¶ster
+                // 4. Profil Fotosu Göster
+                // Note: Edit button is now outside avatar-container in the HTML structure
                 const avatarContainer = document.getElementById('avatar-container');
+
                 if (user.photoURL) {
-                    // Google fotosu varsa
+                    // Avatar or Google photo exists
                     avatarContainer.innerHTML = `<img src="${user.photoURL}" alt="Profil" class="avatar-img">`;
                 } else {
-                    // Foto yoksa ismin baÃ…Å¸ harfini gÃƒÂ¶ster
+                    // No photo - show initial letter as fallback
                     const initial = name.charAt(0).toUpperCase();
                     avatarContainer.innerHTML = `<span class="avatar-placeholder">${initial}</span>`;
                 }
@@ -617,6 +637,27 @@
             </div>
         </div>
     </footer>
+
+    <!-- Avatar Selection Modal -->
+    <div id="avatar-modal" class="avatar-modal" role="dialog" aria-labelledby="avatar-modal-title" aria-hidden="true">
+        <div class="avatar-modal-overlay" id="avatar-modal-overlay"></div>
+        <div class="avatar-modal-content">
+            <div class="avatar-modal-header">
+                <h3 id="avatar-modal-title">Avatar Seç</h3>
+                <button type="button" class="modal-close-btn" id="avatar-modal-close" aria-label="Kapat">×</button>
+            </div>
+            <div class="avatar-modal-body">
+                <p class="avatar-modal-subtitle">İTÜ temalı avatarını seç</p>
+                <div class="avatar-grid" id="avatar-grid">
+                    <!-- Avatars populated by JavaScript -->
+                </div>
+            </div>
+            <div class="avatar-modal-footer">
+                <button type="button" class="btn-modal-cancel" id="avatar-cancel-btn">İptal</button>
+                <button type="button" class="btn-modal-save" id="avatar-save-btn">Kaydet</button>
+            </div>
+        </div>
+    </div>
 
     <script src="nav-menu.js?v=2.0"></script>
     <script>

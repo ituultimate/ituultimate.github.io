@@ -16,8 +16,6 @@ const addedCoursesList = document.getElementById('added-courses-list');
 const subjectSearchInput = document.getElementById('subject-search-input');
 const timeLabelsContainer = document.getElementById('timeLabels');
 const gridContainer = document.getElementById('grid');
-const USER_SCHEDULE_KEY = 'ituUltimateUserSchedule';
-const PANEL_STATE_KEY = 'itu_scheduler_panel_state';
 
 const schedulerContainer = document.getElementById('scheduler-container');
 const closePanelBtn = document.getElementById('close-panel-btn');
@@ -42,30 +40,32 @@ const togglePanel = (isOpen) => {
         schedulerContainer.classList.add('panel-closed');
         openPanelBtn.classList.add('visible');
     }
-    localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(isOpen));
 };
 
 // =============================================================
-// DATA MANAGEMENT
+// DATA MANAGEMENT (Cloud-Only - No LocalStorage)
 // =============================================================
 
 const loadSchedule = async () => {
-    if (currentUser) {
-        try {
-            const userDocRef = doc(db, 'users', currentUser.uid);
-            const docSnap = await getDoc(userDocRef);
-            if (docSnap.exists() && docSnap.data().schedule) {
-                currentSchedule = docSnap.data().schedule;
-                localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(currentSchedule));
-            } else {
-                currentSchedule = [];
-            }
-        } catch (error) {
-            console.error("Program çekilirken hata:", error);
-            currentSchedule = JSON.parse(localStorage.getItem(USER_SCHEDULE_KEY)) || [];
+    // Cloud-only: Only load schedule for authenticated users
+    if (!currentUser) {
+        currentSchedule = [];
+        renderSchedule();
+        renderAddedCoursesList();
+        return;
+    }
+
+    try {
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists() && docSnap.data().schedule) {
+            currentSchedule = docSnap.data().schedule;
+        } else {
+            currentSchedule = [];
         }
-    } else {
-        currentSchedule = JSON.parse(localStorage.getItem(USER_SCHEDULE_KEY)) || [];
+    } catch (error) {
+        console.error("Program çekilirken hata:", error);
+        currentSchedule = [];
     }
 
     renderSchedule();
@@ -74,18 +74,22 @@ const loadSchedule = async () => {
 
 const saveSchedule = async (newSchedule) => {
     currentSchedule = newSchedule;
-    localStorage.setItem(USER_SCHEDULE_KEY, JSON.stringify(newSchedule));
 
-    if (currentUser) {
-        try {
-            const userDocRef = doc(db, 'users', currentUser.uid);
-            await setDoc(userDocRef, {
-                schedule: newSchedule,
-                lastUpdated: serverTimestamp()
-            }, { merge: true });
-        } catch (error) {
-            console.error("Program kaydedilirken hata:", error);
-        }
+    // Cloud-only: Only save for authenticated users
+    if (!currentUser) {
+        console.warn("Kullanıcı giriş yapmamış, program kaydedilemez.");
+        return;
+    }
+
+    try {
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        await setDoc(userDocRef, {
+            schedule: newSchedule,
+            lastUpdated: serverTimestamp()
+        }, { merge: true });
+        console.log("Program buluta kaydedildi.");
+    } catch (error) {
+        console.error("Program kaydedilirken hata:", error);
     }
 };
 
@@ -436,23 +440,17 @@ openPanelBtn.addEventListener('click', () => togglePanel(true));
 initializeVisualGrid();
 fetchAndGroupCourses();
 
-// Panel Durumunu Geri Yükle
-const savedPanelState = localStorage.getItem(PANEL_STATE_KEY);
-if (savedPanelState !== null) {
-    const isPanelOpen = JSON.parse(savedPanelState);
-    schedulerContainer.style.transition = 'none';
-    togglePanel(isPanelOpen);
-    setTimeout(() => { schedulerContainer.style.transition = ''; }, 50);
-}
-
-// KULLANICI GİRİŞ DURUMUNU DİNLE
+// KULLANICI GİRİŞ DURUMUNU DİNLE (Cloud-Only)
 onAuthStateChanged(auth, (user) => {
-    if (user) {
+    if (user && user.emailVerified) {
         console.log("Kullanıcı giriş yaptı:", user.email);
         currentUser = user;
+        loadSchedule();
     } else {
-        console.log("Misafir kullanıcı");
+        console.log("Kullanıcı giriş yapmamış veya email doğrulanmamış - program boş kalacak.");
         currentUser = null;
+        currentSchedule = [];
+        renderSchedule();
+        renderAddedCoursesList();
     }
-    loadSchedule();
 });

@@ -10,8 +10,8 @@ const navbarHTML = `
             <ul class="nav-menu">
                 <li class="nav-item"><a href="/" class="nav-link">Anasayfa</a></li>
                 <li class="nav-item"><a href="/programlayici" class="nav-link">Programlayıcı</a></li>
-                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama Takip Sistemi</a></li>
-                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama Hesaplayıcı</a></li>
+                <li class="nav-item"><a href="/yts" class="nav-link">Yoklama (YTS)</a></li>
+                <li class="nav-item"><a href="/ortalamahesaplayici" class="nav-link">Ortalama</a></li>
                 <li class="nav-item nav-dropdown">
                     <span class="nav-dropdown-trigger">
                         Not Defteri <i class="fas fa-chevron-down"></i>
@@ -20,6 +20,15 @@ const navbarHTML = `
                         <a href="/dersnotlari"><i class="fas fa-book"></i> Ders Notları</a>
                         <a href="/dersrehberi"><i class="fas fa-compass"></i> Ders Rehberleri</a>
                         <a href="/dersprogramarsiv"><i class="fas fa-archive"></i> Ders Programı Arşivi</a>
+                    </div>
+                </li>
+                <li class="nav-item nav-dropdown">
+                    <span class="nav-dropdown-trigger">
+                        Kampüs <i class="fas fa-chevron-down"></i>
+                    </span>
+                    <div class="nav-dropdown-content">
+                        <a href="/ituconnect"><i class="fas fa-comments"></i> ITU Connect</a>
+                        <a href="/kampus"><i class="fas fa-map-marker-alt"></i> Kampüste Gez</a>
                     </div>
                 </li>
             </ul>
