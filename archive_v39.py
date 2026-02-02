@@ -193,9 +193,29 @@ def worker_process(departments_subset):
     results = []
     try:
         driver.get("https://obs.itu.edu.tr/public/DersProgram")
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "programSeviyeTipiId")))
-        Select(driver.find_element(By.ID, "programSeviyeTipiId")).select_by_visible_text("Lisans")
+        
+        # Elementin GÖRÜNÜR olmasını bekle (Presence yetmez)
+        dropdown_element = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "programSeviyeTipiId")))
+        
+        # Seçeneklerin yüklenmesi için kısa bir nefes alma payı (GitHub Actions için kritik)
+        time.sleep(2)
+        
+        select = Select(dropdown_element)
+        try:
+            # Önce Türkçe dene
+            select.select_by_visible_text("Lisans")
+        except:
+            try:
+                # Olmazsa İngilizce dene (GitHub Actions sunucusu için)
+                select.select_by_visible_text("Undergraduate")
+            except:
+                # O da olmazsa VALUE değeri ile dene (En garanti yöntem)
+                # İTÜ'de Lisans genelde 'LS' veya '1' olabilir, ama text daha güvenlidir şu an.
+                # Son çare ilk seçeneği seç:
+                select.select_by_index(0)
+        
         time.sleep(1)
+        # ------------------------------------------------
         
         for dept in departments_subset:
             results.extend(scrape_single_department(driver, dept))
@@ -258,10 +278,22 @@ def main():
     print("🚀 İTÜ OBS Bot Başlatılıyor (Hızlı + v35 Formatı + Firebase)...")
     driver = get_driver()
     try:
-        driver.get("https://obs.itu.edu.tr/public/DersProgram")
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "programSeviyeTipiId")))
-        Select(driver.find_element(By.ID, "programSeviyeTipiId")).select_by_visible_text("Lisans")
+       driver.get("https://obs.itu.edu.tr/public/DersProgram")
+        
+        dropdown_element = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "programSeviyeTipiId")))
+        time.sleep(2) # Seçeneklerin dolmasını bekle
+        
+        select = Select(dropdown_element)
+        try:
+            select.select_by_visible_text("Lisans")
+        except:
+            try:
+                select.select_by_visible_text("Undergraduate")
+            except:
+                select.select_by_index(0)
+        
         time.sleep(2)
+        # ------------------------------------------------
         opts = Select(driver.find_element(By.ID, "dersBransKoduId")).options
         departments = [o.text for o in opts if o.text != "Ders Kodu Seçiniz" and o.text.strip()]
     finally:
