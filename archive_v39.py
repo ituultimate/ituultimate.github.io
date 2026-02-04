@@ -78,8 +78,10 @@ def clean_building(building_str):
     return building_str
 
 def course_hash(course):
-    """Değişiklik kontrolü için unique imza"""
-    # TÜM VERİLERİ KAPSAYAN YENİ HALİ:
+    """
+    Değişiklik kontrolü için unique imza.
+    Dersin hocası, saati, sınıfı veya KONTENJANI değişirse hash değişir.
+    """
     data = (
         f"{course['crn']}{course['code']}{course['name']}"
         f"{course['instructor']}{course['building']}{course['day']}"
@@ -95,7 +97,7 @@ def get_driver():
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
-    options.add_argument('--window-size=1920,1080') # Ekran boyutu eklendi
+    options.add_argument('--window-size=1920,1080')
     options.add_argument('--blink-settings=imagesEnabled=false')
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
@@ -195,7 +197,7 @@ def worker_process(departments_subset):
     try:
         driver.get("https://obs.itu.edu.tr/public/DersProgram")
         
-        # --- DÜZELTİLMİŞ KISIM (Worker) ---
+        # --- DİL SEÇİMİ (GÜÇLENDİRİLMİŞ) ---
         dropdown_element = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "programSeviyeTipiId")))
         time.sleep(2)
         
@@ -269,7 +271,7 @@ def main():
     try:
         driver.get("https://obs.itu.edu.tr/public/DersProgram")
         
-        # --- DÜZELTİLMİŞ KISIM (Main) ---
+        # --- DİL SEÇİMİ (ANA KOD) ---
         dropdown_element = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "programSeviyeTipiId")))
         time.sleep(2)
         
@@ -283,7 +285,7 @@ def main():
                 select.select_by_index(0)
         
         time.sleep(2)
-        # --------------------------------
+        # ----------------------------
         
         opts = Select(driver.find_element(By.ID, "dersBransKoduId")).options
         departments = [o.text for o in opts if o.text != "Ders Kodu Seçiniz" and o.text.strip()]
