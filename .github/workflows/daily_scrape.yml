@@ -4,13 +4,14 @@ on:
   schedule:
     # 10:45 TRT (07:45 UTC)
     - cron: '45 7 * * *'
-    # 13:42 TRT (10:42 UTC)
-    - cron: '42 10 * * *'
-    # 14:30 TRT (11:30 UTC)
-    - cron: '30 11 * * *'
+    # 13:45 TRT (10:42 UTC)
+    - cron: '45 10 * * *'
+    # 15:30 TRT (12:30 UTC)
+    - cron: '30 12 * * *'
     # 19:00 TRT (16:00 UTC)
     - cron: '0 16 * * *'
-    
+    # 22:00 TRT (19:00 UTC)
+    - cron: '0 19 * * *'
   workflow_dispatch: # İstediğin zaman elle çalıştırma butonu
 
 jobs:
