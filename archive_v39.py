@@ -12,7 +12,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from bs4 import BeautifulSoup
 
 # --- AYARLAR ---
@@ -22,7 +22,6 @@ LOAD_TIMEOUT = 10     # Ders yüklenmesi için beklenecek maks süre
 
 # --- v35 PARSER MANTIĞI ---
 def adjust_time(time_str):
-    """Bitiş saatine 1 dakika ekler (v35 mantığı)"""
     if not time_str: return time_str
     try:
         hours, minutes = map(int, time_str.split(':'))
@@ -36,13 +35,23 @@ def adjust_time(time_str):
         return time_str
 
 def parse_multiple_days(day_str):
-    """Günleri ayırır"""
     if not day_str: return []
-    days = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma"]
-    return [d for d in days if d in day_str]
+    # Türkçe ve İngilizce günleri eşleştir
+    days_map = {
+        "Pazartesi": "Pazartesi", "Monday": "Pazartesi",
+        "Salı": "Salı", "Tuesday": "Salı",
+        "Çarşamba": "Çarşamba", "Wednesday": "Çarşamba",
+        "Perşembe": "Perşembe", "Thursday": "Perşembe",
+        "Cuma": "Cuma", "Friday": "Cuma"
+    }
+    found_days = []
+    for en_tr, tr_target in days_map.items():
+        if en_tr in day_str:
+            if tr_target not in found_days:
+                found_days.append(tr_target)
+    return found_days
 
 def parse_multiple_classrooms(classroom_str):
-    """Sınıfları ayırır"""
     if not classroom_str: return []
     matches = re.findall(r'([A-Za-z0-9]+(?:-[A-Za-z0-9]+)?)', classroom_str)
     if not matches and len(classroom_str) > 2:
@@ -50,7 +59,6 @@ def parse_multiple_classrooms(classroom_str):
     return matches if matches else [classroom_str]
 
 def parse_multiple_times(time_str, day_count):
-    """Saatleri ayırır ve formatlar"""
     if not time_str: return []
     time_objects = []
     patterns = [r'(\d{2}:\d{2})[-/](\d{2}:\d{2})', r'(\d{2}:\d{2})\s+(\d{2}:\d{2})']
@@ -69,7 +77,6 @@ def parse_multiple_times(time_str, day_count):
     return time_objects
 
 def clean_building(building_str):
-    """Bina ismindeki tekrarları temizler"""
     if not building_str: return building_str
     if len(building_str) > 0 and len(building_str) % len(set(building_str)) == 0:
         half = len(building_str)//2
@@ -80,7 +87,7 @@ def clean_building(building_str):
 def course_hash(course):
     """
     Değişiklik kontrolü için unique imza.
-    Dersin hocası, saati, sınıfı veya KONTENJANI değişirse hash değişir.
+    ENROLLED (Kayıtlı) sayısı değişikliğini de algılar.
     """
     data = (
         f"{course['crn']}{course['code']}{course['name']}"
@@ -120,19 +127,29 @@ def initialize_firebase():
 def scrape_single_department(driver, department_name, max_retries=1):
     for attempt in range(max_retries + 1):
         try:
+            # Dropdown'dan bölümü seç
             ders_dropdown = Select(driver.find_element(By.ID, "dersBransKoduId"))
             ders_dropdown.select_by_visible_text(department_name)
             
+            # Tabloyu temizle
             driver.execute_script("document.getElementById('dersProgramContainer').innerHTML = '';")
-            goster_btn = driver.find_element(By.XPATH, "//button[contains(text(), 'Göster')]")
-            driver.execute_script("arguments[0].click();", goster_btn)
+            
+            # --- DÜZELTME: Görseldeki 'Submit' butonunu ekledik ---
+            try:
+                # Buton metni 'Göster', 'Show' veya 'Submit' olabilir
+                goster_btn = driver.find_element(By.XPATH, "//button[contains(text(), 'Göster') or contains(text(), 'Show') or contains(text(), 'Submit')]")
+                driver.execute_script("arguments[0].click();", goster_btn)
+            except NoSuchElementException:
+                print(f"❌ HATA: {department_name} için 'Submit/Göster' butonu bulunamadı!")
+                return []
+            # --------------------------------------------------------
             
             try:
                 WebDriverWait(driver, LOAD_TIMEOUT).until(
                     lambda d: len(d.find_elements(By.CSS_SELECTOR, "#dersProgramContainer tbody tr")) > 0
                 )
             except TimeoutException:
-                print(f"⚠ {department_name}: Ders yok (Hızlı geçiliyor).")
+                # Ders yoksa hızlıca geç
                 return []
 
             soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -147,6 +164,13 @@ def scrape_single_department(driver, department_name, max_retries=1):
                     
                     def get_text(idx): return cells[idx].text.strip().replace('\n', ' ') if len(cells) > idx else ""
                     
+                    # --- DEBUG LOG ---
+                    enrolled_val = get_text(10)
+                    if enrolled_val and enrolled_val.isdigit() and int(enrolled_val) > 0:
+                         if len(local_courses) < 1: 
+                             print(f"DEBUG: {get_text(1)} - Enrolled Okundu: {enrolled_val}")
+                    # -----------------
+
                     raw_building = clean_building(get_text(5))
                     raw_day = get_text(6)
                     raw_time = get_text(7)
@@ -175,18 +199,20 @@ def scrape_single_department(driver, department_name, max_retries=1):
                         }
                         local_courses.append(course_data)
             
-            print(f"✓ {department_name}: {len(local_courses)} ders kaydı.")
+            print(f"✓ {department_name}: {len(local_courses)} ders.")
             return local_courses
 
         except Exception as e:
             if attempt < max_retries:
                 time.sleep(1)
                 driver.refresh()
+                # Hata durumunda tekrar dil seçimi
                 try: 
-                    # Refresh sonrası tekrar seçim denemesi
                     s = Select(driver.find_element(By.ID, "programSeviyeTipiId"))
                     try: s.select_by_visible_text("Lisans")
-                    except: s.select_by_index(0)
+                    except: 
+                        try: s.select_by_visible_text("Undergraduate")
+                        except: s.select_by_index(0)
                 except: pass
             else:
                 return []
@@ -197,21 +223,22 @@ def worker_process(departments_subset):
     try:
         driver.get("https://obs.itu.edu.tr/public/DersProgram")
         
-        # --- DİL SEÇİMİ (GÜÇLENDİRİLMİŞ) ---
+        # --- DİL SEÇİMİ (Worker - Görsele Uygun) ---
         dropdown_element = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "programSeviyeTipiId")))
         time.sleep(2)
         
         select = Select(dropdown_element)
         try:
-            select.select_by_visible_text("Lisans")
+            # Görseldeki İngilizce arayüz için öncelik
+            select.select_by_visible_text("Undergraduate")
         except:
             try:
-                select.select_by_visible_text("Undergraduate")
+                select.select_by_visible_text("Lisans")
             except:
                 select.select_by_index(0)
         
         time.sleep(1)
-        # ----------------------------------
+        # -------------------------------------------
         
         for dept in departments_subset:
             results.extend(scrape_single_department(driver, dept))
@@ -271,21 +298,22 @@ def main():
     try:
         driver.get("https://obs.itu.edu.tr/public/DersProgram")
         
-        # --- DİL SEÇİMİ (ANA KOD) ---
+        # --- DİL SEÇİMİ (Main - Görsele Uygun) ---
         dropdown_element = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "programSeviyeTipiId")))
         time.sleep(2)
         
         select = Select(dropdown_element)
         try:
-            select.select_by_visible_text("Lisans")
+            # Öncelik İngilizce'de (GitHub Actions için)
+            select.select_by_visible_text("Undergraduate")
         except:
             try:
-                select.select_by_visible_text("Undergraduate")
+                select.select_by_visible_text("Lisans")
             except:
                 select.select_by_index(0)
         
         time.sleep(2)
-        # ----------------------------
+        # ----------------------------------------
         
         opts = Select(driver.find_element(By.ID, "dersBransKoduId")).options
         departments = [o.text for o in opts if o.text != "Ders Kodu Seçiniz" and o.text.strip()]
