@@ -12,6 +12,11 @@ on:
     - cron: '0 16 * * *'
     # 21:00 TRT (18:00 UTC)
     - cron: '0 18 * * *'
+    # 01:50 TRT (22:50 UTC)
+    - cron: '50 22 * * *'
+    # 22:50 TRT (19:50 UTC)
+    - cron: '50 19 * * *'
+
   workflow_dispatch: # İstediğin zaman elle çalıştırma butonu
 
 jobs:
