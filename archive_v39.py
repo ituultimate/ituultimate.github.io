@@ -215,4 +215,98 @@ def worker_process(departments_subset):
 
 # --- FIREBASE SENKRONİZASYONU ---
 def sync_to_firebase(all_courses):
-    if not initialize_firebase
+    if not initialize_firebase(): return
+
+    print("\n🔥 Firebase Senkronizasyonu Başlıyor...")
+    db = firestore.client()
+    collection = db.collection('2025-2026-bahar')
+    
+    existing_docs = {d.id: course_hash(d.to_dict()) for d in collection.stream()}
+    
+    batch = db.batch()
+    batch_count = 0
+    stats = {'new': 0, 'updated': 0, 'unchanged': 0}
+    
+    for course in all_courses:
+        safe_day = course['day'].replace('İ', 'I').replace('ç', 'c').replace('ş', 's').replace('ı', 'i').replace('ğ', 'g').replace('ü', 'u').replace('ö', 'o')
+        doc_id = f"{course['crn']}_{course['code']}_{safe_day}"
+        new_h = course_hash(course)
+        
+        doc_ref = collection.document(doc_id)
+        
+        if doc_id not in existing_docs:
+            batch.set(doc_ref, course)
+            stats['new'] += 1
+            batch_count += 1
+        elif existing_docs[doc_id] != new_h:
+            batch.set(doc_ref, course)
+            stats['updated'] += 1
+            batch_count += 1
+        else:
+            stats['unchanged'] += 1
+            
+        if batch_count >= 400:
+            batch.commit()
+            print(f"  -> 400 ders işlendi...")
+            batch = db.batch()
+            batch_count = 0
+            
+    if batch_count > 0: batch.commit()
+    print(f"✅ Firebase Bitti: +{stats['new']} Yeni, ~{stats['updated']} Güncel, ={stats['unchanged']} Değişmeyen.")
+
+# --- ANA PROGRAM ---
+def main():
+    start_time = time.time()
+    
+    print("🚀 İTÜ OBS Bot Başlatılıyor (Hızlı + v35 Formatı + Firebase)...")
+    driver = get_driver()
+    try:
+        driver.get("https://obs.itu.edu.tr/public/DersProgram")
+        
+        # --- DÜZELTİLMİŞ KISIM (Main) ---
+        dropdown_element = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "programSeviyeTipiId")))
+        time.sleep(2)
+        
+        select = Select(dropdown_element)
+        try:
+            select.select_by_visible_text("Lisans")
+        except:
+            try:
+                select.select_by_visible_text("Undergraduate")
+            except:
+                select.select_by_index(0)
+        
+        time.sleep(2)
+        # --------------------------------
+        
+        opts = Select(driver.find_element(By.ID, "dersBransKoduId")).options
+        departments = [o.text for o in opts if o.text != "Ders Kodu Seçiniz" and o.text.strip()]
+    finally:
+        driver.quit()
+
+    chunk_size = (len(departments) // MAX_WORKERS) + 1
+    chunks = [departments[i:i + chunk_size] for i in range(0, len(departments), chunk_size)]
+    
+    all_courses = []
+    print(f"📡 {len(departments)} departman {MAX_WORKERS} tarayıcı ile taranıyor...")
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = [executor.submit(worker_process, chunk) for chunk in chunks]
+        for future in concurrent.futures.as_completed(futures):
+            all_courses.extend(future.result())
+    
+    all_courses.sort(key=lambda x: (x['code'], x['crn']))
+    print(f"\n🏁 TOPLAM: {len(all_courses)} ders çekildi. ({time.time()-start_time:.1f}sn)")
+    
+    try:
+        js_content = f"const courseData = {json.dumps(all_courses, ensure_ascii=False, indent=2)};"
+        with open('course_data.js', 'w', encoding='utf-8') as f:
+            f.write(js_content)
+        print("✓ 'course_data.js' dosyası oluşturuldu.")
+    except Exception as e:
+        print(f"Dosya hatası: {e}")
+
+    sync_to_firebase(all_courses)
+
+if __name__ == "__main__":
+    main()
