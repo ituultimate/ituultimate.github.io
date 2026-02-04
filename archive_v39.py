@@ -79,7 +79,13 @@ def clean_building(building_str):
 
 def course_hash(course):
     """Değişiklik kontrolü için unique imza"""
-    data = f"{course['crn']}{course['code']}{course['day']}{course['time']['start']}"
+    # TÜM VERİLERİ KAPSAYAN YENİ HALİ:
+    data = (
+        f"{course['crn']}{course['code']}{course['name']}"
+        f"{course['instructor']}{course['building']}{course['day']}"
+        f"{course['time']['start']}{course['time']['end']}"
+        f"{course['classroom']}{course['capacity']}{course['enrolled']}"
+    )
     return hashlib.md5(data.encode()).hexdigest()
 
 # --- SİSTEM AYARLARI ---
