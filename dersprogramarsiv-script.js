@@ -246,7 +246,7 @@ function renderSchedules(schedules) {
                 <td>${times}</td>
                 <td>${locations}</td>
                 <td>${capacity}</td>
-                <td>${exam}</td>
+                <td>${enrolled}</td>
                 <td>${crn}</td>
             </tr>
         `;
