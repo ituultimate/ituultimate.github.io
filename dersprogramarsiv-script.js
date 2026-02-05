@@ -233,9 +233,9 @@ function renderSchedules(schedules) {
             }).filter(Boolean)
         )].join(', ') || '-';
 
-        // Get capacity and exam from first part
+        // Get capacity and enrolled from first part
         const capacity = firstPart.capacity || firstPart.enrolled || '-';
-        const exam = firstPart.majorRestriction || firstPart.exam || '-';
+        const enrolled = firstPart.majorRestriction || firstPart.enrolled || '-';
 
         html += `
             <tr data-crn="${crn}">
