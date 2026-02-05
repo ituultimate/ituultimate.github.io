@@ -180,7 +180,14 @@ function renderSchedules(schedules) {
 
     let html = '';
 
-    Object.entries(groupedByCrn).forEach(([crn, courseParts]) => {
+    // Sort entries by course code (e.g., "MAT 101") for alphabetical/numeric ordering
+    const sortedEntries = Object.entries(groupedByCrn).sort((a, b) => {
+        const codeA = String(a[1][0]?.code || '').trim();
+        const codeB = String(b[1][0]?.code || '').trim();
+        return codeA.localeCompare(codeB, 'tr-TR', { numeric: true });
+    });
+
+    sortedEntries.forEach(([crn, courseParts]) => {
         // Sort parts by day
         const sortedParts = courseParts.sort((a, b) => (dayOrder[a.day] || 99) - (dayOrder[b.day] || 99));
 
